@@ -1,4 +1,3 @@
-﻿using Avalonia.Platform;
 using CopperCalzone.Models;
 using System.Text.Json;
 
@@ -6,24 +5,6 @@ namespace CopperCalzone.Parsing;
 
 public static class BoardLoader
 {
-    public static readonly string[] BuiltInSampleNames =
-    [
-        "StickHub",
-        "RoyalBlue54L",
-        "HonklockGateway"
-    ];
-
-    public static PcbBoard LoadBuiltInSample(string sampleName)
-    {
-        var uri = new Uri($"avares://CopperCalzone/Assets/Samples/{sampleName}.json");
-        using var stream = AssetLoader.Open(uri);
-        var board = JsonSerializer.Deserialize<PcbBoard>(stream)
-            ?? throw new InvalidDataException($"Failed to load sample '{sampleName}'.");
-        if (string.IsNullOrWhiteSpace(board.Metadata.Title))
-            board.Metadata.Title = sampleName;
-        return board;
-    }
-
     public static PcbBoard LoadFromContent(string content, string fileName = "Board")
     {
         if (string.IsNullOrWhiteSpace(content))
