@@ -1,0 +1,14 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="using:CopperCalzone.Views"
+        mc:Ignorable="d" d:DesignWidth="1360" d:DesignHeight="840"
+        x:Class="CopperCalzone.Views.MainWindow"
+        Title="CopperCalzone"
+        Width="1360" Height="840"
+        MinWidth="800" MinHeight="520"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource M3SurfaceBrush}">
+  <views:MainView />
+</Window>

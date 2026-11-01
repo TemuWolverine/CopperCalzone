@@ -1,0 +1,761 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:CopperCalzone.ViewModels"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="520" d:DesignHeight="720"
+             x:Class="CopperCalzone.Views.SidebarView"
+             x:DataType="vm:MainViewModel">
+
+  <Border Classes="m3-surface-sheet"
+          Width="{Binding SidebarWidth}"
+          Margin="8,0,4,8"
+          IsVisible="{Binding IsLeftSidebarOpen}"
+          Background="{DynamicResource M3SurfaceContainerLowBrush}"
+          BoxShadow="0 6 20 0 #26000000">
+    <Grid RowDefinitions="Auto,*">
+
+      <!-- M3 Expressive Segmented Pill Tabs Header (Nets / BOM / Layers) -->
+      <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="12,12,12,6">
+        <Border Grid.Column="0"
+                Background="{DynamicResource M3SurfaceContainerHighestBrush}"
+                CornerRadius="22"
+                Padding="4">
+          <Grid ColumnDefinitions="*,*,*">
+            <Button Grid.Column="0"
+                    Classes="tab-btn"
+                    Classes.active="{Binding IsNetsTabActive}"
+                    Command="{Binding SwitchTabCommand}"
+                    CommandParameter="nets"
+                    Padding="10,8">
+              <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                <materialIcons:MaterialIcon Kind="LanConnect" Width="15" Height="15" VerticalAlignment="Center" />
+                <TextBlock Text="Nets (" VerticalAlignment="Center" FontSize="12.5" />
+                <TextBlock Text="{Binding TotalNetCount}" VerticalAlignment="Center" FontSize="12.5" />
+                <TextBlock Text=")" VerticalAlignment="Center" FontSize="12.5" />
+              </StackPanel>
+            </Button>
+
+            <Button Grid.Column="1"
+                    Classes="tab-btn"
+                    Classes.active="{Binding IsBomTabActive}"
+                    Command="{Binding SwitchTabCommand}"
+                    CommandParameter="bom"
+                    Padding="10,8">
+              <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                <materialIcons:MaterialIcon Kind="FormatListChecks" Width="15" Height="15" VerticalAlignment="Center" />
+                <TextBlock Text="BOM (" VerticalAlignment="Center" FontSize="12.5" />
+                <TextBlock Text="{Binding TotalBomCount}" VerticalAlignment="Center" FontSize="12.5" />
+                <TextBlock Text=")" VerticalAlignment="Center" FontSize="12.5" />
+              </StackPanel>
+            </Button>
+
+            <Button Grid.Column="2"
+                    Classes="tab-btn"
+                    Classes.active="{Binding IsLayersTabActive}"
+                    Command="{Binding SwitchTabCommand}"
+                    CommandParameter="layers"
+                    Padding="10,8">
+              <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                <materialIcons:MaterialIcon Kind="LayersOutline" Width="15" Height="15" VerticalAlignment="Center" />
+                <TextBlock Text="Layers" VerticalAlignment="Center" FontSize="12.5" />
+              </StackPanel>
+            </Button>
+          </Grid>
+        </Border>
+
+        <Button Grid.Column="1"
+                Margin="8,0,0,0"
+                Command="{Binding ToggleLeftSidebarCommand}"
+                ToolTip.Tip="Close Side Sheet"
+                Classes="tool-btn"
+                Width="36" Height="36"
+                Padding="0"
+                CornerRadius="18"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center">
+          <materialIcons:MaterialIcon Kind="Close" Width="18" Height="18" />
+        </Button>
+      </Grid>
+
+      <!-- TAB 1: NETS -->
+      <Grid Grid.Row="1"
+            RowDefinitions="Auto,Auto,Auto,*"
+            IsVisible="{Binding IsNetsTabActive}">
+
+        <!-- M3 Expressive Pill SearchBar -->
+        <Border Grid.Row="0"
+                Classes="m3-search-bar"
+                Margin="12,6,12,8">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <materialIcons:MaterialIcon Grid.Column="0"
+                                        Kind="Magnify"
+                                        Width="18" Height="18"
+                                        Foreground="{DynamicResource M3OnSurfaceVariantBrush}"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,8,0" />
+            <TextBox Grid.Column="1"
+                     Text="{Binding SearchQuery}"
+                     Watermark="Search nets (GND, +3V3, SPI)..."
+                     Background="Transparent"
+                     BorderThickness="0"
+                     FontSize="13"
+                     VerticalAlignment="Center" />
+            <Button Grid.Column="2"
+                    Margin="4,0,0,0"
+                    IsVisible="{Binding SearchQuery, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                    Command="{Binding ClearSearchCommand}"
+                    Classes="tool-btn"
+                    Width="28" Height="28"
+                    Padding="0"
+                    CornerRadius="14"
+                    ToolTip.Tip="Clear search">
+              <materialIcons:MaterialIcon Kind="CloseCircle" Width="16" Height="16" />
+            </Button>
+          </Grid>
+        </Border>
+
+        <!-- M3 Filter Chips -->
+        <ScrollViewer Grid.Row="1"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Disabled"
+                      Margin="12,0,12,8">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Button Classes="chip-btn"
+                    Classes.active="{Binding IsFilterAll}"
+                    Command="{Binding SetFilterCommand}"
+                    CommandParameter="all">
+              <StackPanel Orientation="Horizontal" Spacing="5">
+                <materialIcons:MaterialIcon Kind="Check"
+                                            Width="13" Height="13"
+                                            IsVisible="{Binding IsFilterAll}" />
+                <TextBlock Text="All" />
+              </StackPanel>
+            </Button>
+            <Button Classes="chip-btn"
+                    Classes.active="{Binding IsFilterPower}"
+                    Command="{Binding SetFilterCommand}"
+                    CommandParameter="power">
+              <StackPanel Orientation="Horizontal" Spacing="5">
+                <materialIcons:MaterialIcon Kind="FlashOutline" Width="13" Height="13" />
+                <TextBlock Text="Power" />
+              </StackPanel>
+            </Button>
+            <Button Classes="chip-btn"
+                    Classes.active="{Binding IsFilterSignals}"
+                    Command="{Binding SetFilterCommand}"
+                    CommandParameter="signals">
+              <StackPanel Orientation="Horizontal" Spacing="5">
+                <materialIcons:MaterialIcon Kind="SineWave" Width="13" Height="13" />
+                <TextBlock Text="Signals" />
+              </StackPanel>
+            </Button>
+            <Button Classes="chip-btn"
+                    Classes.active="{Binding IsFilterTopPins}"
+                    Command="{Binding SetFilterCommand}"
+                    CommandParameter="top-pins">
+              <StackPanel Orientation="Horizontal" Spacing="5">
+                <materialIcons:MaterialIcon Kind="Chip" Width="13" Height="13" />
+                <TextBlock Text="≥4 Pins" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </ScrollViewer>
+
+        <!-- Net Count & Clear Action Bar -->
+        <Border Grid.Row="2"
+                BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="16,6">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Grid.Column="0"
+                       Classes="m3-caption"
+                       FontWeight="Medium"
+                       Text="{Binding ShowingNetsLabel}"
+                       VerticalAlignment="Center" />
+            <Button Grid.Column="1"
+                    Command="{Binding ClearSelectionCommand}"
+                    Classes="tool-btn"
+                    Padding="10,4"
+                    CornerRadius="12">
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <materialIcons:MaterialIcon Kind="FilterRemoveOutline"
+                                            Width="13" Height="13"
+                                            Foreground="{DynamicResource M3PrimaryBrush}" />
+                <TextBlock Text="Clear"
+                           FontSize="11.5"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource M3PrimaryBrush}" />
+              </StackPanel>
+            </Button>
+          </Grid>
+        </Border>
+
+        <!-- Virtualized M3 Net List -->
+        <ListBox Grid.Row="3"
+                 ItemsSource="{Binding FilteredNets}"
+                 SelectedItem="{Binding SelectedNetItem}"
+                 Background="Transparent"
+                 Padding="8,6">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:NetItemViewModel">
+              <Grid ColumnDefinitions="Auto,*,Auto" Margin="4,4">
+                <!-- Expressive Power / Signal Color Indicator -->
+                <Ellipse Grid.Column="0"
+                         Width="10" Height="10"
+                         Fill="{Binding DotBrush}"
+                         VerticalAlignment="Center"
+                         Margin="0,0,10,0" />
+
+                <!-- Net Name -->
+                <TextBlock Grid.Column="1"
+                           Classes="m3-mono m3-label-large"
+                           Text="{Binding DisplayName}"
+                           TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center"
+                           ToolTip.Tip="{Binding Name}" />
+
+                <!-- M3 Tonal Pin & Via Badges -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" Margin="6,0,0,0">
+                  <Border Classes="m3-badge-secondary"
+                          CornerRadius="12"
+                          Padding="8,3">
+                    <TextBlock Classes="m3-label-small"
+                               Text="{Binding PadCountBadge}"
+                               Foreground="{DynamicResource M3OnSecondaryContainerBrush}" />
+                  </Border>
+                  <Border Classes="m3-badge-tertiary"
+                          IsVisible="{Binding HasVias}"
+                          CornerRadius="12"
+                          Padding="8,3">
+                    <TextBlock Classes="m3-label-small"
+                               Text="{Binding ViaCountBadge}"
+                               Foreground="{DynamicResource M3OnTertiaryContainerBrush}" />
+                  </Border>
+                </StackPanel>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Grid>
+
+      <!-- TAB 2: INTERACTIVE BOM (M3 Expressive Assembly Tracker & Component Table) -->
+      <Grid Grid.Row="1"
+            RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto"
+            IsVisible="{Binding IsBomTabActive}">
+
+        <!-- 1. M3 Expressive Assembly Progress Card -->
+        <Border Grid.Row="0"
+                Margin="12,6,12,8"
+                Background="{DynamicResource M3SurfaceContainerBrush}"
+                BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+                BorderThickness="1"
+                CornerRadius="20"
+                Padding="14,10">
+          <StackPanel Spacing="8">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+              <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <materialIcons:MaterialIcon Kind="CheckDecagramOutline"
+                                            Width="16" Height="16"
+                                            Foreground="{DynamicResource M3PrimaryBrush}"
+                                            VerticalAlignment="Center" />
+                <TextBlock Text="{Binding AssemblyProgressText}"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource M3OnSurfaceBrush}"
+                           VerticalAlignment="Center" />
+              </StackPanel>
+
+              <Button Grid.Column="1"
+                      Command="{Binding MarkAllBomPlacedCommand}"
+                      Classes="tool-btn"
+                      Padding="8,3"
+                      CornerRadius="10"
+                      ToolTip.Tip="Mark all BOM items as placed">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                  <materialIcons:MaterialIcon Kind="CheckAll" Width="13" Height="13" Foreground="{DynamicResource M3PrimaryBrush}" />
+                  <TextBlock Text="All" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource M3PrimaryBrush}" />
+                </StackPanel>
+              </Button>
+
+              <Button Grid.Column="2"
+                      Margin="4,0,0,0"
+                      Command="{Binding ResetBomPlacedCommand}"
+                      Classes="tool-btn"
+                      Padding="8,3"
+                      CornerRadius="10"
+                      ToolTip.Tip="Reset placed status for all components">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                  <materialIcons:MaterialIcon Kind="Restart" Width="13" Height="13" Foreground="{DynamicResource M3OnSurfaceVariantBrush}" />
+                  <TextBlock Text="Reset" FontSize="11" Foreground="{DynamicResource M3OnSurfaceVariantBrush}" />
+                </StackPanel>
+              </Button>
+            </Grid>
+
+            <ProgressBar Minimum="0"
+                         Maximum="1"
+                         Value="{Binding AssemblyProgressRatio}"
+                         Height="6"
+                         CornerRadius="3"
+                         Foreground="{DynamicResource M3PrimaryBrush}"
+                         Background="{DynamicResource M3SurfaceContainerHighestBrush}" />
+          </StackPanel>
+        </Border>
+
+        <!-- 2. M3 Pill SearchBar for BOM -->
+        <Border Grid.Row="1"
+                Classes="m3-search-bar"
+                Margin="12,0,12,8">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <materialIcons:MaterialIcon Grid.Column="0"
+                                        Kind="Magnify"
+                                        Width="18" Height="18"
+                                        Foreground="{DynamicResource M3OnSurfaceVariantBrush}"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,8,0" />
+            <TextBox Grid.Column="1"
+                     Text="{Binding BomSearchQuery}"
+                     Watermark="Search ref, value, or footprint (R1, 100nF, 0402)..."
+                     Background="Transparent"
+                     BorderThickness="0"
+                     FontSize="13"
+                     VerticalAlignment="Center" />
+            <Button Grid.Column="2"
+                    Margin="4,0,0,0"
+                    IsVisible="{Binding BomSearchQuery, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                    Command="{Binding ClearBomSearchCommand}"
+                    Classes="tool-btn"
+                    Width="28" Height="28"
+                    Padding="0"
+                    CornerRadius="14"
+                    ToolTip.Tip="Clear BOM search">
+              <materialIcons:MaterialIcon Kind="CloseCircle" Width="16" Height="16" />
+            </Button>
+          </Grid>
+        </Border>
+
+        <!-- 3. M3 Filter Chips for BOM -->
+        <ScrollViewer Grid.Row="2"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Disabled"
+                      Margin="12,0,12,8">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Button Classes="chip-btn"
+                    Classes.active="{Binding IsBomFilterAll}"
+                    Command="{Binding SetBomFilterCommand}"
+                    CommandParameter="all">
+              <StackPanel Orientation="Horizontal" Spacing="5">
+                <materialIcons:MaterialIcon Kind="Check" Width="13" Height="13" IsVisible="{Binding IsBomFilterAll}" />
+                <TextBlock Text="All Parts" />
+              </StackPanel>
+            </Button>
+            <Button Classes="chip-btn"
+                    Classes.active="{Binding IsBomFilterTop}"
+                    Command="{Binding SetBomFilterCommand}"
+                    CommandParameter="top">
+              <StackPanel Orientation="Horizontal" Spacing="5">
+                <materialIcons:MaterialIcon Kind="ArrowUpBoldBoxOutline" Width="13" Height="13" />
+                <TextBlock Text="Top (F.Cu)" />
+              </StackPanel>
+            </Button>
+            <Button Classes="chip-btn"
+                    Classes.active="{Binding IsBomFilterBottom}"
+                    Command="{Binding SetBomFilterCommand}"
+                    CommandParameter="bottom">
+              <StackPanel Orientation="Horizontal" Spacing="5">
+                <materialIcons:MaterialIcon Kind="ArrowDownBoldBoxOutline" Width="13" Height="13" />
+                <TextBlock Text="Bottom (B.Cu)" />
+              </StackPanel>
+            </Button>
+            <Button Classes="chip-btn"
+                    Classes.active="{Binding IsBomFilterUnplaced}"
+                    Command="{Binding SetBomFilterCommand}"
+                    CommandParameter="unplaced">
+              <StackPanel Orientation="Horizontal" Spacing="5">
+                <materialIcons:MaterialIcon Kind="CheckboxBlankOutline" Width="13" Height="13" />
+                <TextBlock Text="Unplaced" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </ScrollViewer>
+
+        <!-- 4. BOM Showing Count & Clear Selection Bar -->
+        <Border Grid.Row="3"
+                BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="16,4">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Grid.Column="0"
+                       Classes="m3-caption"
+                       FontWeight="Medium"
+                       Text="{Binding ShowingBomLabel}"
+                       VerticalAlignment="Center" />
+            <Button Grid.Column="1"
+                    Command="{Binding ClearBomSelectionCommand}"
+                    Classes="tool-btn"
+                    Padding="10,4"
+                    CornerRadius="12">
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <materialIcons:MaterialIcon Kind="FilterRemoveOutline"
+                                            Width="13" Height="13"
+                                            Foreground="{DynamicResource M3PrimaryBrush}" />
+                <TextBlock Text="Clear"
+                           FontSize="11.5"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource M3PrimaryBrush}" />
+              </StackPanel>
+            </Button>
+          </Grid>
+        </Border>
+
+        <!-- 5. Sortable BOM Column Headers -->
+        <Border Grid.Row="4"
+                Background="{DynamicResource M3SurfaceContainerBrush}"
+                BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="8,4">
+          <Grid ColumnDefinitions="48,110,95,*,50">
+            <Button Grid.Column="0"
+                    Classes="tool-btn"
+                    Command="{Binding SortBomByCommand}"
+                    CommandParameter="placed"
+                    Padding="4,4"
+                    HorizontalAlignment="Center"
+                    ToolTip.Tip="Sort by Placed Status">
+              <StackPanel Orientation="Horizontal" Spacing="2">
+                <materialIcons:MaterialIcon Kind="CheckboxMarkedOutline" Width="12" Height="12" />
+                <TextBlock Classes="m3-label-small" Text="Placed" />
+              </StackPanel>
+            </Button>
+            <Button Grid.Column="1"
+                    Classes="tool-btn"
+                    Command="{Binding SortBomByCommand}"
+                    CommandParameter="references"
+                    Padding="4,4"
+                    HorizontalAlignment="Left"
+                    ToolTip.Tip="Sort by Reference Designators (C1, C5, etc.)">
+              <TextBlock Classes="m3-label-small" Text="References" />
+            </Button>
+            <Button Grid.Column="2"
+                    Classes="tool-btn"
+                    Command="{Binding SortBomByCommand}"
+                    CommandParameter="value"
+                    Padding="4,4"
+                    HorizontalAlignment="Left"
+                    ToolTip.Tip="Sort by Component Value">
+              <TextBlock Classes="m3-label-small" Text="Value" />
+            </Button>
+            <Button Grid.Column="3"
+                    Classes="tool-btn"
+                    Command="{Binding SortBomByCommand}"
+                    CommandParameter="footprint"
+                    Padding="4,4"
+                    HorizontalAlignment="Left"
+                    ToolTip.Tip="Sort by Footprint Package">
+              <TextBlock Classes="m3-label-small" Text="Footprint" />
+            </Button>
+            <Button Grid.Column="4"
+                    Classes="tool-btn"
+                    Command="{Binding SortBomByCommand}"
+                    CommandParameter="quantity"
+                    Padding="4,4"
+                    HorizontalAlignment="Center"
+                    ToolTip.Tip="Sort by Quantity">
+              <TextBlock Classes="m3-label-small" Text="Quantity" />
+            </Button>
+          </Grid>
+        </Border>
+
+        <!-- 6. Virtualized BOM Rows ListBox -->
+        <ListBox Grid.Row="5"
+                 ItemsSource="{Binding FilteredBomItems}"
+                 SelectedItem="{Binding SelectedBomItem}"
+                 Background="Transparent"
+                 Padding="4,4">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:BomItemViewModel">
+              <Grid ColumnDefinitions="48,110,95,*,50" Margin="2,3" VerticalAlignment="Center">
+                <!-- Placed Checkbox -->
+                <CheckBox Grid.Column="0"
+                          IsChecked="{Binding IsPlaced}"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          ToolTip.Tip="Mark component group as placed" />
+
+                <!-- References (Grouped e.g. C1, C5) -->
+                <TextBlock Grid.Column="1"
+                           Classes="m3-mono-label"
+                           Text="{Binding ReferencesText}"
+                           Foreground="{DynamicResource M3PrimaryBrush}"
+                           TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center"
+                           Margin="2,0,6,0"
+                           ToolTip.Tip="{Binding ReferencesText}" />
+
+                <!-- Value + Side Badge -->
+                <Grid Grid.Column="2" ColumnDefinitions="*,Auto" Margin="0,0,6,0" VerticalAlignment="Center">
+                  <TextBlock Grid.Column="0"
+                             Classes="m3-label-medium"
+                             Text="{Binding Value}"
+                             Foreground="{DynamicResource M3OnSurfaceBrush}"
+                             TextTrimming="CharacterEllipsis"
+                             VerticalAlignment="Center"
+                             ToolTip.Tip="{Binding Value}" />
+                  <Border Grid.Column="1"
+                          CornerRadius="6"
+                          Padding="4,1"
+                          Margin="3,0,0,0"
+                          BorderBrush="{Binding SideBrush}"
+                          BorderThickness="1"
+                          VerticalAlignment="Center">
+                    <TextBlock Text="{Binding SideText}"
+                               FontSize="9"
+                               FontWeight="Bold"
+                               Foreground="{Binding SideBrush}" />
+                  </Border>
+                </Grid>
+
+                <!-- Footprint Package -->
+                <TextBlock Grid.Column="3"
+                           Classes="m3-mono-small"
+                           Text="{Binding Package}"
+                           Foreground="{DynamicResource M3OnSurfaceVariantBrush}"
+                           TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center"
+                           Margin="0,0,6,0"
+                           ToolTip.Tip="{Binding Package}" />
+
+                <!-- Quantity Pill Badge -->
+                <Border Grid.Column="4"
+                        Classes="m3-badge-secondary"
+                        Padding="6,2"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                  <TextBlock Classes="m3-label-small"
+                             Text="{Binding Quantity}"
+                             Foreground="{DynamicResource M3OnSecondaryContainerBrush}" />
+                </Border>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+        <!-- 7. Selected BOM Item Component Switcher Footer Card -->
+        <Border Grid.Row="6"
+                IsVisible="{Binding SelectedBomItem, Converter={x:Static ObjectConverters.IsNotNull}}"
+                Background="{DynamicResource M3SurfaceContainerHighBrush}"
+                BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="14,10">
+          <StackPanel Spacing="8">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+              <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <materialIcons:MaterialIcon Kind="Chip"
+                                             Width="15" Height="15"
+                                             Foreground="{DynamicResource M3PrimaryBrush}"
+                                             VerticalAlignment="Center" />
+                <TextBlock Classes="m3-label-medium"
+                           FontWeight="Bold"
+                           Text="{Binding SelectedBomItem.Value}"
+                           Foreground="{DynamicResource M3OnSurfaceBrush}"
+                           TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center" />
+                <TextBlock Text="•"
+                           Foreground="{DynamicResource M3OutlineBrush}"
+                           VerticalAlignment="Center" />
+                <TextBlock Classes="m3-mono m3-label-medium"
+                           FontWeight="Bold"
+                           Text="{Binding SelectedComponentRef}"
+                           Foreground="{DynamicResource M3PrimaryBrush}"
+                           VerticalAlignment="Center" />
+              </StackPanel>
+
+              <Button Grid.Column="1"
+                      Command="{Binding PrevBomComponentCommand}"
+                      Classes="m3-tonal"
+                      Padding="10,4"
+                      CornerRadius="12"
+                      ToolTip.Tip="Previous Reference in Group">
+                <materialIcons:MaterialIcon Kind="ChevronLeft" Width="15" Height="15" />
+              </Button>
+              <Button Grid.Column="2"
+                      Margin="6,0,0,0"
+                      Command="{Binding NextBomComponentCommand}"
+                      Classes="m3-filled"
+                      Padding="10,4"
+                      CornerRadius="12"
+                      ToolTip.Tip="Next Reference in Group">
+                <materialIcons:MaterialIcon Kind="ChevronRight" Width="15" Height="15" />
+              </Button>
+            </Grid>
+
+            <!-- Individual Reference Designator Chips -->
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+              <ItemsControl ItemsSource="{Binding SelectedBomItem.References}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" Spacing="4" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="x:String">
+                    <Button Classes="chip-btn"
+                            Padding="8,3"
+                            FontSize="11"
+                            Command="{Binding $parent[UserControl].((vm:MainViewModel)DataContext).SelectBomComponentCommand}"
+                            CommandParameter="{Binding}"
+                            Content="{Binding}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </StackPanel>
+        </Border>
+
+      </Grid>
+
+      <!-- TAB 3: LAYERS (M3 Expressive Filled Cards) -->
+      <ScrollViewer Grid.Row="1"
+                    IsVisible="{Binding IsLayersTabActive}"
+                    Padding="12,8,12,14">
+        <StackPanel Spacing="12">
+
+          <!-- Layer Presets Card -->
+          <Border Classes="m3-card">
+            <StackPanel Spacing="8">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="TuneVariant"
+                                            Width="15" Height="15"
+                                            Foreground="{DynamicResource M3PrimaryBrush}" />
+                <TextBlock Classes="m3-section-title"
+                           Text="QUICK PRESETS"
+                           VerticalAlignment="Center" />
+              </StackPanel>
+              <WrapPanel Orientation="Horizontal">
+                <Button Classes="chip-btn" Margin="0,0,6,6"
+                        Command="{Binding ApplyLayerPresetCommand}" CommandParameter="all"
+                        Content="All Layers" />
+                <Button Classes="chip-btn" Margin="0,0,6,6"
+                        Command="{Binding ApplyLayerPresetCommand}" CommandParameter="top"
+                        Content="Top View" />
+                <Button Classes="chip-btn" Margin="0,0,6,6"
+                        Command="{Binding ApplyLayerPresetCommand}" CommandParameter="bottom"
+                        Content="Bottom View" />
+                <Button Classes="chip-btn" Margin="0,0,6,6"
+                        Command="{Binding ApplyLayerPresetCommand}" CommandParameter="copper"
+                        Content="Copper Only" />
+              </WrapPanel>
+            </StackPanel>
+          </Border>
+
+          <!-- Copper Layers Card -->
+          <Border Classes="m3-card">
+            <StackPanel Spacing="6">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="LayersTripleOutline"
+                                            Width="15" Height="15"
+                                            Foreground="{DynamicResource M3PrimaryBrush}" />
+                <TextBlock Classes="m3-section-title"
+                           Text="COPPER LAYERS"
+                           VerticalAlignment="Center" />
+              </StackPanel>
+              <ItemsControl ItemsSource="{Binding CopperLayers}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:LayerItemViewModel">
+                    <CheckBox IsChecked="{Binding IsVisible}" Margin="0,3">
+                      <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Border Width="14" Height="14"
+                                CornerRadius="4"
+                                Background="{Binding ColorBrush}" />
+                        <TextBlock Classes="m3-label-large"
+                                   Text="{Binding DisplayName}"
+                                   VerticalAlignment="Center" />
+                      </StackPanel>
+                    </CheckBox>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+
+          <!-- Technical Layers Card -->
+          <Border Classes="m3-card">
+            <StackPanel Spacing="6">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="VectorSquare"
+                                            Width="15" Height="15"
+                                            Foreground="{DynamicResource M3PrimaryBrush}" />
+                <TextBlock Classes="m3-section-title"
+                           Text="TECHNICAL LAYERS"
+                           VerticalAlignment="Center" />
+              </StackPanel>
+              <ItemsControl ItemsSource="{Binding TechLayers}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:LayerItemViewModel">
+                    <CheckBox IsChecked="{Binding IsVisible}" Margin="0,3">
+                      <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Border Width="14" Height="14"
+                                CornerRadius="4"
+                                Background="{Binding ColorBrush}" />
+                        <TextBlock Classes="m3-label-large"
+                                   Text="{Binding DisplayName}"
+                                   VerticalAlignment="Center" />
+                      </StackPanel>
+                    </CheckBox>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+
+          <!-- Pad Net Labels Card -->
+          <Border Classes="m3-card">
+            <StackPanel Spacing="6">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="TagOutline"
+                                            Width="15" Height="15"
+                                            Foreground="{DynamicResource M3PrimaryBrush}" />
+                <TextBlock Classes="m3-section-title"
+                           Text="PAD &amp; VIA LABELS"
+                           VerticalAlignment="Center" />
+              </StackPanel>
+              <CheckBox IsChecked="{Binding ShowPadNetNames}"
+                        Content="Show Net Names on Pads &amp; Vias" />
+            </StackPanel>
+          </Border>
+
+          <!-- Copper Pour Zones Card -->
+          <Border Classes="m3-card">
+            <StackPanel Spacing="6">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="TextureBox"
+                                            Width="15" Height="15"
+                                            Foreground="{DynamicResource M3PrimaryBrush}" />
+                <TextBlock Classes="m3-section-title"
+                           Text="COPPER POUR ZONES"
+                           VerticalAlignment="Center" />
+              </StackPanel>
+              <StackPanel Spacing="4">
+                <RadioButton GroupName="ZoneMode"
+                             IsChecked="{Binding IsZoneSolid}"
+                             Content="Solid Fill" />
+                <RadioButton GroupName="ZoneMode"
+                             IsChecked="{Binding IsZoneHatch}"
+                             Content="Cross-Hatch Fill" />
+                <RadioButton GroupName="ZoneMode"
+                             IsChecked="{Binding IsZoneOutline}"
+                             Content="Outlines Only" />
+                <RadioButton GroupName="ZoneMode"
+                             IsChecked="{Binding IsZoneHide}"
+                             Content="Hidden" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
+        </StackPanel>
+      </ScrollViewer>
+
+    </Grid>
+  </Border>
+</UserControl>

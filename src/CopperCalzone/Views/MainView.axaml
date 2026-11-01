@@ -1,0 +1,50 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:CopperCalzone.ViewModels"
+             xmlns:views="using:CopperCalzone.Views"
+             xmlns:render="using:CopperCalzone.Rendering"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
+             x:Class="CopperCalzone.Views.MainView"
+             x:DataType="vm:MainViewModel"
+             Background="{DynamicResource M3SurfaceBrush}"
+             DragDrop.AllowDrop="True">
+
+  <Grid RowDefinitions="Auto,*">
+    <!-- M3 Expressive Top App Bar & Floating Pill Toolbar -->
+    <views:TopToolbarView Grid.Row="0" x:Name="TopToolbar" />
+
+    <!-- TAB 1: PCB Viewer (M3 Side Sheet + Expressive Rounded Viewport) -->
+    <Grid Grid.Row="1"
+          ColumnDefinitions="Auto,*"
+          x:Name="ContentGrid"
+          IsVisible="{Binding IsViewerTabActive}">
+
+      <!-- Left M3 Side Sheet / Navigation Drawer (Nets & Layers) -->
+      <views:SidebarView Grid.Column="0" x:Name="Sidebar" />
+
+      <!-- Center Expressive Viewport Container -->
+      <Border Grid.Column="1"
+              Classes="m3-surface-sheet"
+              Margin="4,0,8,8">
+        <Grid ClipToBounds="True">
+          <!-- Hardware-Accelerated Skia PCB Canvas -->
+          <render:PcbCanvasControl x:Name="PcbCanvas" />
+
+          <!-- Floating M3 Elevated Card Pin Inspector & Pin-to-Pin Navigation Bar -->
+          <views:PinInspectorView />
+
+          <!-- M3 Hover Tooltip & Bottom-Right HUD Tonal Status Pill -->
+          <views:ViewportOverlayView x:Name="ViewportOverlay" />
+        </Grid>
+      </Border>
+    </Grid>
+
+    <!-- TAB 2: Full-Screen GitHub PCB Browser -->
+    <views:GitHubBrowserView Grid.Row="1"
+                             DataContext="{Binding GitHubBrowser}"
+                             IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsGitHubTabActive}" />
+
+  </Grid>
+</UserControl>

@@ -1,0 +1,518 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:CopperCalzone.ViewModels"
+             xmlns:models="using:CopperCalzone.Models"
+             xmlns:octo="clr-namespace:Octokit;assembly=Octokit"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="700"
+             x:Class="CopperCalzone.Views.GitHubBrowserView"
+             x:DataType="vm:GitHubBrowserViewModel">
+
+  <!-- M3 Expressive Full Screen GitHub PCB Browser -->
+  <Border Classes="m3-surface-sheet"
+          Background="{DynamicResource M3SurfaceBrush}"
+          Margin="8,0,8,8">
+    <Grid RowDefinitions="Auto,*,Auto" Background="{DynamicResource M3SurfaceContainerLowBrush}">
+
+      <!-- Top Header / M3 App Bar -->
+      <Border Grid.Row="0"
+              Background="{DynamicResource M3SurfaceContainerBrush}"
+              BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+              BorderThickness="0,0,0,1"
+              Padding="22,14">
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+          <!-- Icon & Title -->
+          <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+            <Border Background="{DynamicResource M3PrimaryContainerBrush}"
+                    CornerRadius="14"
+                    Width="40" Height="40">
+              <materialIcons:MaterialIcon Kind="Github"
+                                          Width="22" Height="22"
+                                          Foreground="{DynamicResource M3OnPrimaryContainerBrush}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+            </Border>
+            <StackPanel VerticalAlignment="Center" Spacing="1">
+              <TextBlock Classes="m3-title-medium"
+                         Text="GitHub PCB Browser" />
+              <TextBlock Classes="m3-caption"
+                         Text="Browse repositories &amp; load KiCad PCB layouts directly" />
+            </StackPanel>
+          </StackPanel>
+
+          <!-- User Status Chip & Sign Out (if logged in) -->
+          <StackPanel Grid.Column="2"
+                      Orientation="Horizontal"
+                      Spacing="10"
+                      VerticalAlignment="Center"
+                      Margin="0,0,12,0"
+                      IsVisible="{Binding !!CurrentUserName}">
+            <Border Background="{DynamicResource M3SecondaryContainerBrush}"
+                    CornerRadius="18"
+                    Padding="12,6">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="CheckDecagram"
+                                            Width="15" Height="15"
+                                            Foreground="{DynamicResource M3PrimaryBrush}"
+                                            VerticalAlignment="Center" />
+                <TextBlock Classes="m3-label-medium"
+                           Text="{Binding CurrentUserName}"
+                           Foreground="{DynamicResource M3OnSecondaryContainerBrush}"
+                           VerticalAlignment="Center" />
+              </StackPanel>
+            </Border>
+            <Button Command="{Binding LogoutCommand}"
+                    ToolTip.Tip="Sign Out from GitHub"
+                    Classes="tool-btn"
+                    Padding="12,7">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="Logout" Width="15" Height="15" />
+                <TextBlock Text="Sign Out" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+
+          <!-- Return to PCB Viewport Button -->
+          <Button Grid.Column="3"
+                  Command="{Binding CloseCommand}"
+                  ToolTip.Tip="Return to PCB Viewport"
+                  Classes="m3-tonal">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <materialIcons:MaterialIcon Kind="ArrowLeft" Width="16" Height="16" />
+              <TextBlock Text="Back to Viewer" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+        </Grid>
+      </Border>
+
+      <!-- Main Body Area -->
+      <Grid Grid.Row="1" Margin="24">
+
+        <!-- STEP 1: Not Authenticated (M3 Expressive Hero Card) -->
+        <Border HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{DynamicResource M3SurfaceContainerHighBrush}"
+                BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+                BorderThickness="1"
+                CornerRadius="28"
+                Padding="40,36"
+                MaxWidth="480"
+                BoxShadow="0 12 36 0 #40000000"
+                IsVisible="{Binding IsNotAuthenticated}">
+          <StackPanel Spacing="18" HorizontalAlignment="Center">
+            <Border Background="{DynamicResource M3PrimaryContainerBrush}"
+                    CornerRadius="24"
+                    Width="72" Height="72"
+                    HorizontalAlignment="Center">
+              <materialIcons:MaterialIcon Kind="Github"
+                                          Width="40" Height="40"
+                                          Foreground="{DynamicResource M3OnPrimaryContainerBrush}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+            </Border>
+
+            <TextBlock Classes="m3-headline-medium"
+                       Text="Connect to GitHub"
+                       HorizontalAlignment="Center" />
+
+            <TextBlock Classes="m3-body-medium"
+                       Text="Sign in to browse your personal repositories, organization projects, and collaborator boards for KiCad PCB layouts."
+                       TextWrapping="Wrap"
+                       TextAlignment="Center" />
+
+            <Button Command="{Binding StartLoginCommand}"
+                    HorizontalAlignment="Center"
+                    Classes="m3-filled"
+                    Padding="24,12"
+                    CornerRadius="24"
+                    Margin="0,6,0,0">
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <materialIcons:MaterialIcon Kind="Github" Width="18" Height="18" />
+                <TextBlock Text="Sign in with GitHub" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </Border>
+
+        <!-- STEP 2: Device Code Pending (M3 Expressive Hero Card) -->
+        <Border HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{DynamicResource M3SurfaceContainerHighBrush}"
+                BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+                BorderThickness="1"
+                CornerRadius="28"
+                Padding="40,36"
+                MaxWidth="500"
+                BoxShadow="0 12 36 0 #40000000"
+                IsVisible="{Binding IsDeviceCodePending}">
+          <StackPanel Spacing="18" HorizontalAlignment="Center">
+            <Border Background="{DynamicResource M3SecondaryContainerBrush}"
+                    CornerRadius="20"
+                    Width="56" Height="56"
+                    HorizontalAlignment="Center">
+              <materialIcons:MaterialIcon Kind="KeyVariant"
+                                          Width="28" Height="28"
+                                          Foreground="{DynamicResource M3OnSecondaryContainerBrush}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+            </Border>
+
+            <TextBlock Classes="m3-headline-medium"
+                       Text="Authorize Device"
+                       HorizontalAlignment="Center" />
+
+            <TextBlock Classes="m3-body-medium"
+                       Text="Enter the following one-time verification code on GitHub to complete authorization:"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center" />
+
+            <!-- M3 Primary Container Highlighted Code Box -->
+            <Border Background="{DynamicResource M3PrimaryContainerBrush}"
+                    CornerRadius="20"
+                    Padding="28,16"
+                    HorizontalAlignment="Center">
+              <TextBlock Classes="m3-mono-code"
+                         Text="{Binding UserCode}"
+                         Foreground="{DynamicResource M3OnPrimaryContainerBrush}" />
+            </Border>
+
+            <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" Margin="0,6,0,0">
+              <Button Command="{Binding CopyCodeAndOpenBrowserCommand}"
+                      Classes="m3-filled"
+                      Padding="20,11">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <materialIcons:MaterialIcon Kind="ContentCopy" Width="16" Height="16" />
+                  <TextBlock Text="Copy Code &amp; Open GitHub" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+              <Button Command="{Binding CancelLoginCommand}"
+                      Classes="m3-tonal"
+                      Padding="16,11">
+                <TextBlock Text="Cancel" VerticalAlignment="Center" />
+              </Button>
+            </StackPanel>
+
+            <TextBlock Classes="m3-body-small"
+                       FontStyle="Italic"
+                       Text="Waiting for authorization in your browser..."
+                       HorizontalAlignment="Center" />
+          </StackPanel>
+        </Border>
+
+        <!-- STEP 3: Repositories List -->
+        <Grid RowDefinitions="Auto,*"
+              ColumnDefinitions="*"
+              IsVisible="{Binding IsRepoList}">
+
+          <!-- M3 SearchBar & Refresh -->
+          <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+            <Border Grid.Column="0"
+                    Classes="m3-search-bar"
+                    Padding="16,6">
+              <Grid ColumnDefinitions="Auto,*">
+                <materialIcons:MaterialIcon Grid.Column="0"
+                                            Kind="Magnify"
+                                            Width="20" Height="20"
+                                            Foreground="{DynamicResource M3OnSurfaceVariantBrush}"
+                                            VerticalAlignment="Center"
+                                            Margin="0,0,10,0" />
+                <TextBox Grid.Column="1"
+                         Text="{Binding RepoSearchQuery, Mode=TwoWay}"
+                         Watermark="Search repositories by name, owner, or description..."
+                         Background="Transparent"
+                         BorderThickness="0"
+                         FontSize="13.5"
+                         VerticalAlignment="Center" />
+              </Grid>
+            </Border>
+
+            <Button Grid.Column="1"
+                    Command="{Binding RefreshRepositoriesCommand}"
+                    ToolTip.Tip="Refresh repository list"
+                    Classes="m3-tonal"
+                    Margin="12,0,0,0"
+                    Padding="16,10">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="Refresh" Width="17" Height="17" />
+                <TextBlock Text="Refresh" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </Grid>
+
+          <!-- Repository ListBox Card -->
+          <Border Grid.Row="1"
+                  Classes="m3-surface-sheet"
+                  Background="{DynamicResource M3SurfaceContainerBrush}">
+            <ListBox ItemsSource="{Binding FilteredRepositories}"
+                     Background="Transparent"
+                     Padding="8">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="octo:Repository">
+                  <Button Command="{Binding $parent[UserControl].((vm:GitHubBrowserViewModel)DataContext).SelectRepositoryCommand}"
+                          CommandParameter="{Binding}"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Stretch"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          CornerRadius="16"
+                          Padding="14,12">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                      <!-- Repo M3 Tonal Icon Container -->
+                      <Border Grid.Column="0"
+                              Background="{DynamicResource M3SecondaryContainerBrush}"
+                              CornerRadius="14"
+                              Width="40" Height="40"
+                              VerticalAlignment="Center"
+                              Margin="0,0,14,0">
+                        <materialIcons:MaterialIcon Kind="SourceRepository"
+                                                    Width="20" Height="20"
+                                                    Foreground="{DynamicResource M3OnSecondaryContainerBrush}"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center" />
+                      </Border>
+
+                      <!-- Info -->
+                      <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                          <TextBlock Classes="m3-title-small"
+                                     Text="{Binding FullName}"
+                                     VerticalAlignment="Center" />
+                          <Border Classes="m3-badge-tertiary"
+                                  IsVisible="{Binding Private}">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                              <materialIcons:MaterialIcon Kind="LockOutline"
+                                                          Width="11" Height="11"
+                                                          Foreground="{DynamicResource M3OnTertiaryContainerBrush}" />
+                              <TextBlock Classes="m3-label-small"
+                                         Text="Private"
+                                         Foreground="{DynamicResource M3OnTertiaryContainerBrush}" />
+                            </StackPanel>
+                          </Border>
+                        </StackPanel>
+                        <TextBlock Classes="m3-body-small"
+                                   Text="{Binding Description}"
+                                   TextTrimming="CharacterEllipsis"
+                                   IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                      </StackPanel>
+
+                      <!-- Chevron -->
+                      <materialIcons:MaterialIcon Grid.Column="2"
+                                                  Kind="ChevronRight"
+                                                  Width="20" Height="20"
+                                                  Foreground="{DynamicResource M3OnSurfaceVariantBrush}"
+                                                  VerticalAlignment="Center"
+                                                  Margin="12,0,0,0" />
+                    </Grid>
+                  </Button>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Border>
+        </Grid>
+
+        <!-- STEP 4: Folder & PCB File Navigation -->
+        <Grid RowDefinitions="Auto,Auto,*"
+              ColumnDefinitions="*"
+              IsVisible="{Binding IsFileNavigation}">
+
+          <!-- Repository Header & Back to Repos Button -->
+          <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
+            <Button Grid.Column="0"
+                    Command="{Binding BackToReposCommand}"
+                    Classes="m3-tonal"
+                    Padding="14,8">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="ArrowLeft" Width="16" Height="16" />
+                <TextBlock Text="All Repositories" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+
+            <TextBlock Grid.Column="1"
+                       Classes="m3-title-medium"
+                       Text="{Binding SelectedRepository.FullName}"
+                       VerticalAlignment="Center"
+                       Margin="16,0" />
+
+            <Border Grid.Column="2"
+                    Classes="m3-badge-secondary"
+                    CornerRadius="16"
+                    Padding="12,6"
+                    VerticalAlignment="Center">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="SourceBranch"
+                                            Width="15" Height="15"
+                                            Foreground="{DynamicResource M3OnSecondaryContainerBrush}" />
+                <TextBlock Classes="m3-label-medium"
+                           Text="{Binding SelectedRepository.DefaultBranch}"
+                           Foreground="{DynamicResource M3OnSecondaryContainerBrush}" />
+              </StackPanel>
+            </Border>
+          </Grid>
+
+          <!-- M3 Pill Breadcrumbs Navigation -->
+          <Border Grid.Row="1"
+                  Background="{DynamicResource M3SurfaceContainerHighBrush}"
+                  BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+                  BorderThickness="1"
+                  CornerRadius="18"
+                  Padding="12,6"
+                  Margin="0,0,0,12">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+              <ItemsControl ItemsSource="{Binding Breadcrumbs}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" Spacing="2" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:BreadcrumbItem">
+                    <StackPanel Orientation="Horizontal" Spacing="2">
+                      <Button Command="{Binding $parent[UserControl].((vm:GitHubBrowserViewModel)DataContext).NavigateBreadcrumbCommand}"
+                              CommandParameter="{Binding Path}"
+                              Classes="tool-btn"
+                              Padding="8,4"
+                              CornerRadius="12">
+                        <TextBlock Text="{Binding Name}" />
+                      </Button>
+                      <materialIcons:MaterialIcon Kind="ChevronRight"
+                                                  Width="15" Height="15"
+                                                  Foreground="{DynamicResource M3OnSurfaceVariantBrush}"
+                                                  VerticalAlignment="Center" />
+                    </StackPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </Border>
+
+          <!-- Folder Items List Card -->
+          <Border Grid.Row="2"
+                  Classes="m3-surface-sheet"
+                  Background="{DynamicResource M3SurfaceContainerBrush}">
+            <Grid>
+              <ListBox ItemsSource="{Binding CurrentFolderItems}"
+                       Background="Transparent"
+                       Padding="8">
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="models:GitHubItemModel">
+                    <Button Command="{Binding $parent[UserControl].((vm:GitHubBrowserViewModel)DataContext).NavigateFolderCommand}"
+                            CommandParameter="{Binding}"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            CornerRadius="16"
+                            Padding="14,10">
+                      <Grid ColumnDefinitions="Auto,*,Auto">
+                        <!-- Icon: Folder or PCB -->
+                        <Panel Grid.Column="0" Width="38" Height="38" Margin="0,0,14,0" VerticalAlignment="Center">
+                          <Border IsVisible="{Binding IsDirectory}"
+                                  Background="{DynamicResource M3SecondaryContainerBrush}"
+                                  CornerRadius="12">
+                            <materialIcons:MaterialIcon Kind="FolderOutline"
+                                                        Width="20" Height="20"
+                                                        Foreground="{DynamicResource M3OnSecondaryContainerBrush}"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center" />
+                          </Border>
+                          <Border IsVisible="{Binding !IsDirectory}"
+                                  Background="{DynamicResource M3PrimaryContainerBrush}"
+                                  CornerRadius="12">
+                            <materialIcons:MaterialIcon Kind="DeveloperBoard"
+                                                        Width="20" Height="20"
+                                                        Foreground="{DynamicResource M3OnPrimaryContainerBrush}"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center" />
+                          </Border>
+                        </Panel>
+
+                        <!-- Name & Size -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                          <TextBlock Classes="m3-label-large"
+                                     Text="{Binding Name}" />
+                          <TextBlock Classes="m3-caption"
+                                     Text="{Binding FormattedSize}" />
+                        </StackPanel>
+
+                        <!-- M3 Primary Container Action Pill -->
+                        <Border Grid.Column="2"
+                                Classes="m3-badge-primary"
+                                VerticalAlignment="Center"
+                                IsVisible="{Binding !IsDirectory}">
+                          <StackPanel Orientation="Horizontal" Spacing="6">
+                            <materialIcons:MaterialIcon Kind="OpenInApp"
+                                                        Width="15" Height="15"
+                                                        Foreground="{DynamicResource M3OnPrimaryContainerBrush}" />
+                            <TextBlock Classes="m3-label-medium"
+                                       FontWeight="Bold"
+                                       Text="Load PCB"
+                                       Foreground="{DynamicResource M3OnPrimaryContainerBrush}" />
+                          </StackPanel>
+                        </Border>
+                      </Grid>
+                    </Button>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+
+              <!-- Empty State -->
+              <StackPanel HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          Spacing="12"
+                          IsVisible="{Binding !CurrentFolderItems.Count}">
+                <materialIcons:MaterialIcon Kind="FolderOpenOutline"
+                                            Width="40" Height="40"
+                                            Foreground="{DynamicResource M3OutlineBrush}"
+                                            HorizontalAlignment="Center" />
+                <TextBlock Classes="m3-body-medium"
+                           Text="No .kicad_pcb files or subfolders found in this directory."
+                           HorizontalAlignment="Center" />
+                <Button Command="{Binding NavigateUpCommand}"
+                        Classes="m3-tonal"
+                        HorizontalAlignment="Center">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <materialIcons:MaterialIcon Kind="ArrowUp" Width="16" Height="16" />
+                    <TextBlock Text="Go Up One Level" VerticalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+              </StackPanel>
+            </Grid>
+          </Border>
+        </Grid>
+      </Grid>
+
+      <!-- Footer Status Bar -->
+      <Border Grid.Row="2"
+              Background="{DynamicResource M3SurfaceContainerBrush}"
+              BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+              BorderThickness="0,1,0,0"
+              Padding="22,10">
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <!-- Loading indicator text -->
+            <TextBlock Classes="m3-body-small"
+                       Text="{Binding StatusMessage}"
+                       VerticalAlignment="Center"
+                       IsVisible="{Binding IsLoading}" />
+            <!-- Error message -->
+            <TextBlock Classes="m3-body-small"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource M3ErrorBrush}"
+                       Text="{Binding ErrorMessage}"
+                       VerticalAlignment="Center"
+                       IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          </StackPanel>
+
+          <Button Grid.Column="1"
+                  Command="{Binding CloseCommand}"
+                  Classes="tool-btn"
+                  Padding="14,6">
+            <TextBlock Text="Return to Viewer" />
+          </Button>
+        </Grid>
+      </Border>
+    </Grid>
+  </Border>
+</UserControl>

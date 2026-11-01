@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="CopperCalzone.Android/CopperCalzone.Android.csproj" />
+  <Project Path="CopperCalzone.Desktop/CopperCalzone.Desktop.csproj" />
+  <Project Path="CopperCalzone/CopperCalzone.csproj" />
+</Solution>

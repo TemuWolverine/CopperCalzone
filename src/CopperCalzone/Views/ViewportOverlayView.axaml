@@ -1,0 +1,75 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:CopperCalzone.ViewModels"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="CopperCalzone.Views.ViewportOverlayView"
+             x:DataType="vm:MainViewModel"
+             IsHitTestVisible="False">
+
+  <Panel IsHitTestVisible="False">
+    <!-- M3 Expressive Hover Tooltip -->
+    <Border IsVisible="{Binding IsHoverTooltipVisible}"
+            IsHitTestVisible="False"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Margin="{Binding HoverTooltipMargin}"
+            Background="{DynamicResource M3SurfaceContainerHighestBrush}"
+            BorderBrush="{DynamicResource M3PrimaryBrush}"
+            BorderThickness="1"
+            CornerRadius="14"
+            Padding="12,8"
+            BoxShadow="0 6 16 0 #44000000">
+      <StackPanel Spacing="2">
+        <TextBlock Classes="m3-label-medium"
+                   FontWeight="Bold"
+                   Foreground="{DynamicResource M3OnSurfaceBrush}"
+                   Text="{Binding HoverTooltipTitle}" />
+        <TextBlock Classes="m3-mono-small"
+                   FontWeight="SemiBold"
+                   Foreground="{DynamicResource M3PrimaryBrush}"
+                   Text="{Binding HoverTooltipNet}" />
+      </StackPanel>
+    </Border>
+
+    <!-- Bottom-Right M3 Tonal HUD Status Pill -->
+    <Border HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Margin="16"
+            IsHitTestVisible="False"
+            Background="{DynamicResource M3SurfaceOverlayBrush}"
+            BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+            BorderThickness="1"
+            CornerRadius="20"
+            Padding="14,7"
+            BoxShadow="0 4 14 0 #33000000">
+      <StackPanel Orientation="Horizontal" Spacing="10">
+        <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+          <materialIcons:MaterialIcon Kind="AxisArrow"
+                                      Width="14" Height="14"
+                                      Foreground="{DynamicResource M3OnSurfaceVariantBrush}" />
+          <TextBlock Classes="m3-mono-small"
+                     Foreground="{DynamicResource M3OnSurfaceBrush}"
+                     Text="{Binding HudCoordinates}"
+                     VerticalAlignment="Center" />
+        </StackPanel>
+        <TextBlock Text="•"
+                   FontSize="12"
+                   Foreground="{DynamicResource M3OutlineBrush}"
+                   VerticalAlignment="Center" />
+        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+          <materialIcons:MaterialIcon Kind="Magnify"
+                                      Width="14" Height="14"
+                                      Foreground="{DynamicResource M3PrimaryBrush}" />
+          <TextBlock Classes="m3-mono-small"
+                     FontWeight="Bold"
+                     Foreground="{DynamicResource M3PrimaryBrush}"
+                     Text="{Binding HudZoom}"
+                     VerticalAlignment="Center" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+  </Panel>
+</UserControl>

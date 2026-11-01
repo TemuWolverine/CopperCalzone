@@ -1,0 +1,66 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- M3 Expressive Card Container (Used in Sidebar, Sheets) -->
+  <Style Selector="Border.m3-card">
+    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerBrush}" />
+    <Setter Property="CornerRadius" Value="20" />
+    <Setter Property="Padding" Value="14,12" />
+  </Style>
+
+  <!-- M3 Elevated Floating Overlay Card (Pin Inspector, HUD, Hero) -->
+  <Style Selector="Border.m3-elevated-card">
+    <Setter Property="Background" Value="{DynamicResource M3SurfaceOverlayBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource M3OutlineVariantBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="24" />
+    <Setter Property="Padding" Value="18,16" />
+    <Setter Property="BoxShadow" Value="0 10 28 0 #55000000" />
+  </Style>
+
+  <!-- M3 Surface Sheet Outer Border (Sidebar, GitHub Browser, Viewport) -->
+  <Style Selector="Border.m3-surface-sheet">
+    <Setter Property="CornerRadius" Value="24" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="BorderBrush" Value="{DynamicResource M3OutlineVariantBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+
+  <!-- M3 Expressive Pill Search Bar -->
+  <Style Selector="Border.m3-search-bar">
+    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource M3OutlineVariantBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="24" />
+    <Setter Property="Padding" Value="14,4" />
+  </Style>
+
+  <!-- M3 Expressive Segmented Pill Bar Container -->
+  <Style Selector="Border.m3-pill-bar">
+    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource M3OutlineVariantBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="22" />
+    <Setter Property="Padding" Value="4" />
+  </Style>
+
+  <!-- M3 Badges & Chips Containers -->
+  <Style Selector="Border.m3-badge-secondary">
+    <Setter Property="Background" Value="{DynamicResource M3SecondaryContainerBrush}" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="Padding" Value="8,2" />
+  </Style>
+
+  <Style Selector="Border.m3-badge-tertiary">
+    <Setter Property="Background" Value="{DynamicResource M3TertiaryContainerBrush}" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="Padding" Value="8,2" />
+  </Style>
+
+  <Style Selector="Border.m3-badge-primary">
+    <Setter Property="Background" Value="{DynamicResource M3PrimaryContainerBrush}" />
+    <Setter Property="CornerRadius" Value="16" />
+    <Setter Property="Padding" Value="12,6" />
+  </Style>
+
+</Styles>
