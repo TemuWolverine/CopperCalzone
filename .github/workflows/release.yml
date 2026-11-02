@@ -49,6 +49,8 @@ jobs:
       - name: Package Windows Artifacts
         shell: pwsh
         run: |
+          # Remove PDB symbol files before archiving
+          Remove-Item -Path "publish/windows/*.pdb" -Force -ErrorAction SilentlyContinue
           Compress-Archive -Path "publish/windows/*" -DestinationPath "CopperCalzone-win-x64.zip"
 
       - name: Upload Windows Assets to GitHub Release
@@ -57,7 +59,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload ${{ needs.release-please.outputs.tag_name }} CopperCalzone-win-x64.zip --clobber
-          gh release upload ${{ needs.release-please.outputs.tag_name }} "publish/windows/CopperCalzone.Desktop.exe#CopperCalzone-win-x64.exe" --clobber
 
   build-android:
     needs: release-please
