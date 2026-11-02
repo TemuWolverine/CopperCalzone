@@ -407,3 +407,4 @@ src/SillyMIDI.Platform.Linux/staging_folder/
 src/SillyMIDI.Platform.Linux/out/
 output/
 /src/.cr
+test_android_out/

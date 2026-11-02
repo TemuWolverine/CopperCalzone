@@ -1,0 +1,39 @@
+﻿# Auto-detect text files and normalize line endings to CRLF on Windows
+* text=auto eol=crlf
+
+# C# and .NET
+*.cs text diff=csharp eol=crlf
+*.axaml text eol=crlf
+*.xaml text eol=crlf
+*.csproj text eol=crlf
+*.props text eol=crlf
+*.targets text eol=crlf
+*.sln text eol=crlf
+*.config text eol=crlf
+*.conf text eol=crlf
+
+# Web & Data
+*.json text eol=crlf
+*.xml text eol=crlf
+*.md text eol=crlf
+*.txt text eol=crlf
+*.kicad_pcb text eol=crlf
+
+# Scripts & Tooling
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.editorconfig text eol=crlf
+*.gitattributes text eol=crlf
+*.gitignore text eol=crlf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.dll binary
+*.pdb binary
+*.exe binary
