@@ -1,0 +1,112 @@
+name: release-please
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          target-branch: master
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  build-windows:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '11.0.x'
+          dotnet-quality: 'preview'
+
+      - name: Publish Windows Native AOT
+        run: >
+          dotnet publish src/CopperCalzone.Desktop/CopperCalzone.Desktop.csproj
+          -c Release
+          -r win-x64
+          -p:PublishAot=true
+          -o publish/windows
+
+      - name: Package Windows Artifacts
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "publish/windows/*" -DestinationPath "CopperCalzone-win-x64.zip"
+
+      - name: Upload Windows Assets to GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ needs.release-please.outputs.tag_name }} CopperCalzone-win-x64.zip --clobber
+          gh release upload ${{ needs.release-please.outputs.tag_name }} "publish/windows/CopperCalzone.Desktop.exe#CopperCalzone-win-x64.exe" --clobber
+
+  build-android:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '11.0.x'
+          dotnet-quality: 'preview'
+
+      - name: Install Android Workload
+        run: dotnet workload install android
+
+      - name: Publish Android APK
+        run: >
+          dotnet publish src/CopperCalzone.Android/CopperCalzone.Android.csproj
+          -c Release
+          -f net11.0-android
+          -o publish/android
+
+      - name: Locate and Upload Android APK to GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $apk = Get-ChildItem -Path "publish/android" -Filter "*Signed.apk" | Select-Object -First 1
+          if (-not $apk) {
+            $apk = Get-ChildItem -Path "publish/android" -Filter "*.apk" | Select-Object -First 1
+          }
+          if (-not $apk) {
+            $apk = Get-ChildItem -Recurse -Path "src/CopperCalzone.Android/bin/Release" -Filter "*.apk" | Select-Object -First 1
+          }
+
+          if ($apk) {
+            Write-Host "Found APK at $($apk.FullName)"
+            Copy-Item $apk.FullName -Destination "CopperCalzone.apk"
+            gh release upload ${{ needs.release-please.outputs.tag_name }} CopperCalzone.apk --clobber
+          } else {
+            Write-Error "No APK found in publish output."
+            exit 1
+          }
