@@ -1,4 +1,4 @@
-using CopperCalzone.Models;
+﻿using CopperCalzone.Models;
 using System.Text.Json;
 
 namespace CopperCalzone.Parsing;

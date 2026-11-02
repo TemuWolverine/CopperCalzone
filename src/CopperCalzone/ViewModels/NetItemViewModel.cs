@@ -1,28 +1,22 @@
-﻿using Avalonia.Media;
+using Avalonia.Media;
 using CopperCalzone.Models;
 
 namespace CopperCalzone.ViewModels;
 
-public sealed class NetItemViewModel
+public sealed class NetItemViewModel(PcbNet net)
 {
     private static readonly IBrush PowerBrush = new SolidColorBrush(Color.Parse("#EFB8C8"));
     private static readonly IBrush SignalBrush = new SolidColorBrush(Color.Parse("#D0BCFF"));
 
-    public PcbNet Net { get; }
-
-    public int Id => Net.Id;
-    public string Name => Net.Name;
     public string DisplayName => string.IsNullOrEmpty(Net.Name) ? "(unnamed)" : Net.Name;
-    public int PadCount => Net.PadCount;
-    public int ViaCount => Net.ViaCount;
-    public bool IsPower => Net.IsPower;
-    public bool HasVias => Net.ViaCount > 0;
-    public string PadCountBadge => $"{Net.PadCount} pins";
-    public string ViaCountBadge => $"{Net.ViaCount} vias";
     public IBrush DotBrush => Net.IsPower ? PowerBrush : SignalBrush;
-
-    public NetItemViewModel(PcbNet net)
-    {
-        Net = net;
-    }
+    public bool HasVias => Net.ViaCount > 0;
+    public int Id => Net.Id;
+    public bool IsPower => Net.IsPower;
+    public string Name => Net.Name;
+    public PcbNet Net { get; } = net;
+    public int PadCount => Net.PadCount;
+    public string PadCountBadge => $"{Net.PadCount} pins";
+    public int ViaCount => Net.ViaCount;
+    public string ViaCountBadge => $"{Net.ViaCount} vias";
 }

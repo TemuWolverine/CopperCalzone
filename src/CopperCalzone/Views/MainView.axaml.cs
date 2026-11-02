@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
@@ -91,18 +92,38 @@ public partial class MainView : UserControl
     {
         if (width <= 0) return;
         bool isCompact = width < 760;
-        double targetWidth = DataContext is MainViewModel vm ? vm.SidebarWidth : 340;
         if (isCompact)
         {
-            Grid.SetColumnSpan(Sidebar, 2);
+            Grid.SetColumnSpan(Sidebar, 3);
             Sidebar.ZIndex = 10;
             Sidebar.MaxWidth = Math.Max(260, width - 20);
+            if (SidebarResizer != null)
+                SidebarResizer.IsVisible = false;
         }
         else
         {
             Grid.SetColumnSpan(Sidebar, 1);
             Sidebar.ZIndex = 0;
-            Sidebar.MaxWidth = Math.Max(340, targetWidth);
+            Sidebar.MaxWidth = Math.Max(260, width - 100);
+            if (SidebarResizer != null && DataContext is MainViewModel vm)
+                SidebarResizer.IsVisible = vm.IsLeftSidebarOpen;
+        }
+    }
+
+    private void OnSidebarResizerDragDelta(object? sender, VectorEventArgs e)
+    {
+        if (DataContext is MainViewModel vm)
+        {
+            double maxWidth = Math.Max(300, Bounds.Width - 120);
+            vm.SidebarWidth = Math.Clamp(vm.SidebarWidth + e.Vector.X, 260, maxWidth);
+        }
+    }
+
+    private void OnSidebarResizerDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if (DataContext is MainViewModel vm)
+        {
+            vm.SidebarWidth = vm.IsBomTabActive ? 520 : 340;
         }
     }
 

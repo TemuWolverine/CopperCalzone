@@ -1,4 +1,4 @@
-using Android.Content.PM;
+﻿using Android.Content.PM;
 using Android.Views;
 using AndroidX.Core.View;
 using Avalonia;

@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:CopperCalzone.ViewModels"
+             xmlns:views="using:CopperCalzone.Views"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="520" d:DesignHeight="720"
              x:Class="CopperCalzone.Views.SidebarView"
@@ -32,7 +33,7 @@
               <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
                 <materialIcons:MaterialIcon Kind="LanConnect" Width="15" Height="15" VerticalAlignment="Center" />
                 <TextBlock Text="Nets (" VerticalAlignment="Center" FontSize="12.5" />
-                <TextBlock Text="{Binding TotalNetCount}" VerticalAlignment="Center" FontSize="12.5" />
+                <TextBlock Text="{Binding Nets.TotalNetCount}" VerticalAlignment="Center" FontSize="12.5" />
                 <TextBlock Text=")" VerticalAlignment="Center" FontSize="12.5" />
               </StackPanel>
             </Button>
@@ -46,7 +47,7 @@
               <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
                 <materialIcons:MaterialIcon Kind="FormatListChecks" Width="15" Height="15" VerticalAlignment="Center" />
                 <TextBlock Text="BOM (" VerticalAlignment="Center" FontSize="12.5" />
-                <TextBlock Text="{Binding TotalBomCount}" VerticalAlignment="Center" FontSize="12.5" />
+                <TextBlock Text="{Binding Bom.TotalBomCount}" VerticalAlignment="Center" FontSize="12.5" />
                 <TextBlock Text=")" VerticalAlignment="Center" FontSize="12.5" />
               </StackPanel>
             </Button>
@@ -81,7 +82,7 @@
 
       <!-- TAB 1: NETS -->
       <Grid Grid.Row="1"
-            RowDefinitions="Auto,Auto,Auto,*"
+            RowDefinitions="Auto,Auto,*"
             IsVisible="{Binding IsNetsTabActive}">
 
         <!-- M3 Expressive Pill SearchBar -->
@@ -116,55 +117,8 @@
           </Grid>
         </Border>
 
-        <!-- M3 Filter Chips -->
-        <ScrollViewer Grid.Row="1"
-                      HorizontalScrollBarVisibility="Auto"
-                      VerticalScrollBarVisibility="Disabled"
-                      Margin="12,0,12,8">
-          <StackPanel Orientation="Horizontal" Spacing="6">
-            <Button Classes="chip-btn"
-                    Classes.active="{Binding IsFilterAll}"
-                    Command="{Binding SetFilterCommand}"
-                    CommandParameter="all">
-              <StackPanel Orientation="Horizontal" Spacing="5">
-                <materialIcons:MaterialIcon Kind="Check"
-                                            Width="13" Height="13"
-                                            IsVisible="{Binding IsFilterAll}" />
-                <TextBlock Text="All" />
-              </StackPanel>
-            </Button>
-            <Button Classes="chip-btn"
-                    Classes.active="{Binding IsFilterPower}"
-                    Command="{Binding SetFilterCommand}"
-                    CommandParameter="power">
-              <StackPanel Orientation="Horizontal" Spacing="5">
-                <materialIcons:MaterialIcon Kind="FlashOutline" Width="13" Height="13" />
-                <TextBlock Text="Power" />
-              </StackPanel>
-            </Button>
-            <Button Classes="chip-btn"
-                    Classes.active="{Binding IsFilterSignals}"
-                    Command="{Binding SetFilterCommand}"
-                    CommandParameter="signals">
-              <StackPanel Orientation="Horizontal" Spacing="5">
-                <materialIcons:MaterialIcon Kind="SineWave" Width="13" Height="13" />
-                <TextBlock Text="Signals" />
-              </StackPanel>
-            </Button>
-            <Button Classes="chip-btn"
-                    Classes.active="{Binding IsFilterTopPins}"
-                    Command="{Binding SetFilterCommand}"
-                    CommandParameter="top-pins">
-              <StackPanel Orientation="Horizontal" Spacing="5">
-                <materialIcons:MaterialIcon Kind="Chip" Width="13" Height="13" />
-                <TextBlock Text="≥4 Pins" />
-              </StackPanel>
-            </Button>
-          </StackPanel>
-        </ScrollViewer>
-
         <!-- Net Count & Clear Action Bar -->
-        <Border Grid.Row="2"
+        <Border Grid.Row="1"
                 BorderBrush="{DynamicResource M3OutlineVariantBrush}"
                 BorderThickness="0,0,0,1"
                 Padding="16,6">
@@ -193,7 +147,7 @@
         </Border>
 
         <!-- Virtualized M3 Net List -->
-        <ListBox Grid.Row="3"
+        <ListBox Grid.Row="2"
                  ItemsSource="{Binding FilteredNets}"
                  SelectedItem="{Binding SelectedNetItem}"
                  Background="Transparent"
@@ -242,7 +196,7 @@
 
       <!-- TAB 2: INTERACTIVE BOM (M3 Expressive Assembly Tracker & Component Table) -->
       <Grid Grid.Row="1"
-            RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto"
+            RowDefinitions="Auto,Auto,Auto,Auto,*,Auto"
             IsVisible="{Binding IsBomTabActive}">
 
         <!-- 1. M3 Expressive Assembly Progress Card -->
@@ -409,140 +363,224 @@
           </Grid>
         </Border>
 
-        <!-- 5. Sortable BOM Column Headers -->
-        <Border Grid.Row="4"
-                Background="{DynamicResource M3SurfaceContainerBrush}"
-                BorderBrush="{DynamicResource M3OutlineVariantBrush}"
-                BorderThickness="0,0,0,1"
-                Padding="8,4">
-          <Grid ColumnDefinitions="48,110,95,*,50">
-            <Button Grid.Column="0"
-                    Classes="tool-btn"
-                    Command="{Binding SortBomByCommand}"
-                    CommandParameter="placed"
-                    Padding="4,4"
-                    HorizontalAlignment="Center"
-                    ToolTip.Tip="Sort by Placed Status">
-              <StackPanel Orientation="Horizontal" Spacing="2">
-                <materialIcons:MaterialIcon Kind="CheckboxMarkedOutline" Width="12" Height="12" />
-                <TextBlock Classes="m3-label-small" Text="Placed" />
-              </StackPanel>
-            </Button>
-            <Button Grid.Column="1"
-                    Classes="tool-btn"
-                    Command="{Binding SortBomByCommand}"
-                    CommandParameter="references"
-                    Padding="4,4"
-                    HorizontalAlignment="Left"
-                    ToolTip.Tip="Sort by Reference Designators (C1, C5, etc.)">
-              <TextBlock Classes="m3-label-small" Text="References" />
-            </Button>
-            <Button Grid.Column="2"
-                    Classes="tool-btn"
-                    Command="{Binding SortBomByCommand}"
-                    CommandParameter="value"
-                    Padding="4,4"
-                    HorizontalAlignment="Left"
-                    ToolTip.Tip="Sort by Component Value">
-              <TextBlock Classes="m3-label-small" Text="Value" />
-            </Button>
-            <Button Grid.Column="3"
-                    Classes="tool-btn"
-                    Command="{Binding SortBomByCommand}"
-                    CommandParameter="footprint"
-                    Padding="4,4"
-                    HorizontalAlignment="Left"
-                    ToolTip.Tip="Sort by Footprint Package">
-              <TextBlock Classes="m3-label-small" Text="Footprint" />
-            </Button>
-            <Button Grid.Column="4"
-                    Classes="tool-btn"
-                    Command="{Binding SortBomByCommand}"
-                    CommandParameter="quantity"
-                    Padding="4,4"
-                    HorizontalAlignment="Center"
-                    ToolTip.Tip="Sort by Quantity">
-              <TextBlock Classes="m3-label-small" Text="Quantity" />
-            </Button>
-          </Grid>
-        </Border>
-
-        <!-- 6. Virtualized BOM Rows ListBox -->
-        <ListBox Grid.Row="5"
-                 ItemsSource="{Binding FilteredBomItems}"
-                 SelectedItem="{Binding SelectedBomItem}"
-                 Background="Transparent"
-                 Padding="4,4">
-          <ListBox.ItemTemplate>
-            <DataTemplate x:DataType="vm:BomItemViewModel">
-              <Grid ColumnDefinitions="48,110,95,*,50" Margin="2,3" VerticalAlignment="Center">
-                <!-- Placed Checkbox -->
-                <CheckBox Grid.Column="0"
-                          IsChecked="{Binding IsPlaced}"
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Center"
-                          ToolTip.Tip="Mark component group as placed" />
-
-                <!-- References (Grouped e.g. C1, C5) -->
-                <TextBlock Grid.Column="1"
-                           Classes="m3-mono-label"
-                           Text="{Binding ReferencesText}"
-                           Foreground="{DynamicResource M3PrimaryBrush}"
-                           TextTrimming="CharacterEllipsis"
-                           VerticalAlignment="Center"
-                           Margin="2,0,6,0"
-                           ToolTip.Tip="{Binding ReferencesText}" />
-
-                <!-- Value + Side Badge -->
-                <Grid Grid.Column="2" ColumnDefinitions="*,Auto" Margin="0,0,6,0" VerticalAlignment="Center">
-                  <TextBlock Grid.Column="0"
-                             Classes="m3-label-medium"
-                             Text="{Binding Value}"
-                             Foreground="{DynamicResource M3OnSurfaceBrush}"
-                             TextTrimming="CharacterEllipsis"
-                             VerticalAlignment="Center"
-                             ToolTip.Tip="{Binding Value}" />
-                  <Border Grid.Column="1"
-                          CornerRadius="6"
-                          Padding="4,1"
-                          Margin="3,0,0,0"
-                          BorderBrush="{Binding SideBrush}"
-                          BorderThickness="1"
-                          VerticalAlignment="Center">
-                    <TextBlock Text="{Binding SideText}"
-                               FontSize="9"
-                               FontWeight="Bold"
-                               Foreground="{Binding SideBrush}" />
-                  </Border>
+        <!-- 5 & 6. Sortable BOM Table (Headers & Virtualized Rows with Adjustable Column Widths) -->
+        <ScrollViewer Grid.Row="4"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Disabled">
+          <Grid RowDefinitions="Auto,*">
+            <!-- 5. Sortable BOM Column Headers with Resize Handles -->
+            <Border Grid.Row="0"
+                    Background="{DynamicResource M3SurfaceContainerBrush}"
+                    BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="4,4">
+              <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,*">
+                <!-- Column 0: Placed -->
+                <Grid Grid.Column="0" Width="{Binding BomColPlacedWidth}">
+                  <Button Classes="tool-btn"
+                          Command="{Binding SortBomByCommand}"
+                          CommandParameter="placed"
+                          Padding="4,4,10,4"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Center"
+                          ToolTip.Tip="Sort by Placed Status">
+                    <StackPanel Orientation="Horizontal" Spacing="2">
+                      <materialIcons:MaterialIcon Kind="CheckboxMarkedOutline" Width="12" Height="12" />
+                      <TextBlock Classes="m3-label-small" Text="Placed" />
+                    </StackPanel>
+                  </Button>
+                  <Thumb Classes="col-resizer"
+                         Tag="placed"
+                         HorizontalAlignment="Right"
+                         DragDelta="OnColResizerDragDelta"
+                         DoubleTapped="OnColResizerDoubleTapped"
+                         ToolTip.Tip="Drag to resize column (Double-click to reset)" />
                 </Grid>
 
-                <!-- Footprint Package -->
-                <TextBlock Grid.Column="3"
-                           Classes="m3-mono-small"
-                           Text="{Binding Package}"
-                           Foreground="{DynamicResource M3OnSurfaceVariantBrush}"
-                           TextTrimming="CharacterEllipsis"
-                           VerticalAlignment="Center"
-                           Margin="0,0,6,0"
-                           ToolTip.Tip="{Binding Package}" />
+                <!-- Column 1: References -->
+                <Grid Grid.Column="1" Width="{Binding BomColRefWidth}">
+                  <Button Classes="tool-btn"
+                          Command="{Binding SortBomByCommand}"
+                          CommandParameter="references"
+                          Padding="6,4,10,4"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Left"
+                          ToolTip.Tip="Sort by Reference Designators (C1, C5, etc.)">
+                    <TextBlock Classes="m3-label-small" Text="References" />
+                  </Button>
+                  <Thumb Classes="col-resizer"
+                         Tag="references"
+                         HorizontalAlignment="Right"
+                         DragDelta="OnColResizerDragDelta"
+                         DoubleTapped="OnColResizerDoubleTapped"
+                         ToolTip.Tip="Drag to resize column (Double-click to reset)" />
+                </Grid>
 
-                <!-- Quantity Pill Badge -->
-                <Border Grid.Column="4"
-                        Classes="m3-badge-secondary"
-                        Padding="6,2"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center">
-                  <TextBlock Classes="m3-label-small"
-                             Text="{Binding Quantity}"
-                             Foreground="{DynamicResource M3OnSecondaryContainerBrush}" />
-                </Border>
+                <!-- Column 2: Value -->
+                <Grid Grid.Column="2" Width="{Binding BomColValWidth}">
+                  <Button Classes="tool-btn"
+                          Command="{Binding SortBomByCommand}"
+                          CommandParameter="value"
+                          Padding="6,4,10,4"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Left"
+                          ToolTip.Tip="Sort by Component Value">
+                    <TextBlock Classes="m3-label-small" Text="Value" />
+                  </Button>
+                  <Thumb Classes="col-resizer"
+                         Tag="value"
+                         HorizontalAlignment="Right"
+                         DragDelta="OnColResizerDragDelta"
+                         DoubleTapped="OnColResizerDoubleTapped"
+                         ToolTip.Tip="Drag to resize column (Double-click to reset)" />
+                </Grid>
+
+                <!-- Column 3: Footprint -->
+                <Grid Grid.Column="3" Width="{Binding BomColFpWidth}">
+                  <Button Classes="tool-btn"
+                          Command="{Binding SortBomByCommand}"
+                          CommandParameter="footprint"
+                          Padding="6,4,10,4"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Left"
+                          ToolTip.Tip="Sort by Footprint Package">
+                    <TextBlock Classes="m3-label-small" Text="Footprint" />
+                  </Button>
+                  <Thumb Classes="col-resizer"
+                         Tag="footprint"
+                         HorizontalAlignment="Right"
+                         DragDelta="OnColResizerDragDelta"
+                         DoubleTapped="OnColResizerDoubleTapped"
+                         ToolTip.Tip="Drag to resize column (Double-click to reset)" />
+                </Grid>
+
+                <!-- Column 4: Quantity -->
+                <Grid Grid.Column="4" Width="{Binding BomColQtyWidth}">
+                  <Button Classes="tool-btn"
+                          Command="{Binding SortBomByCommand}"
+                          CommandParameter="quantity"
+                          Padding="4,4,10,4"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Center"
+                          ToolTip.Tip="Sort by Quantity">
+                    <TextBlock Classes="m3-label-small" Text="Quantity" />
+                  </Button>
+                  <Thumb Classes="col-resizer"
+                         Tag="quantity"
+                         HorizontalAlignment="Right"
+                         DragDelta="OnColResizerDragDelta"
+                         DoubleTapped="OnColResizerDoubleTapped"
+                         ToolTip.Tip="Drag to resize column (Double-click to reset)" />
+                </Grid>
+
+                <!-- Column 5: Filler -->
+                <Border Grid.Column="5" />
               </Grid>
-            </DataTemplate>
-          </ListBox.ItemTemplate>
-        </ListBox>
+            </Border>
+
+            <!-- 6. Virtualized BOM Rows ListBox -->
+            <ListBox Grid.Row="1"
+                     ItemsSource="{Binding FilteredBomItems}"
+                     SelectedItem="{Binding SelectedBomItem}"
+                     Background="Transparent"
+                     Padding="4,2">
+              <ListBox.Styles>
+                <Style Selector="ListBoxItem">
+                  <Setter Property="Padding" Value="0,2" />
+                </Style>
+              </ListBox.Styles>
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:BomItemViewModel">
+                  <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,*" Margin="0,1" VerticalAlignment="Center">
+                    <!-- Placed Checkbox -->
+                    <Border Grid.Column="0"
+                            Width="{Binding $parent[views:SidebarView].((vm:MainViewModel)DataContext).BomColPlacedWidth}"
+                            HorizontalAlignment="Left">
+                      <CheckBox IsChecked="{Binding IsPlaced}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                ToolTip.Tip="Mark component group as placed" />
+                    </Border>
+
+                    <!-- References (Grouped e.g. C1, C5) -->
+                    <Border Grid.Column="1"
+                            Width="{Binding $parent[views:SidebarView].((vm:MainViewModel)DataContext).BomColRefWidth}"
+                            HorizontalAlignment="Left"
+                            Padding="6,0,8,0">
+                      <TextBlock Classes="m3-mono-label"
+                                 Text="{Binding ReferencesText}"
+                                 Foreground="{DynamicResource M3PrimaryBrush}"
+                                 TextTrimming="CharacterEllipsis"
+                                 VerticalAlignment="Center"
+                                 ToolTip.Tip="{Binding ReferencesText}" />
+                    </Border>
+
+                    <!-- Value + Side Badge -->
+                    <Border Grid.Column="2"
+                            Width="{Binding $parent[views:SidebarView].((vm:MainViewModel)DataContext).BomColValWidth}"
+                            HorizontalAlignment="Left"
+                            Padding="6,0,8,0">
+                      <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                        <TextBlock Grid.Column="0"
+                                   Classes="m3-label-medium"
+                                   Text="{Binding Value}"
+                                   Foreground="{DynamicResource M3OnSurfaceBrush}"
+                                   TextTrimming="CharacterEllipsis"
+                                   VerticalAlignment="Center"
+                                   ToolTip.Tip="{Binding Value}" />
+                        <Border Grid.Column="1"
+                                CornerRadius="6"
+                                Padding="4,1"
+                                Margin="3,0,0,0"
+                                BorderBrush="{Binding SideBrush}"
+                                BorderThickness="1"
+                                VerticalAlignment="Center">
+                          <TextBlock Text="{Binding SideText}"
+                                     FontSize="9"
+                                     FontWeight="Bold"
+                                     Foreground="{Binding SideBrush}" />
+                        </Border>
+                      </Grid>
+                    </Border>
+
+                    <!-- Footprint Package -->
+                    <Border Grid.Column="3"
+                            Width="{Binding $parent[views:SidebarView].((vm:MainViewModel)DataContext).BomColFpWidth}"
+                            HorizontalAlignment="Left"
+                            Padding="6,0,8,0">
+                      <TextBlock Classes="m3-mono-small"
+                                 Text="{Binding Package}"
+                                 Foreground="{DynamicResource M3OnSurfaceVariantBrush}"
+                                 TextTrimming="CharacterEllipsis"
+                                 VerticalAlignment="Center"
+                                 ToolTip.Tip="{Binding Package}" />
+                    </Border>
+
+                    <!-- Quantity Pill Badge -->
+                    <Border Grid.Column="4"
+                            Width="{Binding $parent[views:SidebarView].((vm:MainViewModel)DataContext).BomColQtyWidth}"
+                            HorizontalAlignment="Left">
+                      <Border Classes="m3-badge-secondary"
+                              Padding="6,2"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center">
+                        <TextBlock Classes="m3-label-small"
+                                   Text="{Binding Quantity}"
+                                   Foreground="{DynamicResource M3OnSecondaryContainerBrush}" />
+                      </Border>
+                    </Border>
+
+                    <!-- Column 5: Filler -->
+                    <Border Grid.Column="5" />
+                  </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Grid>
+        </ScrollViewer>
 
         <!-- 7. Selected BOM Item Component Switcher Footer Card -->
-        <Border Grid.Row="6"
+        <Border Grid.Row="5"
                 IsVisible="{Binding SelectedBomItem, Converter={x:Static ObjectConverters.IsNotNull}}"
                 Background="{DynamicResource M3SurfaceContainerHighBrush}"
                 BorderBrush="{DynamicResource M3OutlineVariantBrush}"

@@ -317,15 +317,16 @@
               ColumnDefinitions="*"
               IsVisible="{Binding IsFileNavigation}">
 
-          <!-- Repository Header & Back to Repos Button -->
+          <!-- Repository Header & Previous Navigation Button -->
           <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
             <Button Grid.Column="0"
-                    Command="{Binding BackToReposCommand}"
+                    Command="{Binding NavigatePreviousCommand}"
                     Classes="m3-tonal"
-                    Padding="14,8">
+                    Padding="14,8"
+                    ToolTip.Tip="Navigate to previous location">
               <StackPanel Orientation="Horizontal" Spacing="6">
                 <materialIcons:MaterialIcon Kind="ArrowLeft" Width="16" Height="16" />
-                <TextBlock Text="All Repositories" VerticalAlignment="Center" />
+                <TextBlock Text="Previous" VerticalAlignment="Center" />
               </StackPanel>
             </Button>
 

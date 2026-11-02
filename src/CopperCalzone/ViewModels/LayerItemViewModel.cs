@@ -1,4 +1,4 @@
-﻿using Avalonia.Media;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CopperCalzone.Rendering;
 
@@ -8,14 +8,13 @@ public partial class LayerItemViewModel : ObservableObject
 {
     private readonly Action<string, bool> _onVisibilityChanged;
 
-    public string LayerName { get; }
-    public string DisplayName { get; }
-    public IBrush ColorBrush { get; }
-
-    private bool _suppressNotification;
-
     [ObservableProperty]
     private bool _isVisible;
+
+    private bool _suppressNotification;
+    public IBrush ColorBrush { get; }
+    public string DisplayName { get; }
+    public string LayerName { get; }
 
     public LayerItemViewModel(string layerName, string displayName, bool isVisible, Action<string, bool> onVisibilityChanged)
     {
@@ -34,18 +33,18 @@ public partial class LayerItemViewModel : ObservableObject
         }
     }
 
+    public void SetVisibleSilent(bool visible)
+    {
+        _suppressNotification = true;
+        IsVisible = visible;
+        _suppressNotification = false;
+    }
+
     partial void OnIsVisibleChanged(bool value)
     {
         if (!_suppressNotification)
         {
             _onVisibilityChanged(LayerName, value);
         }
-    }
-
-    public void SetVisibleSilent(bool visible)
-    {
-        _suppressNotification = true;
-        IsVisible = visible;
-        _suppressNotification = false;
     }
 }

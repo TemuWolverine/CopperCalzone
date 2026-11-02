@@ -30,8 +30,7 @@ public partial class App : Application
             }
         };
 
-        // Load initial board: either from CLI argument on Desktop or default built-in sample
-        bool loadedFromArgs = false;
+        // Load initial board from CLI argument on Desktop if specified
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopArgs &&
             desktopArgs.Args is { Length: > 0 } &&
             File.Exists(desktopArgs.Args[0]))
@@ -42,24 +41,10 @@ public partial class App : Application
                 string content = File.ReadAllText(path);
                 var board = BoardLoader.LoadFromContent(content, Path.GetFileName(path));
                 vm.LoadBoard(board);
-                loadedFromArgs = true;
             }
             catch
             {
-                // Fall back to sample board if CLI file fails
-            }
-        }
-
-        if (!loadedFromArgs)
-        {
-            try
-            {
-                var sample = BoardLoader.LoadBuiltInSample(BoardLoader.BuiltInSampleNames[0]);
-                vm.LoadBoard(sample);
-            }
-            catch
-            {
-                // Ignore if assets unavailable
+                // Gracefully ignore if CLI file fails to load
             }
         }
 

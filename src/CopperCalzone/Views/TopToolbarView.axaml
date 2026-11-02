@@ -52,7 +52,7 @@
                       VerticalAlignment="Center"
                       Margin="8,2">
 
-            <!-- M3 Segmented Pill Switcher: Viewer / GitHub -->
+            <!-- M3 Segmented Pill Switcher: Viewer / GitHub / Settings -->
             <Border Classes="m3-pill-bar">
               <StackPanel Orientation="Horizontal" Spacing="3">
                 <Button Classes="tool-btn"
@@ -71,6 +71,15 @@
                   <StackPanel Orientation="Horizontal" Spacing="6">
                     <materialIcons:MaterialIcon Kind="Github" Width="16" Height="16" />
                     <TextBlock Text="GitHub" VerticalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+                <Button Classes="tool-btn"
+                        Classes.active="{Binding IsSettingsTabActive}"
+                        Command="{Binding OpenSettingsCommand}"
+                        ToolTip.Tip="Preferences &amp; Settings">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <materialIcons:MaterialIcon Kind="CogOutline" Width="16" Height="16" />
+                    <TextBlock Text="Settings" VerticalAlignment="Center" />
                   </StackPanel>
                 </Button>
               </StackPanel>
@@ -128,25 +137,6 @@
                 </Button>
               </StackPanel>
             </Border>
-
-            <!-- Built-in Sample Selector Pill Container -->
-            <Border Background="{DynamicResource M3SurfaceContainerHighBrush}"
-                    BorderBrush="{DynamicResource M3OutlineVariantBrush}"
-                    BorderThickness="1"
-                    CornerRadius="18"
-                    Padding="12,2">
-              <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                <materialIcons:MaterialIcon Kind="ViewGridOutline"
-                                            Width="15" Height="15"
-                                            Foreground="{DynamicResource M3PrimaryBrush}"
-                                            VerticalAlignment="Center" />
-                <ComboBox ItemsSource="{Binding SampleBoards}"
-                          SelectedItem="{Binding SelectedSampleBoard}"
-                          Width="155"
-                          FontSize="12.5"
-                          VerticalAlignment="Center" />
-              </StackPanel>
-            </Border>
           </StackPanel>
         </ScrollViewer>
 
@@ -182,8 +172,8 @@
             RowDefinitions="Auto,Auto"
             Margin="0,2,0,4">
 
-        <!-- Row 0: Navigation, Board Title, Open FAB, GitHub Button & Theme Toggle -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto,Auto" Margin="0,2,0,6">
+        <!-- Row 0: Navigation, Board Title, Open FAB, GitHub, Settings & Theme Toggle -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" Margin="0,2,0,6">
           <!-- Sidebar Toggle Button -->
           <Button Grid.Column="0"
                   Command="{Binding ToggleLeftSidebarCommand}"
@@ -230,17 +220,26 @@
                   ToolTip.Tip="Switch to GitHub PCB Browser"
                   Classes="tool-btn"
                   Classes.active="{Binding IsGitHubTabActive}"
-                  Padding="12,8"
+                  Padding="10,8"
                   Margin="0,0,6,0"
                   VerticalAlignment="Center">
-            <StackPanel Orientation="Horizontal" Spacing="5">
-              <materialIcons:MaterialIcon Kind="Github" Width="16" Height="16" />
-              <TextBlock Text="GitHub" VerticalAlignment="Center" />
-            </StackPanel>
+            <materialIcons:MaterialIcon Kind="Github" Width="18" Height="18" />
+          </Button>
+
+          <!-- Settings Tab Toggle Button (Compact) -->
+          <Button Grid.Column="4"
+                  Command="{Binding OpenSettingsCommand}"
+                  ToolTip.Tip="Preferences &amp; Settings"
+                  Classes="tool-btn"
+                  Classes.active="{Binding IsSettingsTabActive}"
+                  Padding="10,8"
+                  Margin="0,0,6,0"
+                  VerticalAlignment="Center">
+            <materialIcons:MaterialIcon Kind="CogOutline" Width="18" Height="18" />
           </Button>
 
           <!-- Theme Toggle Button -->
-          <Button Grid.Column="4"
+          <Button Grid.Column="5"
                   Command="{Binding ToggleThemeCommand}"
                   ToolTip.Tip="Toggle Dark / Light Material 3 Theme"
                   Classes="m3-tonal"
@@ -253,24 +252,11 @@
           </Button>
         </Grid>
 
-        <!-- Row 1: Sample Picker & Floating Viewport Controls (Horizontally Scrollable) -->
+        <!-- Row 1: Floating Viewport Controls (Horizontally Scrollable) -->
         <ScrollViewer Grid.Row="1"
                       HorizontalScrollBarVisibility="Hidden"
                       VerticalScrollBarVisibility="Disabled">
           <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-            <!-- Sample ComboBox Pill -->
-            <Border Background="{DynamicResource M3SurfaceContainerHighBrush}"
-                    BorderBrush="{DynamicResource M3OutlineVariantBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16"
-                    Padding="10,2">
-              <ComboBox ItemsSource="{Binding SampleBoards}"
-                        SelectedItem="{Binding SelectedSampleBoard}"
-                        Width="135"
-                        FontSize="12"
-                        VerticalAlignment="Center" />
-            </Border>
-
             <!-- Viewport Tools Pill Group -->
             <Border Background="{DynamicResource M3SurfaceContainerHighBrush}"
                     BorderBrush="{DynamicResource M3OutlineVariantBrush}"

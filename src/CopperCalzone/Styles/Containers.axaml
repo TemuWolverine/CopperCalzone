@@ -1,4 +1,4 @@
-<Styles xmlns="https://github.com/avaloniaui"
+﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
   <!-- M3 Expressive Card Container (Used in Sidebar, Sheets) -->
@@ -61,6 +61,65 @@
     <Setter Property="Background" Value="{DynamicResource M3PrimaryContainerBrush}" />
     <Setter Property="CornerRadius" Value="16" />
     <Setter Property="Padding" Value="12,6" />
+  </Style>
+
+  <!-- M3 Splitter / Column Resizer Thumb Styles -->
+  <Style Selector="Thumb.col-resizer">
+    <Setter Property="Width" Value="8" />
+    <Setter Property="Cursor" Value="SizeWestEast" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="Transparent" Width="8" HorizontalAlignment="Right">
+          <Border Width="1.5"
+                  Height="14"
+                  CornerRadius="1"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  Background="{DynamicResource M3OutlineVariantBrush}"
+                  Opacity="0.3"
+                  Classes="col-resizer-line" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="Thumb.col-resizer:pointerover /template/ Border.col-resizer-line">
+    <Setter Property="Opacity" Value="1.0" />
+    <Setter Property="Width" Value="2" />
+    <Setter Property="Background" Value="{DynamicResource M3PrimaryBrush}" />
+  </Style>
+  <Style Selector="Thumb.col-resizer:pressed /template/ Border.col-resizer-line">
+    <Setter Property="Opacity" Value="1.0" />
+    <Setter Property="Width" Value="2" />
+    <Setter Property="Background" Value="{DynamicResource M3PrimaryBrush}" />
+  </Style>
+
+  <Style Selector="Thumb.sidebar-resizer">
+    <Setter Property="Width" Value="8" />
+    <Setter Property="Cursor" Value="SizeWestEast" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="Transparent" Width="8" HorizontalAlignment="Center">
+          <Border Width="2"
+                  CornerRadius="1"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Stretch"
+                  Margin="0,8,0,16"
+                  Background="{DynamicResource M3OutlineVariantBrush}"
+                  Opacity="0.25"
+                  Classes="sidebar-resizer-line" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="Thumb.sidebar-resizer:pointerover /template/ Border.sidebar-resizer-line">
+    <Setter Property="Opacity" Value="1.0" />
+    <Setter Property="Width" Value="3" />
+    <Setter Property="Background" Value="{DynamicResource M3PrimaryBrush}" />
+  </Style>
+  <Style Selector="Thumb.sidebar-resizer:pressed /template/ Border.sidebar-resizer-line">
+    <Setter Property="Opacity" Value="1.0" />
+    <Setter Property="Width" Value="3" />
+    <Setter Property="Background" Value="{DynamicResource M3PrimaryBrush}" />
   </Style>
 
 </Styles>

@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CopperCalzone.Models;
 using CopperCalzone.Services;
@@ -118,7 +118,7 @@ public partial class GitHubBrowserViewModel : ObservableObject
                 CurrentUserLogin = user.Login;
                 CurrentUserAvatarUrl = user.AvatarUrl;
             }
-            CurrentStep = GitHubBrowserStep.RepoList;
+            CurrentStep = SelectedRepository != null ? GitHubBrowserStep.FileNavigation : GitHubBrowserStep.RepoList;
             if (_allRepositories.Count == 0)
             {
                 await LoadRepositoriesAsync();
@@ -133,7 +133,11 @@ public partial class GitHubBrowserViewModel : ObservableObject
 
         if (restored)
         {
-            await LoadRepositoriesAsync();
+            CurrentStep = SelectedRepository != null ? GitHubBrowserStep.FileNavigation : GitHubBrowserStep.RepoList;
+            if (_allRepositories.Count == 0)
+            {
+                await LoadRepositoriesAsync();
+            }
         }
         else
         {
@@ -200,13 +204,23 @@ public partial class GitHubBrowserViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public async Task NavigateUpAsync()
+    public async Task NavigatePreviousAsync()
     {
-        if (string.IsNullOrEmpty(CurrentPath)) return;
+        if (string.IsNullOrEmpty(CurrentPath))
+        {
+            BackToRepos();
+            return;
+        }
 
         int lastSlash = CurrentPath.LastIndexOf('/');
         string parentPath = lastSlash >= 0 ? CurrentPath[..lastSlash] : "";
         await LoadFolderContentsAsync(parentPath);
+    }
+
+    [RelayCommand]
+    public async Task NavigateUpAsync()
+    {
+        await NavigatePreviousAsync();
     }
 
     [RelayCommand]
@@ -353,13 +367,17 @@ public partial class GitHubBrowserViewModel : ObservableObject
             CurrentUserName = user.Name;
             CurrentUserLogin = user.Login;
             CurrentUserAvatarUrl = user.AvatarUrl;
-            CurrentStep = GitHubBrowserStep.RepoList;
+            CurrentStep = SelectedRepository != null ? GitHubBrowserStep.FileNavigation : GitHubBrowserStep.RepoList;
         }
         else
         {
             CurrentUserName = "";
             CurrentUserLogin = "";
             CurrentUserAvatarUrl = "";
+            SelectedRepository = null;
+            CurrentPath = "";
+            CurrentFolderItems.Clear();
+            Breadcrumbs.Clear();
             CurrentStep = GitHubBrowserStep.NotAuthenticated;
         }
     }

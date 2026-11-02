@@ -1,4 +1,4 @@
-﻿namespace CopperCalzone.ViewModels;
+namespace CopperCalzone.ViewModels;
 
 public enum GitHubBrowserStep
 {

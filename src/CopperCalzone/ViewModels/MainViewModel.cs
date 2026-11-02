@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -5,76 +6,28 @@ using CopperCalzone.Models;
 using CopperCalzone.Parsing;
 using CopperCalzone.Rendering;
 using CopperCalzone.Services;
-using System.Collections.ObjectModel;
 
 namespace CopperCalzone.ViewModels;
 
-public partial class MainViewModel : ObservableObject
+public sealed partial class MainViewModel : ObservableObject
 {
-    private PcbCanvasControl? _canvas;
-    private PcbBoard? _currentBoard;
-    private List<NetItemViewModel> _allNetItems = [];
-    private List<BomItemViewModel> _allBomItems = [];
-    private List<PcbPad> _activeNetPads = [];
-    private int _currentPinIndex = -1;
-    private bool _suppressSelectionCallback;
+    [ObservableProperty]
+    private MainTabMode _activeTabMode = MainTabMode.Viewer;
 
-    public MainViewModel()
-    {
-        var authService = new GitHubAuthService();
-        var pcbService = new GitHubPcbService(authService);
-        GitHubBrowser = new GitHubBrowserViewModel(authService, pcbService);
-
-        GitHubBrowser.PcbContentReady += (content, fileName) =>
-        {
-            try
-            {
-                var board = BoardLoader.LoadFromContent(content, fileName);
-                LoadBoard(board);
-                IsGitHubTabActive = false;
-            }
-            catch (Exception ex)
-            {
-                GitHubBrowser.ErrorMessage = $"Failed to parse board '{fileName}': {ex.Message}";
-            }
-        };
-
-        GitHubBrowser.RequestClose += () =>
-        {
-            IsGitHubTabActive = false;
-        };
-
-    }
-
+    [ObservableProperty]
+    private string _boardSubtitle = "No board loaded";
 
     [ObservableProperty]
     private string _boardTitle = "CopperCalzone";
 
-    [ObservableProperty]
-    private string _boardSubtitle = "Loading board...";
+    private PcbCanvasControl? _canvas;
+    private PcbBoard? _currentBoard;
 
     [ObservableProperty]
-    private bool _isGitHubTabActive;
-
-    public bool IsViewerTabActive => !IsGitHubTabActive;
-
-    partial void OnIsGitHubTabActiveChanged(bool value)
-    {
-        OnPropertyChanged(nameof(IsViewerTabActive));
-    }
-
-
-    [ObservableProperty]
-    private bool _isLeftSidebarOpen = !OperatingSystem.IsAndroid();
-
-    [ObservableProperty]
-    private bool _isNetsTabActive = true;
+    private bool _hasBoard;
 
     [ObservableProperty]
     private bool _isBomTabActive;
-
-    [ObservableProperty]
-    private bool _isLayersTabActive;
 
     [ObservableProperty]
     private bool _isDarkTheme = true;
@@ -83,749 +36,447 @@ public partial class MainViewModel : ObservableObject
     private bool _isFlipped;
 
     [ObservableProperty]
-    private bool _showPadNetNames = true;
+    private bool _isLayersTabActive;
 
     [ObservableProperty]
-    private string _searchQuery = "";
+    private bool _isLeftSidebarOpen = !OperatingSystem.IsAndroid();
 
     [ObservableProperty]
-    private string _activeFilter = "all";
+    private bool _isNetsTabActive = true;
+
+    private double _lastBomSidebarWidth = 520;
+
+    private double _lastNonBomSidebarWidth = 340;
 
     [ObservableProperty]
-    private int _totalNetCount;
+    private double _sidebarWidth = 340;
 
-    [ObservableProperty]
-    private string _showingNetsLabel = "Showing 0 nets";
+    public event Func<Task>? OpenFileRequested;
 
-    [ObservableProperty]
-    private NetItemViewModel? _selectedNetItem;
+    public event Action<bool>? ThemeChanged;
 
-    [ObservableProperty]
-    private BomItemViewModel? _selectedBomItem;
+    public double AssemblyProgressRatio => Bom.AssemblyProgressRatio;
 
-    [ObservableProperty]
-    private int _selectedBomComponentIndex = -1;
+    public string AssemblyProgressText => Bom.AssemblyProgressText;
 
-    [ObservableProperty]
-    private string _selectedComponentRef = "";
+    public BomViewModel Bom { get; } = new();
 
-    [ObservableProperty]
-    private int _totalBomCount;
+    public string BomActiveFilter { get => Bom.BomActiveFilter; set => Bom.BomActiveFilter = value; }
 
-    [ObservableProperty]
-    private int _totalComponentCount;
+    public double BomColFpWidth { get => Bom.BomColFpWidth; set => Bom.BomColFpWidth = value; }
 
-    [ObservableProperty]
-    private int _placedComponentCount;
+    public double BomColPlacedWidth { get => Bom.BomColPlacedWidth; set => Bom.BomColPlacedWidth = value; }
 
-    [ObservableProperty]
-    private string _assemblyProgressText = "0 / 0 parts placed (0%)";
+    public double BomColQtyWidth { get => Bom.BomColQtyWidth; set => Bom.BomColQtyWidth = value; }
 
-    [ObservableProperty]
-    private double _assemblyProgressRatio;
+    public double BomColRefWidth { get => Bom.BomColRefWidth; set => Bom.BomColRefWidth = value; }
 
-    [ObservableProperty]
-    private string _bomSearchQuery = "";
+    public double BomColValWidth { get => Bom.BomColValWidth; set => Bom.BomColValWidth = value; }
 
-    [ObservableProperty]
-    private string _bomActiveFilter = "all";
+    public string BomSearchQuery { get => Bom.BomSearchQuery; set => Bom.BomSearchQuery = value; }
 
-    [ObservableProperty]
-    private string _showingBomLabel = "Showing 0 items";
+    public bool BomSortAscending { get => Bom.BomSortAscending; set => Bom.BomSortAscending = value; }
 
-    [ObservableProperty]
-    private string _bomSortColumn = "references";
+    public string BomSortColumn { get => Bom.BomSortColumn; set => Bom.BomSortColumn = value; }
 
-    [ObservableProperty]
-    private bool _bomSortAscending = true;
+    public ObservableCollection<LayerItemViewModel> CopperLayers => Layers.CopperLayers;
 
-    public double SidebarWidth => IsBomTabActive ? 520 : 340;
+    public ObservableCollection<BomItemViewModel> FilteredBomItems => Bom.FilteredBomItems;
 
-    // Zone mode radio properties
-    [ObservableProperty]
-    private bool _isZoneSolid = true;
-
-    [ObservableProperty]
-    private bool _isZoneHatch;
-
-    [ObservableProperty]
-    private bool _isZoneOutline;
-
-    [ObservableProperty]
-    private bool _isZoneHide;
-
-    // HUD & Tooltip
-    [ObservableProperty]
-    private string _hudCoordinates = "X: 0.00 mm, Y: 0.00 mm";
-
-    [ObservableProperty]
-    private string _hudZoom = "100%";
-
-    [ObservableProperty]
-    private bool _isHoverTooltipVisible;
-
-    [ObservableProperty]
-    private string _hoverTooltipTitle = "";
-
-    [ObservableProperty]
-    private string _hoverTooltipNet = "";
-
-    [ObservableProperty]
-    private Thickness _hoverTooltipMargin = new(0);
-
-    // Pin Inspector & Pin-to-Pin Navigation Bar
-    [ObservableProperty]
-    private bool _hasActiveInspector;
-
-    [ObservableProperty]
-    private string _inspectorNetName = "";
-
-    [ObservableProperty]
-    private string _inspectorNetSummary = "";
-
-    [ObservableProperty]
-    private string _inspectorPinBadge = "Pin 0 / 0";
-
-    [ObservableProperty]
-    private string _inspectorPinTitle = "";
-
-    [ObservableProperty]
-    private string _inspectorPinMeta = "";
-
-    [ObservableProperty]
-    private string _inspectorConnectedPins = "";
-
-    [ObservableProperty]
-    private string _selectedSampleBoard = BoardLoader.BuiltInSampleNames[0];
-
-    [ObservableProperty]
-    private bool _isGitHubBrowserOpen;
+    public ObservableCollection<NetItemViewModel> FilteredNets => Nets.FilteredNets;
 
     public GitHubBrowserViewModel GitHubBrowser { get; }
 
+    public bool HasActiveInspector => Inspector.HasActiveInspector;
 
-    public ObservableCollection<string> SampleBoards { get; } = new(BoardLoader.BuiltInSampleNames);
-    public ObservableCollection<NetItemViewModel> FilteredNets { get; } = [];
-    public ObservableCollection<BomItemViewModel> FilteredBomItems { get; } = [];
-    public ObservableCollection<LayerItemViewModel> CopperLayers { get; } = [];
-    public ObservableCollection<LayerItemViewModel> TechLayers { get; } = [];
+    public Thickness HoverTooltipMargin => Inspector.HoverTooltipMargin;
 
-    public bool IsFilterAll => ActiveFilter == "all";
-    public bool IsFilterPower => ActiveFilter == "power";
-    public bool IsFilterSignals => ActiveFilter == "signals";
-    public bool IsFilterTopPins => ActiveFilter == "top-pins";
+    public string HoverTooltipNet => Inspector.HoverTooltipNet;
 
-    public bool IsBomFilterAll => BomActiveFilter == "all";
-    public bool IsBomFilterTop => BomActiveFilter == "top";
-    public bool IsBomFilterBottom => BomActiveFilter == "bottom";
-    public bool IsBomFilterUnplaced => BomActiveFilter == "unplaced";
+    public string HoverTooltipTitle => Inspector.HoverTooltipTitle;
 
-    public event Action<bool>? ThemeChanged;
-    public event Func<Task>? OpenFileRequested;
+    public string HudCoordinates => Inspector.HudCoordinates;
+
+    public string HudZoom => Inspector.HudZoom;
+
+    public PinInspectorViewModel Inspector { get; } = new();
+
+    public string InspectorConnectedPins => Inspector.InspectorConnectedPins;
+
+    public string InspectorNetName => Inspector.InspectorNetName;
+
+    public string InspectorNetSummary => Inspector.InspectorNetSummary;
+
+    public string InspectorPinBadge => Inspector.InspectorPinBadge;
+
+    public string InspectorPinMeta => Inspector.InspectorPinMeta;
+
+    public string InspectorPinTitle => Inspector.InspectorPinTitle;
+
+    public bool IsBomFilterAll => Bom.IsBomFilterAll;
+
+    public bool IsBomFilterBottom => Bom.IsBomFilterBottom;
+
+    public bool IsBomFilterTop => Bom.IsBomFilterTop;
+
+    public bool IsBomFilterUnplaced => Bom.IsBomFilterUnplaced;
+
+    public bool IsGitHubTabActive => ActiveTabMode == MainTabMode.GitHub;
+
+    public bool IsHoverTooltipVisible => Inspector.IsHoverTooltipVisible;
+
+    public bool IsSettingsTabActive => ActiveTabMode == MainTabMode.Settings;
+
+    public bool IsViewerTabActive => ActiveTabMode == MainTabMode.Viewer;
+
+    public bool IsZoneHatch { get => Layers.IsZoneHatch; set => Layers.IsZoneHatch = value; }
+
+    public bool IsZoneHide { get => Layers.IsZoneHide; set => Layers.IsZoneHide = value; }
+
+    public bool IsZoneOutline { get => Layers.IsZoneOutline; set => Layers.IsZoneOutline = value; }
+
+    public bool IsZoneSolid { get => Layers.IsZoneSolid; set => Layers.IsZoneSolid = value; }
+
+    public LayersViewModel Layers { get; } = new();
+    public NetsViewModel Nets { get; } = new();
+
+    public int PlacedComponentCount => Bom.PlacedComponentCount;
+    public string SearchQuery { get => Nets.SearchQuery; set => Nets.SearchQuery = value; }
+    public int SelectedBomComponentIndex { get => Bom.SelectedBomComponentIndex; set => Bom.SelectedBomComponentIndex = value; }
+    public BomItemViewModel? SelectedBomItem { get => Bom.SelectedBomItem; set => Bom.SelectedBomItem = value; }
+    public string SelectedComponentRef { get => Bom.SelectedComponentRef; set => Bom.SelectedComponentRef = value; }
+    public NetItemViewModel? SelectedNetItem { get => Nets.SelectedNetItem; set => Nets.SelectedNetItem = value; }
+    public SettingsViewModel Settings { get; }
+    public string ShowingBomLabel => Bom.ShowingBomLabel;
+
+    public string ShowingNetsLabel => Nets.ShowingNetsLabel;
+
+    public bool ShowPadNetNames { get => Layers.ShowPadNetNames; set => Layers.ShowPadNetNames = value; }
+
+    public ObservableCollection<LayerItemViewModel> TechLayers => Layers.TechLayers;
+
+    public int TotalBomCount => Bom.TotalBomCount;
+
+    public int TotalComponentCount => Bom.TotalComponentCount;
+
+    public int TotalNetCount => Nets.TotalNetCount;
+
+    public MainViewModel()
+    {
+        var authService = new GitHubAuthService();
+        var pcbService = new GitHubPcbService(authService);
+        GitHubBrowser = new GitHubBrowserViewModel(authService, pcbService);
+
+        Settings = new SettingsViewModel(SettingsService.Instance, ApplySettings);
+        Settings.RequestClose += SwitchToViewer;
+
+        GitHubBrowser.PcbContentReady += (content, fileName) =>
+        {
+            try
+            {
+                var board = BoardLoader.LoadFromContent(content, fileName);
+                LoadBoard(board);
+                SwitchToViewer();
+            }
+            catch (Exception ex)
+            {
+                GitHubBrowser.ErrorMessage = $"Failed to parse board '{fileName}': {ex.Message}";
+            }
+        };
+
+        GitHubBrowser.RequestClose += SwitchToViewer;
+
+        // Forward PropertyChanged events from sub-viewmodels to MainViewModel
+        Nets.PropertyChanged += (s, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.PropertyName))
+                OnPropertyChanged(e.PropertyName);
+        };
+
+        Bom.PropertyChanged += (s, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.PropertyName))
+                OnPropertyChanged(e.PropertyName);
+        };
+
+        Layers.PropertyChanged += (s, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.PropertyName))
+                OnPropertyChanged(e.PropertyName);
+        };
+
+        Inspector.PropertyChanged += (s, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.PropertyName))
+                OnPropertyChanged(e.PropertyName);
+        };
+
+        // Wire Sub-ViewModel Events
+        Nets.NetSelected += netItem =>
+        {
+            if (netItem is null)
+            {
+                SelectNetInternal(null);
+            }
+            else
+            {
+                SelectNetInternal(netItem.Id, flyToFirstPin: true);
+            }
+        };
+
+        Bom.FootprintHighlightRequested += (refs, activeRef) =>
+        {
+            _canvas?.SetHighlightedFootprints(refs, activeRef, flyTo: false);
+        };
+
+        Layers.LayerVisibilityChanged += (layerName, isVis) =>
+        {
+            _canvas?.SetLayerVisibility(layerName, isVis);
+        };
+
+        Layers.ZoneModeChanged += mode =>
+        {
+            _canvas?.SetZoneMode(mode);
+        };
+
+        Layers.ShowPadNetNamesChanged += show =>
+        {
+            _canvas?.SetShowPadNetNames(show);
+        };
+
+        Layers.FlipRequested += flip =>
+        {
+            if (_canvas == null || _canvas.IsFlipped == flip)
+                return;
+
+            _canvas.SetFlip(flip);
+            IsFlipped = flip;
+        };
+
+        Inspector.PadFocusRequested += (pad, fly) =>
+        {
+            _canvas?.SetSelectedPad(pad, flyToPad: fly);
+        };
+
+        Inspector.ClearNetSelectionRequested += () =>
+        {
+            Nets.ClearSelection();
+            _canvas?.SetActiveNet(null);
+            _canvas?.SetSelectedPad(null, false);
+        };
+
+        ApplySettings(SettingsService.Instance.Current);
+    }
+
+    [RelayCommand] public void ApplyLayerPreset(string p) => Layers.ApplyLayerPreset(p);
+
+    public void ApplySettings(AppSettings s)
+    {
+        if (s.RememberSidebarWidths)
+        {
+            _lastNonBomSidebarWidth = s.LastNetsSidebarWidth;
+            _lastBomSidebarWidth = s.LastBomSidebarWidth;
+            SidebarWidth = IsBomTabActive ? _lastBomSidebarWidth : _lastNonBomSidebarWidth;
+        }
+
+        Bom.BomColPlacedWidth = s.BomColPlacedWidth;
+        Bom.BomColRefWidth = s.BomColRefWidth;
+        Bom.BomColValWidth = s.BomColValWidth;
+        Bom.BomColFpWidth = s.BomColFpWidth;
+        Bom.BomColQtyWidth = s.BomColQtyWidth;
+
+        Layers.ShowPadNetNames = s.ShowPadNetNames;
+        IsLeftSidebarOpen = s.IsSidebarOpenByDefault;
+
+        Layers.IsZoneSolid = s.ZoneMode == "solid";
+        Layers.IsZoneHatch = s.ZoneMode == "hatch";
+        Layers.IsZoneOutline = s.ZoneMode == "outline";
+        Layers.IsZoneHide = s.ZoneMode == "hide";
+        if (_canvas is not null)
+        {
+            ZoneDisplayMode zm = s.ZoneMode switch
+            {
+                "hatch" => ZoneDisplayMode.Hatch,
+                "outline" => ZoneDisplayMode.Outline,
+                "hide" => ZoneDisplayMode.Hide,
+                _ => ZoneDisplayMode.Solid
+            };
+            _canvas.SetZoneMode(zm);
+            _canvas.SetShowPadNetNames(Layers.ShowPadNetNames);
+        }
+
+        Bom.BomSortColumn = s.DefaultBomSortColumn;
+        Bom.BomSortAscending = s.DefaultBomSortAscending;
+        Bom.BomActiveFilter = s.DefaultBomFilter;
+        Bom.ApplyBomFilters();
+
+        SwitchTab(s.DefaultSidebarTab);
+
+        if (IsDarkTheme != s.IsDarkTheme)
+        {
+            IsDarkTheme = s.IsDarkTheme;
+            ThemeChanged?.Invoke(IsDarkTheme);
+            _canvas?.SetTheme(!IsDarkTheme);
+        }
+    }
 
     public void AttachCanvas(PcbCanvasControl canvas)
     {
         _canvas = canvas;
-        _canvas.CursorCoordinatesChanged += coords => HudCoordinates = coords;
-        _canvas.ZoomPercentageChanged += pct => HudZoom = $"{pct}%";
-        _canvas.HoveredPadChanged += OnHoveredPadChanged;
+        _canvas.CursorCoordinatesChanged += coords => Inspector.HudCoordinates = coords;
+        _canvas.ZoomPercentageChanged += pct => Inspector.HudZoom = $"{pct}%";
+        _canvas.HoveredPadChanged += (pad, pt) => Inspector.UpdateHoverTooltip(pad, pt);
         _canvas.PadClicked += OnPadClicked;
 
         if (_currentBoard is not null)
         {
             _canvas.SetBoard(_currentBoard);
+            SyncLayersToCanvas();
         }
     }
+
+    [RelayCommand] public void ClearBomSearch() => Bom.ClearBomSearch();
+
+    [RelayCommand] public void ClearBomSelection() => Bom.ClearBomSelection();
+
+    [RelayCommand] public void ClearNetSelection() => Nets.ClearNetSelection();
+
+    [RelayCommand] public void ClearSearch() => Nets.ClearSearch();
+
+    [RelayCommand] public void ClearSelection() => Inspector.ClearSelection();
+
+    [RelayCommand] public void FocusCurrentPin() => Inspector.FocusCurrentPin();
 
     public void LoadBoard(PcbBoard board)
     {
         _currentBoard = board;
+        HasBoard = true;
         BoardTitle = string.IsNullOrWhiteSpace(board.Metadata.Title) ? "KiCad Board" : board.Metadata.Title;
         BoardSubtitle = $"{board.Bbox.Width:0.#} × {board.Bbox.Height:0.#} mm • {board.Nets.Count} nets • {board.Pads.Count} pads";
 
-        // Setup sorted nets
-        _allNetItems = board.Nets
-            .OrderByDescending(n => n.PadCount)
-            .ThenBy(n => n.Name, StringComparer.OrdinalIgnoreCase)
-            .Select(n => new NetItemViewModel(n))
-            .ToList();
-
-        TotalNetCount = _allNetItems.Count;
-
-        // Setup BOM items:
-        // 1. Exclude anything on either front or back silkscreen layers (F.SilkS, B.SilkS)
-        // 2. Require items to be connected to an electrical net to filter out residual labels,
-        //    logos, graphics, test points with no net, fiducials, and unrouted mechanical holes.
-        var padsByRef = board.Pads
-            .Where(p => !string.IsNullOrWhiteSpace(p.FpRef))
-            .GroupBy(p => p.FpRef, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
-
-        var validFootprints = board.Footprints
-            .Where(f => !string.IsNullOrWhiteSpace(f.Ref))
-            .Where(f => !f.Layer.Equals("F.SilkS", StringComparison.OrdinalIgnoreCase) &&
-                        !f.Layer.Equals("B.SilkS", StringComparison.OrdinalIgnoreCase) &&
-                        !f.Layer.EndsWith(".SilkS", StringComparison.OrdinalIgnoreCase))
-            .Where(f => padsByRef.TryGetValue(f.Ref, out var fpPads) &&
-                        fpPads.Any(p => p.Net > 0 &&
-                                       !string.IsNullOrWhiteSpace(p.NetName) &&
-                                       !p.NetName.StartsWith("unconnected-(", StringComparison.OrdinalIgnoreCase)))
-            .ToList();
-
-        _allBomItems = validFootprints
-            .GroupBy(f => (Val: f.Val.Trim(), Pkg: f.Package.Trim()))
-            .OrderBy(g => g.First().Ref, NaturalStringComparer.Instance)
-            .Select(g => new BomItemViewModel(
-                g.Key.Val,
-                g.Key.Pkg,
-                g.First().Layer,
-                g.ToList(),
-                OnBomItemPlacedChanged
-            ))
-            .ToList();
-
-        TotalBomCount = _allBomItems.Count;
-        TotalComponentCount = validFootprints.Count;
-        UpdateAssemblyProgress();
-
-        // Setup layers
-        SetupLayers(board.Layers);
-
-        // Reset selection
-        _suppressSelectionCallback = true;
-        SelectedNetItem = null;
-        SelectedBomItem = null;
-        SelectedBomComponentIndex = -1;
-        SelectedComponentRef = "";
-        _suppressSelectionCallback = false;
-        HasActiveInspector = false;
-        _activeNetPads.Clear();
-        _currentPinIndex = -1;
-
-        ApplyFilters();
-        ApplyBomFilters();
+        // Load sub-viewmodels
+        Nets.LoadNets(board.Nets);
+        Bom.LoadBom(board);
+        Layers.SetupLayers(board.Layers);
+        Inspector.CloseInspector();
 
         if (_canvas is not null)
         {
             _canvas.SetBoard(board);
             SyncLayersToCanvas();
         }
+
+        // Apply layer preset and default sidebar tab from settings
+        var settings = SettingsService.Instance.Current;
+        Layers.ApplyLayerPreset(settings.DefaultLayerPreset);
+        SwitchTab(settings.DefaultSidebarTab);
     }
 
-    private void SetupLayers(List<PcbLayer> boardLayers)
+    [RelayCommand] public void MarkAllBomPlaced() => Bom.MarkAllBomPlaced();
+
+    [RelayCommand] public void NextBomComponent() => Bom.NextBomComponent();
+
+    [RelayCommand] public void NextPin() => Inspector.NextPin();
+
+    [RelayCommand]
+    public async Task OpenGitHubBrowserAsync()
     {
-        CopperLayers.Clear();
-        TechLayers.Clear();
-
-        foreach (var l in boardLayers.Where(x => x.Name.EndsWith(".Cu", StringComparison.Ordinal)))
-        {
-            string displayName = string.IsNullOrWhiteSpace(l.UserName) ? l.Name : l.UserName;
-            CopperLayers.Add(new LayerItemViewModel(l.Name, displayName, true, OnLayerVisibilityChanged));
-        }
-
-        if (CopperLayers.Count == 0)
-        {
-            CopperLayers.Add(new LayerItemViewModel("F.Cu", "F.Cu", true, OnLayerVisibilityChanged));
-            CopperLayers.Add(new LayerItemViewModel("B.Cu", "B.Cu", true, OnLayerVisibilityChanged));
-        }
-
-        (string Name, string Display, bool DefaultVis)[] techDefs =
-        [
-            ("Edge.Cuts", "Board Outline", true),
-            ("F.SilkS", "Front Silkscreen", true),
-            ("B.SilkS", "Back Silkscreen", false),
-            ("F.Mask", "Front Solder Mask", false),
-            ("B.Mask", "Back Solder Mask", false),
-            ("F.Fab", "Front Fabrication", false),
-            ("B.Fab", "Back Fabrication", false)
-        ];
-
-        foreach (var td in techDefs)
-        {
-            TechLayers.Add(new LayerItemViewModel(td.Name, td.Display, td.DefaultVis, OnLayerVisibilityChanged));
-        }
-    }
-
-    private void OnLayerVisibilityChanged(string layerName, bool isVisible)
-    {
-        _canvas?.SetLayerVisibility(layerName, isVisible);
-    }
-
-    private void SyncLayersToCanvas()
-    {
-        if (_canvas is null) return;
-        foreach (var l in CopperLayers)
-            _canvas.SetLayerVisibility(l.LayerName, l.IsVisible);
-        foreach (var l in TechLayers)
-            _canvas.SetLayerVisibility(l.LayerName, l.IsVisible);
-    }
-
-    partial void OnSelectedSampleBoardChanged(string value)
-    {
-        if (string.IsNullOrEmpty(value)) return;
-        try
-        {
-            var board = BoardLoader.LoadBuiltInSample(value);
-            LoadBoard(board);
-        }
-        catch
-        {
-            // Ignore if asset not ready yet
-        }
-    }
-
-    partial void OnSearchQueryChanged(string value) => ApplyFilters();
-
-    partial void OnActiveFilterChanged(string value)
-    {
-        OnPropertyChanged(nameof(IsFilterAll));
-        OnPropertyChanged(nameof(IsFilterPower));
-        OnPropertyChanged(nameof(IsFilterSignals));
-        OnPropertyChanged(nameof(IsFilterTopPins));
-        ApplyFilters();
-    }
-
-    partial void OnBomSearchQueryChanged(string value) => ApplyBomFilters();
-
-    partial void OnBomActiveFilterChanged(string value)
-    {
-        OnPropertyChanged(nameof(IsBomFilterAll));
-        OnPropertyChanged(nameof(IsBomFilterTop));
-        OnPropertyChanged(nameof(IsBomFilterBottom));
-        OnPropertyChanged(nameof(IsBomFilterUnplaced));
-        ApplyBomFilters();
-    }
-
-    partial void OnSelectedNetItemChanged(NetItemViewModel? value)
-    {
-        if (_suppressSelectionCallback) return;
-        SelectNetInternal(value?.Id, null, flyToFirstPin: false);
-    }
-
-    partial void OnSelectedBomItemChanged(BomItemViewModel? value)
-    {
-        if (_suppressSelectionCallback) return;
-        SelectBomItemInternal(value, flyToComponent: false);
-    }
-
-    partial void OnShowPadNetNamesChanged(bool value)
-    {
-        _canvas?.SetShowPadNetNames(value);
-    }
-
-    partial void OnIsZoneSolidChanged(bool value)
-    {
-        if (value) _canvas?.SetZoneMode(ZoneDisplayMode.Solid);
-    }
-
-    partial void OnIsZoneHatchChanged(bool value)
-    {
-        if (value) _canvas?.SetZoneMode(ZoneDisplayMode.Hatch);
-    }
-
-    partial void OnIsZoneOutlineChanged(bool value)
-    {
-        if (value) _canvas?.SetZoneMode(ZoneDisplayMode.Outline);
-    }
-
-    partial void OnIsZoneHideChanged(bool value)
-    {
-        if (value) _canvas?.SetZoneMode(ZoneDisplayMode.Hide);
-    }
-
-    private void ApplyFilters()
-    {
-        string q = SearchQuery.Trim();
-        var matches = _allNetItems.Where(net =>
-        {
-            if (ActiveFilter == "power" && !net.IsPower) return false;
-            if (ActiveFilter == "signals" && net.IsPower) return false;
-            if (ActiveFilter == "top-pins" && net.PadCount < 4) return false;
-
-            if (!string.IsNullOrEmpty(q))
-            {
-                return net.Name.Contains(q, StringComparison.OrdinalIgnoreCase);
-            }
-            return true;
-        }).ToList();
-
-        FilteredNets.Clear();
-        foreach (var item in matches)
-            FilteredNets.Add(item);
-
-        ShowingNetsLabel = $"Showing {FilteredNets.Count} of {_allNetItems.Count} nets";
-    }
-
-    private void ApplyBomFilters()
-    {
-        string q = BomSearchQuery.Trim();
-        var matches = _allBomItems.Where(item =>
-        {
-            if (BomActiveFilter == "top" && item.IsBottom) return false;
-            if (BomActiveFilter == "bottom" && !item.IsBottom) return false;
-            if (BomActiveFilter == "unplaced" && item.IsPlaced) return false;
-
-            if (!string.IsNullOrEmpty(q))
-            {
-                if (item.Value.Contains(q, StringComparison.OrdinalIgnoreCase)) return true;
-                if (item.Package.Contains(q, StringComparison.OrdinalIgnoreCase)) return true;
-                if (item.References.Any(r => r.Contains(q, StringComparison.OrdinalIgnoreCase))) return true;
-                return false;
-            }
-            return true;
-        }).ToList();
-
-        IEnumerable<BomItemViewModel> sorted = BomSortColumn switch
-        {
-            "placed" => BomSortAscending ? matches.OrderBy(b => b.IsPlaced) : matches.OrderByDescending(b => b.IsPlaced),
-            "value" => BomSortAscending ? matches.OrderBy(b => b.Value, NaturalStringComparer.Instance) : matches.OrderByDescending(b => b.Value, NaturalStringComparer.Instance),
-            "footprint" => BomSortAscending ? matches.OrderBy(b => b.Package) : matches.OrderByDescending(b => b.Package),
-            "quantity" => BomSortAscending ? matches.OrderBy(b => b.Quantity) : matches.OrderByDescending(b => b.Quantity),
-            _ => BomSortAscending
-                ? matches.OrderBy(b => b.References.FirstOrDefault() ?? "", NaturalStringComparer.Instance)
-                : matches.OrderByDescending(b => b.References.FirstOrDefault() ?? "", NaturalStringComparer.Instance)
-        };
-
-        FilteredBomItems.Clear();
-        foreach (var item in sorted)
-            FilteredBomItems.Add(item);
-
-        int totalParts = matches.Sum(m => m.Quantity);
-        ShowingBomLabel = $"Showing {matches.Count} items ({totalParts} parts)";
-    }
-
-    private void UpdateAssemblyProgress()
-    {
-        PlacedComponentCount = _allBomItems.Where(b => b.IsPlaced).Sum(b => b.Quantity);
-        double pct = TotalComponentCount > 0 ? (double)PlacedComponentCount / TotalComponentCount * 100.0 : 0.0;
-        AssemblyProgressRatio = pct / 100.0;
-        AssemblyProgressText = $"{PlacedComponentCount} / {TotalComponentCount} parts placed ({pct:0}%)";
-    }
-
-    private void OnBomItemPlacedChanged(BomItemViewModel item)
-    {
-        UpdateAssemblyProgress();
-        if (BomActiveFilter == "unplaced")
-        {
-            ApplyBomFilters();
-        }
-    }
-
-    public void SelectBomItemInternal(BomItemViewModel? item, bool flyToComponent, string? specificRef = null)
-    {
-        if (item is null)
-        {
-            foreach (var b in _allBomItems) b.IsSelected = false;
-            _suppressSelectionCallback = true;
-            SelectedBomItem = null;
-            _suppressSelectionCallback = false;
-            SelectedBomComponentIndex = -1;
-            SelectedComponentRef = "";
-            _canvas?.SetHighlightedFootprints(null, flyTo: false);
-            return;
-        }
-
-        foreach (var b in _allBomItems) b.IsSelected = b == item;
-        _suppressSelectionCallback = true;
-        SelectedBomItem = item;
-        _suppressSelectionCallback = false;
-
-        if (!string.IsNullOrEmpty(specificRef) && item.References.Contains(specificRef, StringComparer.OrdinalIgnoreCase))
-        {
-            SelectedComponentRef = specificRef;
-            SelectedBomComponentIndex = item.References.FindIndex(r => r.Equals(specificRef, StringComparison.OrdinalIgnoreCase));
-        }
-        else
-        {
-            SelectedBomComponentIndex = item.References.Count > 0 ? 0 : -1;
-            SelectedComponentRef = SelectedBomComponentIndex >= 0 ? item.References[SelectedBomComponentIndex] : "";
-        }
-
-        // View must not adjust (neither zoom nor pan)
-        _canvas?.SetHighlightedFootprints(item.References, SelectedComponentRef, flyTo: false);
-    }
-
-    private void OnHoveredPadChanged(PcbPad? pad, Point screenPt)
-    {
-        if (pad is null)
-        {
-            IsHoverTooltipVisible = false;
-            return;
-        }
-
-        HoverTooltipTitle = string.IsNullOrEmpty(pad.Fn)
-            ? $"{pad.FpRef}.{pad.Num}"
-            : $"{pad.FpRef}.{pad.Num} ({pad.Fn})";
-        HoverTooltipNet = $"Net: {(string.IsNullOrEmpty(pad.NetName) ? "NC" : pad.NetName)}";
-        HoverTooltipMargin = new Thickness(screenPt.X + 14, Math.Max(8, screenPt.Y - 46), 0, 0);
-        IsHoverTooltipVisible = true;
-    }
-
-    private void OnPadClicked(PcbPad? pad)
-    {
-        if (IsBomTabActive)
-        {
-            if (pad is null || string.IsNullOrEmpty(pad.FpRef))
-            {
-                ClearBomSelection();
-                return;
-            }
-
-            var matchingBom = _allBomItems.FirstOrDefault(b => b.References.Contains(pad.FpRef, StringComparer.OrdinalIgnoreCase));
-            if (matchingBom is not null)
-            {
-                _suppressSelectionCallback = true;
-                SelectedBomItem = matchingBom;
-                _suppressSelectionCallback = false;
-                SelectBomItemInternal(matchingBom, flyToComponent: false, specificRef: pad.FpRef);
-            }
-            return;
-        }
-
-        if (pad is null || pad.Net <= 0)
-        {
-            ClearSelection();
-            return;
-        }
-
-        SelectNetInternal(pad.Net, pad, flyToFirstPin: false);
-    }
-
-    private void SelectNetInternal(int? netId, PcbPad? specificPad, bool flyToFirstPin)
-    {
-        if (netId is null || _currentBoard is null)
-        {
-            _suppressSelectionCallback = true;
-            SelectedNetItem = null;
-            _suppressSelectionCallback = false;
-            HasActiveInspector = false;
-            _activeNetPads.Clear();
-            _currentPinIndex = -1;
-            _canvas?.SetActiveNet(null);
-            _canvas?.SetSelectedPad(null, false);
-            return;
-        }
-
-        var netVm = _allNetItems.FirstOrDefault(n => n.Id == netId.Value);
-        _suppressSelectionCallback = true;
-        SelectedNetItem = netVm;
-        _suppressSelectionCallback = false;
-
-        _canvas?.SetActiveNet(netId.Value);
-
-        // Gather pads belonging to this net sorted by component reference + pin number
-        _activeNetPads = _currentBoard.Pads
-            .Where(p => p.Net == netId.Value)
-            .OrderBy(p => p.FpRef, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(p => int.TryParse(p.Num, out int n) ? n : int.MaxValue)
-            .ThenBy(p => p.Num, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        if (specificPad is not null)
-        {
-            _currentPinIndex = _activeNetPads.IndexOf(specificPad);
-            if (_currentPinIndex < 0 && _activeNetPads.Count > 0)
-                _currentPinIndex = 0;
-        }
-        else
-        {
-            _currentPinIndex = _activeNetPads.Count > 0 ? 0 : -1;
-        }
-
-        UpdateInspectorDetails(flyToPin: flyToFirstPin);
-    }
-
-    private void UpdateInspectorDetails(bool flyToPin)
-    {
-        if (_currentBoard is null || SelectedNetItem is null)
-        {
-            HasActiveInspector = false;
-            return;
-        }
-
-        var net = SelectedNetItem.Net;
-        HasActiveInspector = true;
-        InspectorNetName = string.IsNullOrEmpty(net.Name) ? "(unnamed)" : net.Name;
-        InspectorNetSummary = $"{net.PadCount} pins • {net.ViaCount} vias • {net.TrackCount} segs • {net.Length:0.1f} mm";
-
-        var allPinRefs = _activeNetPads.Select(p => $"{p.FpRef}.{p.Num}").ToList();
-        InspectorConnectedPins = allPinRefs.Count > 0
-            ? string.Join(", ", allPinRefs.Take(16)) + (allPinRefs.Count > 16 ? $" (+{allPinRefs.Count - 16} more)" : "")
-            : "No component pins";
-
-        if (_currentPinIndex >= 0 && _currentPinIndex < _activeNetPads.Count)
-        {
-            var pad = _activeNetPads[_currentPinIndex];
-            InspectorPinBadge = $"Pin {_currentPinIndex + 1} of {_activeNetPads.Count}";
-            InspectorPinTitle = string.IsNullOrEmpty(pad.Fn)
-                ? $"{pad.FpRef} — Pin {pad.Num}"
-                : $"{pad.FpRef} — Pin {pad.Num} ({pad.Fn})";
-
-            string valPart = string.IsNullOrEmpty(pad.FpVal) ? "" : $" ({pad.FpVal})";
-            string pinTypePart = string.IsNullOrEmpty(pad.PinType) ? "" : $" • {pad.PinType}";
-            InspectorPinMeta = $"{pad.FpRef}{valPart} • {pad.FpLayer} • {pad.Shape} {pad.W:0.##}×{pad.H:0.##} mm{pinTypePart}";
-
-            _canvas?.SetSelectedPad(pad, flyToPad: flyToPin);
-        }
-        else
-        {
-            InspectorPinBadge = "0 Pins";
-            InspectorPinTitle = InspectorNetName;
-            InspectorPinMeta = "Copper net without component pads";
-            _canvas?.SetSelectedPad(null, flyToPad: false);
-        }
+        ActiveTabMode = MainTabMode.GitHub;
+        await GitHubBrowser.InitializeAsync();
     }
 
     [RelayCommand]
-    public void PrevPin()
+    public void OpenSettings()
     {
-        if (_activeNetPads.Count == 0) return;
-        _currentPinIndex = (_currentPinIndex - 1 + _activeNetPads.Count) % _activeNetPads.Count;
-        UpdateInspectorDetails(flyToPin: true);
+        ActiveTabMode = MainTabMode.Settings;
     }
 
-    [RelayCommand]
-    public void NextPin()
-    {
-        if (_activeNetPads.Count == 0) return;
-        _currentPinIndex = (_currentPinIndex + 1) % _activeNetPads.Count;
-        UpdateInspectorDetails(flyToPin: true);
-    }
+    [RelayCommand] public void PrevBomComponent() => Bom.PrevBomComponent();
+
+    [RelayCommand] public void PrevPin() => Inspector.PrevPin();
 
     [RelayCommand]
-    public void FocusCurrentPin()
+    public async Task RequestOpenFileAsync()
     {
-        if (_currentPinIndex >= 0 && _currentPinIndex < _activeNetPads.Count)
+        if (OpenFileRequested is not null)
         {
-            UpdateInspectorDetails(flyToPin: true);
+            await OpenFileRequested.Invoke();
         }
     }
 
-    [RelayCommand]
-    public void ClearSelection()
-    {
-        SelectNetInternal(null, null, false);
-    }
-
-    [RelayCommand]
-    public void ClearSearch()
-    {
-        SearchQuery = "";
-    }
-
-    [RelayCommand]
-    public void SetFilter(string filter)
-    {
-        ActiveFilter = filter;
-    }
-
-    [RelayCommand]
-    public void SwitchTab(string tab)
-    {
-        IsNetsTabActive = tab == "nets";
-        IsBomTabActive = tab == "bom";
-        IsLayersTabActive = tab == "layers";
-        OnPropertyChanged(nameof(SidebarWidth));
-    }
-
-    [RelayCommand]
-    public void SortBomBy(string column)
-    {
-        if (BomSortColumn.Equals(column, StringComparison.OrdinalIgnoreCase))
-        {
-            BomSortAscending = !BomSortAscending;
-        }
-        else
-        {
-            BomSortColumn = column.ToLowerInvariant();
-            BomSortAscending = true;
-        }
-        ApplyBomFilters();
-    }
-
-    [RelayCommand]
-    public void SetBomFilter(string filter)
-    {
-        BomActiveFilter = filter;
-    }
-
-    [RelayCommand]
-    public void ClearBomSearch()
-    {
-        BomSearchQuery = "";
-    }
-
-    [RelayCommand]
-    public void ClearBomSelection()
-    {
-        SelectBomItemInternal(null, flyToComponent: false);
-    }
-
-    [RelayCommand]
-    public void PrevBomComponent()
-    {
-        if (SelectedBomItem is null || SelectedBomItem.References.Count <= 1) return;
-        SelectedBomComponentIndex = (SelectedBomComponentIndex - 1 + SelectedBomItem.References.Count) % SelectedBomItem.References.Count;
-        SelectedComponentRef = SelectedBomItem.References[SelectedBomComponentIndex];
-        _canvas?.SetHighlightedFootprints(SelectedBomItem.References, SelectedComponentRef, flyTo: false);
-    }
-
-    [RelayCommand]
-    public void NextBomComponent()
-    {
-        if (SelectedBomItem is null || SelectedBomItem.References.Count <= 1) return;
-        SelectedBomComponentIndex = (SelectedBomComponentIndex + 1) % SelectedBomItem.References.Count;
-        SelectedComponentRef = SelectedBomItem.References[SelectedBomComponentIndex];
-        _canvas?.SetHighlightedFootprints(SelectedBomItem.References, SelectedComponentRef, flyTo: false);
-    }
-
-    [RelayCommand]
-    public void SelectBomComponent(string componentRef)
-    {
-        if (SelectedBomItem is null || !SelectedBomItem.References.Contains(componentRef, StringComparer.OrdinalIgnoreCase)) return;
-        SelectedComponentRef = componentRef;
-        SelectedBomComponentIndex = SelectedBomItem.References.FindIndex(r => r.Equals(componentRef, StringComparison.OrdinalIgnoreCase));
-        _canvas?.SetHighlightedFootprints(SelectedBomItem.References, SelectedComponentRef, flyTo: false);
-    }
-
-    [RelayCommand]
-    public void MarkAllBomPlaced()
-    {
-        foreach (var item in _allBomItems)
-            item.IsPlaced = true;
-        UpdateAssemblyProgress();
-        if (BomActiveFilter == "unplaced") ApplyBomFilters();
-    }
-
-    [RelayCommand]
-    public void ResetBomPlaced()
-    {
-        foreach (var item in _allBomItems)
-            item.IsPlaced = false;
-        UpdateAssemblyProgress();
-        if (BomActiveFilter == "unplaced") ApplyBomFilters();
-    }
-
-    [RelayCommand]
-    public void ToggleLeftSidebar()
-    {
-        IsLeftSidebarOpen = !IsLeftSidebarOpen;
-    }
-
-    [RelayCommand]
-    public void ZoomIn() => _canvas?.ZoomBy(1.25);
-
-    [RelayCommand]
-    public void ZoomOut() => _canvas?.ZoomBy(1.0 / 1.25);
-
-    [RelayCommand]
-    public void ZoomFit() => _canvas?.FitBoardToView();
+    [RelayCommand] public void ResetBomPlaced() => Bom.ResetBomPlaced();
 
     [RelayCommand]
     public void RotateClockwise() => _canvas?.RotateClockwise90();
 
     [RelayCommand]
     public void RotateCounterClockwise() => _canvas?.RotateCounterClockwise90();
+
+    [RelayCommand] public void SelectBomComponent(string r) => Bom.SelectBomComponent(r);
+
+    public void SelectNetInternal(int? netId, PcbPad? specificPad = null, bool flyToFirstPin = false)
+    {
+        if (netId is null or 0 || _currentBoard is null)
+        {
+            Nets.ClearSelection();
+            Inspector.CloseInspector();
+            _canvas?.SetActiveNet(null);
+            _canvas?.SetSelectedPad(null, false);
+            return;
+        }
+
+        Nets.SelectNetById(netId.Value);
+        _canvas?.SetActiveNet(netId.Value);
+
+        var net = _currentBoard.Nets.FirstOrDefault(n => n.Id == netId.Value);
+        var pads = _currentBoard.Pads
+            .Where(p => p.Net == netId.Value)
+            .OrderBy(p => p.FpRef, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(p => int.TryParse(p.Num, out int n) ? n : int.MaxValue)
+            .ThenBy(p => p.Num, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        Inspector.InspectNet(net, pads, specificPad, flyToFirstPin);
+    }
+
+    [RelayCommand] public void SetBomFilter(string filter) => Bom.SetBomFilter(filter);
+
+    [RelayCommand] public void SortBomBy(string col) => Bom.SortBomBy(col);
+
+    [RelayCommand]
+    public void SwitchTab(string tab)
+    {
+        bool wasBom = IsBomTabActive;
+        IsNetsTabActive = tab == "nets";
+        IsBomTabActive = tab == "bom";
+        IsLayersTabActive = tab == "layers";
+
+        if (wasBom && !IsBomTabActive)
+        {
+            _lastBomSidebarWidth = SidebarWidth;
+            SidebarWidth = _lastNonBomSidebarWidth;
+        }
+        else if (!wasBom && IsBomTabActive)
+        {
+            _lastNonBomSidebarWidth = SidebarWidth;
+            SidebarWidth = Math.Max(520, _lastBomSidebarWidth);
+        }
+    }
+
+    [RelayCommand]
+    public void SwitchToViewer()
+    {
+        ActiveTabMode = MainTabMode.Viewer;
+    }
+
+    public void SyncLayersToCanvas()
+    {
+        if (_canvas is null) return;
+        foreach (var l in Layers.CopperLayers)
+            _canvas.SetLayerVisibility(l.LayerName, l.IsVisible);
+        foreach (var l in Layers.TechLayers)
+            _canvas.SetLayerVisibility(l.LayerName, l.IsVisible);
+    }
 
     [RelayCommand]
     public void ToggleFlipBoard()
@@ -836,9 +487,15 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public void ToggleLeftSidebar()
+    {
+        IsLeftSidebarOpen = !IsLeftSidebarOpen;
+    }
+
+    [RelayCommand]
     public void TogglePadLabels()
     {
-        ShowPadNetNames = !ShowPadNetNames;
+        Layers.TogglePadLabels();
     }
 
     [RelayCommand]
@@ -850,58 +507,61 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public async Task RequestOpenFileAsync()
+    public void ZoomFit() => _canvas?.FitBoardToView();
+
+    [RelayCommand]
+    public void ZoomIn() => _canvas?.ZoomBy(1.25);
+
+    [RelayCommand]
+    public void ZoomOut() => _canvas?.ZoomBy(1.0 / 1.25);
+
+    partial void OnActiveTabModeChanged(MainTabMode value)
     {
-        if (OpenFileRequested is not null)
+        OnPropertyChanged(nameof(IsViewerTabActive));
+        OnPropertyChanged(nameof(IsGitHubTabActive));
+        OnPropertyChanged(nameof(IsSettingsTabActive));
+    }
+
+    private void OnPadClicked(PcbPad? pad)
+    {
+        if (IsBomTabActive)
         {
-            await OpenFileRequested.Invoke();
-        }
-    }
-
-    [RelayCommand]
-    public async Task OpenGitHubBrowserAsync()
-    {
-        IsGitHubTabActive = true;
-        await GitHubBrowser.InitializeAsync();
-    }
-
-    [RelayCommand]
-    public void SwitchToViewer()
-    {
-        IsGitHubTabActive = false;
-    }
-
-
-
-    [RelayCommand]
-    public void ApplyLayerPreset(string preset)
-    {
-        if (_canvas is null) return;
-
-        foreach (var l in CopperLayers.Concat(TechLayers))
-        {
-            bool show = preset switch
+            if (pad is null || string.IsNullOrEmpty(pad.FpRef))
             {
-                "all" => true,
-                "top" => l.LayerName is "Edge.Cuts" or "F.Cu" or "F.SilkS" or "F.Mask",
-                "bottom" => l.LayerName is "Edge.Cuts" or "B.Cu" or "B.SilkS" or "B.Mask",
-                "copper" => l.LayerName.EndsWith(".Cu", StringComparison.Ordinal) || l.LayerName == "Edge.Cuts",
-                _ => l.IsVisible
-            };
+                Bom.ClearBomSelection();
+                return;
+            }
 
-            l.SetVisibleSilent(show);
-            _canvas.SetLayerVisibility(l.LayerName, show);
+            Bom.SelectByFootprintRef(pad.FpRef);
         }
+        else
+        {
+            if (pad is null || pad.Net == 0)
+            {
+                Nets.ClearSelection();
+                Inspector.CloseInspector();
+                _canvas?.SetActiveNet(null);
+                _canvas?.SetSelectedPad(null, false);
+                return;
+            }
 
-        if (preset == "top" && _canvas.IsFlipped)
-        {
-            _canvas.SetFlip(false);
-            IsFlipped = false;
+            SelectNetInternal(pad.Net, specificPad: pad, flyToFirstPin: false);
         }
-        else if (preset == "bottom" && !_canvas.IsFlipped)
+    }
+
+    partial void OnSidebarWidthChanged(double value)
+    {
+        if (IsBomTabActive)
+            _lastBomSidebarWidth = value;
+        else
+            _lastNonBomSidebarWidth = value;
+
+        var s = SettingsService.Instance.Current;
+        if (s.RememberSidebarWidths)
         {
-            _canvas.SetFlip(true);
-            IsFlipped = true;
+            s.LastNetsSidebarWidth = _lastNonBomSidebarWidth;
+            s.LastBomSidebarWidth = _lastBomSidebarWidth;
+            SettingsService.Instance.Save();
         }
     }
 }

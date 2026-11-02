@@ -1,0 +1,352 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:CopperCalzone.ViewModels"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
+             x:Class="CopperCalzone.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel"
+             Background="{DynamicResource M3SurfaceBrush}">
+
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto">
+    <StackPanel MaxWidth="920"
+                Margin="20,12,20,32"
+                Spacing="16"
+                HorizontalAlignment="Center">
+
+      <!-- Header Card -->
+      <Border Classes="m3-surface-sheet"
+              Background="{DynamicResource M3SurfaceContainerLowBrush}"
+              CornerRadius="24"
+              Padding="24,18">
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+              <materialIcons:MaterialIcon Kind="TuneVariant" Width="26" Height="26" Foreground="{DynamicResource M3PrimaryBrush}" />
+              <TextBlock Text="Settings &amp; Preferences" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource M3OnSurfaceBrush}" VerticalAlignment="Center" />
+            </StackPanel>
+            <TextBlock Text="Configure default views, persistent layer selections, and startup behavior"
+                       Classes="m3-caption"
+                       FontSize="13" />
+            <TextBlock Text="{Binding StatusMessage}"
+                       Classes="m3-mono-small"
+                       FontSize="11.5"
+                       Foreground="{DynamicResource M3PrimaryBrush}"
+                       Margin="0,4,0,0" />
+          </StackPanel>
+
+          <!-- Action Buttons -->
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <Button Classes="tool-btn"
+                    Command="{Binding ResetAllDefaultsCommand}"
+                    ToolTip.Tip="Reset all preferences to factory defaults"
+                    Padding="12,8">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="Restore" Width="16" Height="16" Foreground="{DynamicResource M3ErrorBrush}" />
+                <TextBlock Text="Reset Defaults" Foreground="{DynamicResource M3ErrorBrush}" FontSize="12.5" />
+              </StackPanel>
+            </Button>
+
+            <Button Classes="m3-tonal"
+                    Command="{Binding CloseSettingsCommand}"
+                    ToolTip.Tip="Return to PCB Viewer"
+                    Padding="14,8"
+                    CornerRadius="16">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="ArrowLeft" Width="16" Height="16" />
+                <TextBlock Text="Done" FontWeight="SemiBold" FontSize="12.5" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- 1. Navigation & Startup Preferences Card -->
+      <Border Classes="m3-card">
+        <StackPanel Spacing="14">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <materialIcons:MaterialIcon Kind="CompassOutline" Width="18" Height="18" Foreground="{DynamicResource M3PrimaryBrush}" />
+            <TextBlock Classes="m3-section-title" Text="NAVIGATION &amp; STARTUP DEFAULTS" />
+          </StackPanel>
+
+          <!-- Default Sidebar Tab -->
+          <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+              <TextBlock Classes="m3-label-large" Text="Default View on Board Load" />
+              <TextBlock Classes="m3-caption" Text="Select which sidebar tab is automatically opened when a PCB is loaded" />
+            </StackPanel>
+
+            <Border Grid.Column="1" Classes="m3-pill-bar">
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <Button Classes="tab-btn"
+                        Classes.active="{Binding IsDefaultTabNets}"
+                        Command="{Binding SetDefaultSidebarTabCommand}"
+                        CommandParameter="nets"
+                        Padding="14,6">
+                  <StackPanel Orientation="Horizontal" Spacing="5">
+                    <materialIcons:MaterialIcon Kind="LanConnect" Width="14" Height="14" />
+                    <TextBlock Text="Nets" FontSize="12" />
+                  </StackPanel>
+                </Button>
+                <Button Classes="tab-btn"
+                        Classes.active="{Binding IsDefaultTabBom}"
+                        Command="{Binding SetDefaultSidebarTabCommand}"
+                        CommandParameter="bom"
+                        Padding="14,6">
+                  <StackPanel Orientation="Horizontal" Spacing="5">
+                    <materialIcons:MaterialIcon Kind="FormatListChecks" Width="14" Height="14" />
+                    <TextBlock Text="BOM" FontSize="12" />
+                  </StackPanel>
+                </Button>
+                <Button Classes="tab-btn"
+                        Classes.active="{Binding IsDefaultTabLayers}"
+                        Command="{Binding SetDefaultSidebarTabCommand}"
+                        CommandParameter="layers"
+                        Padding="14,6">
+                  <StackPanel Orientation="Horizontal" Spacing="5">
+                    <materialIcons:MaterialIcon Kind="LayersOutline" Width="14" Height="14" />
+                    <TextBlock Text="Layers" FontSize="12" />
+                  </StackPanel>
+                </Button>
+              </StackPanel>
+            </Border>
+          </Grid>
+
+          <!-- Sidebar Open by Default -->
+          <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+              <TextBlock Classes="m3-label-large" Text="Keep Side Panel Open by Default" />
+              <TextBlock Classes="m3-caption" Text="Automatically open the left side drawer on desktop startup" />
+            </StackPanel>
+            <CheckBox Grid.Column="1" IsChecked="{Binding IsSidebarOpenByDefault}" VerticalAlignment="Center" />
+          </Grid>
+
+          <!-- Remember Custom Sidebar Widths -->
+          <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+              <TextBlock Classes="m3-label-large" Text="Remember Custom Side Panel Widths" />
+              <TextBlock Classes="m3-caption" Text="Persist dragged side panel widths across app restarts (e.g. wider BOM vs compact Nets)" />
+            </StackPanel>
+            <CheckBox Grid.Column="1" IsChecked="{Binding RememberSidebarWidths}" VerticalAlignment="Center" />
+          </Grid>
+        </StackPanel>
+      </Border>
+
+      <!-- 2. Layer Selection & Rendering Defaults Card -->
+      <Border Classes="m3-card">
+        <StackPanel Spacing="14">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <materialIcons:MaterialIcon Kind="LayersTripleOutline" Width="18" Height="18" Foreground="{DynamicResource M3PrimaryBrush}" />
+            <TextBlock Classes="m3-section-title" Text="LAYER SELECTION &amp; RENDERING DEFAULTS" />
+          </StackPanel>
+
+          <!-- Default Layer Preset -->
+          <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+              <TextBlock Classes="m3-label-large" Text="Default Layer Preset" />
+              <TextBlock Classes="m3-caption" Text="Initial layer visibility preset applied when opening a new board" />
+            </StackPanel>
+
+            <WrapPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+              <Button Classes="chip-btn" Classes.active="{Binding IsPresetAll}" Command="{Binding SetDefaultLayerPresetCommand}" CommandParameter="all" Margin="0,0,6,0" Content="All Layers" />
+              <Button Classes="chip-btn" Classes.active="{Binding IsPresetTop}" Command="{Binding SetDefaultLayerPresetCommand}" CommandParameter="top" Margin="0,0,6,0" Content="Top View" />
+              <Button Classes="chip-btn" Classes.active="{Binding IsPresetBottom}" Command="{Binding SetDefaultLayerPresetCommand}" CommandParameter="bottom" Margin="0,0,6,0" Content="Bottom View" />
+              <Button Classes="chip-btn" Classes.active="{Binding IsPresetCopper}" Command="{Binding SetDefaultLayerPresetCommand}" CommandParameter="copper" Content="Copper Only" />
+            </WrapPanel>
+          </Grid>
+
+          <!-- Pad & Via Net Name Labels -->
+          <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+              <TextBlock Classes="m3-label-large" Text="Show Net Names on Pads &amp; Vias" />
+              <TextBlock Classes="m3-caption" Text="Display net name labels directly inside pads and via rings by default" />
+            </StackPanel>
+            <CheckBox Grid.Column="1" IsChecked="{Binding ShowPadNetNames}" VerticalAlignment="Center" />
+          </Grid>
+
+          <!-- Copper Pour Fill Mode -->
+          <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+              <TextBlock Classes="m3-label-large" Text="Copper Pour Zones Fill Mode" />
+              <TextBlock Classes="m3-caption" Text="Default rendering style for KiCad copper fill zones" />
+            </StackPanel>
+
+            <WrapPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+              <Button Classes="chip-btn" Classes.active="{Binding IsZoneSolid}" Command="{Binding SetZoneModeCommand}" CommandParameter="solid" Margin="0,0,6,0" Content="Solid Fill" />
+              <Button Classes="chip-btn" Classes.active="{Binding IsZoneHatch}" Command="{Binding SetZoneModeCommand}" CommandParameter="hatch" Margin="0,0,6,0" Content="Hatch Fill" />
+              <Button Classes="chip-btn" Classes.active="{Binding IsZoneOutline}" Command="{Binding SetZoneModeCommand}" CommandParameter="outline" Margin="0,0,6,0" Content="Outlines Only" />
+              <Button Classes="chip-btn" Classes.active="{Binding IsZoneHide}" Command="{Binding SetZoneModeCommand}" CommandParameter="hide" Content="Hidden" />
+            </WrapPanel>
+          </Grid>
+
+          <!-- Layer Visibility Defaults -->
+          <Border Background="{DynamicResource M3SurfaceContainerHighBrush}"
+                  CornerRadius="16"
+                  Padding="14,10"
+                  Margin="0,6,0,0">
+            <StackPanel Spacing="10">
+              <TextBlock Classes="m3-label-medium" Text="Default Layer Visibility Toggles" FontWeight="Bold" />
+              <TextBlock Classes="m3-caption" Text="Checked layers are enabled by default for all boards" />
+
+              <TextBlock Classes="m3-mono-small" Text="COPPER LAYERS" FontWeight="Bold" Margin="0,4,0,2" />
+              <ItemsControl ItemsSource="{Binding DefaultCopperLayers}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:LayerDefaultItemViewModel">
+                    <CheckBox IsChecked="{Binding IsVisible}" Margin="0,0,16,6">
+                      <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <Border Width="12" Height="12" CornerRadius="3" Background="{Binding ColorBrush}" />
+                        <TextBlock Classes="m3-label-small" Text="{Binding Name}" VerticalAlignment="Center" />
+                      </StackPanel>
+                    </CheckBox>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <TextBlock Classes="m3-mono-small" Text="TECHNICAL LAYERS" FontWeight="Bold" Margin="0,6,0,2" />
+              <ItemsControl ItemsSource="{Binding DefaultTechnicalLayers}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:LayerDefaultItemViewModel">
+                    <CheckBox IsChecked="{Binding IsVisible}" Margin="0,0,16,6">
+                      <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <Border Width="12" Height="12" CornerRadius="3" Background="{Binding ColorBrush}" />
+                        <TextBlock Classes="m3-label-small" Text="{Binding Name}" VerticalAlignment="Center" />
+                      </StackPanel>
+                    </CheckBox>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Border>
+
+      <!-- 3. BOM & Assembly Preferences Card -->
+      <Border Classes="m3-card">
+        <StackPanel Spacing="14">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <materialIcons:MaterialIcon Kind="FormatListChecks" Width="18" Height="18" Foreground="{DynamicResource M3PrimaryBrush}" />
+            <TextBlock Classes="m3-section-title" Text="INTERACTIVE BOM &amp; ASSEMBLY TRACKING" />
+          </StackPanel>
+
+          <!-- Default Sort Column -->
+          <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+              <TextBlock Classes="m3-label-large" Text="Default BOM Sort Column &amp; Order" />
+              <TextBlock Classes="m3-caption" Text="Initial column used to group and sort component items" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+              <ComboBox SelectedIndex="0"
+                        SelectedItem="{Binding DefaultBomSortColumn}"
+                        Width="140">
+                <!-- Dropdown for sort columns -->
+                <ComboBoxItem Content="references" />
+                <ComboBoxItem Content="value" />
+                <ComboBoxItem Content="footprint" />
+                <ComboBoxItem Content="quantity" />
+                <ComboBoxItem Content="placed" />
+              </ComboBox>
+
+              <CheckBox IsChecked="{Binding DefaultBomSortAscending}" Content="Ascending" VerticalAlignment="Center" />
+            </StackPanel>
+          </Grid>
+
+          <!-- Default Component Filter -->
+          <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+              <TextBlock Classes="m3-label-large" Text="Default Component Filter" />
+              <TextBlock Classes="m3-caption" Text="Which filter chip is selected by default on the BOM tab" />
+            </StackPanel>
+
+            <WrapPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+              <Button Classes="chip-btn" Classes.active="{Binding IsFilterAll}" Command="{Binding SetDefaultBomFilterCommand}" CommandParameter="all" Margin="0,0,6,0" Content="All Parts" />
+              <Button Classes="chip-btn" Classes.active="{Binding IsFilterTop}" Command="{Binding SetDefaultBomFilterCommand}" CommandParameter="top" Margin="0,0,6,0" Content="Top (F.Cu)" />
+              <Button Classes="chip-btn" Classes.active="{Binding IsFilterBottom}" Command="{Binding SetDefaultBomFilterCommand}" CommandParameter="bottom" Margin="0,0,6,0" Content="Bottom (B.Cu)" />
+              <Button Classes="chip-btn" Classes.active="{Binding IsFilterUnplaced}" Command="{Binding SetDefaultBomFilterCommand}" CommandParameter="unplaced" Content="Unplaced" />
+            </WrapPanel>
+          </Grid>
+
+          <!-- Reset BOM Column Widths -->
+          <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+              <TextBlock Classes="m3-label-large" Text="BOM Column Widths" />
+              <TextBlock Classes="m3-caption" Text="Reset table column widths back to defaults (Placed: 50, Ref: 110, Val: 100, Package: 140, Qty: 50)" />
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    Classes="tool-btn"
+                    Command="{Binding ResetBomColumnWidthsCommand}"
+                    Padding="12,6"
+                    CornerRadius="12"
+                    VerticalAlignment="Center">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="TableColumnWidth" Width="15" Height="15" Foreground="{DynamicResource M3PrimaryBrush}" />
+                <TextBlock Text="Reset Column Widths" FontSize="12" Foreground="{DynamicResource M3PrimaryBrush}" />
+              </StackPanel>
+            </Button>
+          </Grid>
+        </StackPanel>
+      </Border>
+
+      <!-- 4. Appearance & Storage Card -->
+      <Border Classes="m3-card">
+        <StackPanel Spacing="14">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <materialIcons:MaterialIcon Kind="PaletteOutline" Width="18" Height="18" Foreground="{DynamicResource M3PrimaryBrush}" />
+            <TextBlock Classes="m3-section-title" Text="APPEARANCE &amp; CONFIGURATION STORAGE" />
+          </StackPanel>
+
+          <!-- Theme -->
+          <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+              <TextBlock Classes="m3-label-large" Text="Material 3 Theme" />
+              <TextBlock Classes="m3-caption" Text="Dark theme optimized for PCB contrast, or Light theme for documentation" />
+            </StackPanel>
+
+            <CheckBox Grid.Column="1"
+                      IsChecked="{Binding IsDarkTheme}"
+                      Content="Dark Theme"
+                      VerticalAlignment="Center" />
+          </Grid>
+
+          <!-- Settings File Path -->
+          <Grid ColumnDefinitions="*,Auto" Margin="0,6,0,0">
+            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+              <TextBlock Classes="m3-label-medium" Text="Configuration File Location" FontWeight="Bold" />
+              <TextBlock Classes="m3-mono-small"
+                         Text="{Binding SettingsFilePath}"
+                         TextTrimming="CharacterEllipsis"
+                         Foreground="{DynamicResource M3OnSurfaceVariantBrush}" />
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    Classes="tool-btn"
+                    Command="{Binding OpenSettingsFolderCommand}"
+                    ToolTip.Tip="Open configuration folder in file explorer"
+                    Padding="12,6"
+                    CornerRadius="12"
+                    VerticalAlignment="Center">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <materialIcons:MaterialIcon Kind="FolderOpenOutline" Width="15" Height="15" Foreground="{DynamicResource M3PrimaryBrush}" />
+                <TextBlock Text="Open Folder" FontSize="12" Foreground="{DynamicResource M3PrimaryBrush}" />
+              </StackPanel>
+            </Button>
+          </Grid>
+        </StackPanel>
+      </Border>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

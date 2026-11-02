@@ -39,6 +39,7 @@
             VerticalAlignment="Bottom"
             Margin="16"
             IsHitTestVisible="False"
+            IsVisible="{Binding HasBoard}"
             Background="{DynamicResource M3SurfaceOverlayBrush}"
             BorderBrush="{DynamicResource M3OutlineVariantBrush}"
             BorderThickness="1"

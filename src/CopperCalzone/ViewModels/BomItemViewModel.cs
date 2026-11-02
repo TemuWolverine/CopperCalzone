@@ -1,4 +1,4 @@
-﻿using Avalonia.Media;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CopperCalzone.Models;
 
@@ -36,12 +36,7 @@ public sealed partial class BomItemViewModel : ObservableObject
 
     public string Value { get; }
 
-    public BomItemViewModel(
-                                                            string value,
-        string package,
-        string layer,
-        List<PcbFootprint> footprints,
-        Action<BomItemViewModel>? onPlacedChanged = null)
+    public BomItemViewModel(string value, string package, string layer, List<PcbFootprint> footprints, Action<BomItemViewModel>? onPlacedChanged = null)
     {
         Value = string.IsNullOrWhiteSpace(value) ? "(No Value)" : value;
         Package = string.IsNullOrWhiteSpace(package) ? "—" : package;

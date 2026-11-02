@@ -17,15 +17,27 @@
 
     <!-- TAB 1: PCB Viewer (M3 Side Sheet + Expressive Rounded Viewport) -->
     <Grid Grid.Row="1"
-          ColumnDefinitions="Auto,*"
+          ColumnDefinitions="Auto,Auto,*"
           x:Name="ContentGrid"
           IsVisible="{Binding IsViewerTabActive}">
 
-      <!-- Left M3 Side Sheet / Navigation Drawer (Nets & Layers) -->
+      <!-- Left M3 Side Sheet / Navigation Drawer (Nets & Layers & BOM) -->
       <views:SidebarView Grid.Column="0" x:Name="Sidebar" />
 
+      <!-- Side panel resize splitter thumb -->
+      <Thumb Grid.Column="1"
+             x:Name="SidebarResizer"
+             Classes="sidebar-resizer"
+             Width="8"
+             Margin="-3,0,-3,0"
+             Cursor="SizeWestEast"
+             DragDelta="OnSidebarResizerDragDelta"
+             DoubleTapped="OnSidebarResizerDoubleTapped"
+             IsVisible="{Binding IsLeftSidebarOpen}"
+             ToolTip.Tip="Drag to resize side panel (Double-click to reset)" />
+
       <!-- Center Expressive Viewport Container -->
-      <Border Grid.Column="1"
+      <Border Grid.Column="2"
               Classes="m3-surface-sheet"
               Margin="4,0,8,8">
         <Grid ClipToBounds="True">
@@ -45,6 +57,11 @@
     <views:GitHubBrowserView Grid.Row="1"
                              DataContext="{Binding GitHubBrowser}"
                              IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsGitHubTabActive}" />
+
+    <!-- TAB 3: Preferences & Settings Panel -->
+    <views:SettingsView Grid.Row="1"
+                        DataContext="{Binding Settings}"
+                        IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsSettingsTabActive}" />
 
   </Grid>
 </UserControl>

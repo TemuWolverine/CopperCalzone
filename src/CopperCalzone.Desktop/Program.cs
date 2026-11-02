@@ -1,7 +1,8 @@
-using Avalonia;
+﻿using Avalonia;
 using CopperCalzone.Models;
 using CopperCalzone.Parsing;
 using CopperCalzone.Rendering;
+using CopperCalzone.ViewModels;
 using SkiaSharp;
 
 namespace CopperCalzone.Desktop;
@@ -98,27 +99,10 @@ internal sealed class Program
         var parsedKicad = BoardLoader.LoadFromContent(sampleKicadPcb, "TestBoard.kicad_pcb");
         Console.WriteLine($"[PASS] Parsed .kicad_pcb '{parsedKicad.Metadata.Title}': {parsedKicad.Pads.Count} pads, {parsedKicad.Nets.Count} nets, {parsedKicad.Tracks.Count} tracks, {parsedKicad.Vias.Count} vias, {parsedKicad.Zones.Count} zones.");
 
-        // 2. Test loading built-in sample JSON boards
-        string samplesDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "CopperCalzone", "Assets", "Samples"));
-        PcbBoard? renderBoard = null;
-        foreach (string name in BoardLoader.BuiltInSampleNames)
-        {
-            string jsonPath = Path.Combine(samplesDir, $"{name}.json");
-            if (File.Exists(jsonPath))
-            {
-                var board = BoardLoader.LoadFromContent(File.ReadAllText(jsonPath), Path.GetFileName(jsonPath));
-                Console.WriteLine($"[PASS] Loaded '{name}' ({board.Bbox.Width}x{board.Bbox.Height} mm): {board.Nets.Count} nets, {board.Pads.Count} pads, {board.Footprints.Count} footprints.");
-                var sampleVm = new CopperCalzone.ViewModels.MainViewModel();
-                sampleVm.LoadBoard(board);
-                Console.WriteLine($"       BOM: {sampleVm.TotalBomCount} groups, {sampleVm.TotalComponentCount} parts. (H1 excluded: {!sampleVm.FilteredBomItems.Any(b => b.References.Contains("H1"))})");
-                if (name == "StickHub")
-                    renderBoard = board;
-            }
-        }
-
-        // 3. Test BOM Viewer and assembly tracking on parsed KiCad board
-        renderBoard ??= parsedKicad;
+        // 2. Test BOM Viewer and assembly tracking on parsed KiCad board
+        PcbBoard renderBoard = parsedKicad;
         var vm = new CopperCalzone.ViewModels.MainViewModel();
+        vm.LoadBoard(parsedKicad);
         vm.LoadBoard(parsedKicad);
         Console.WriteLine($"[PASS] Initialized BOM Viewer for '{parsedKicad.Metadata.Title}': {vm.TotalBomCount} BOM groups, {vm.TotalComponentCount} total parts. ({vm.ShowingBomLabel})");
 
@@ -151,7 +135,93 @@ internal sealed class Program
         capGroup.IsPlaced = true;
         Console.WriteLine($"[PASS] Assembly progress tracking: {vm.AssemblyProgressText}");
 
-        // 4. Test Skia rendering pipeline offscreen if requested
+        // 4. Test adjustable sidebar and BOM column widths
+        if (vm.SidebarWidth < 520) throw new Exception("SidebarWidth should be >= 520 on BOM tab");
+        vm.SidebarWidth = 650;
+        if (vm.SidebarWidth != 650) throw new Exception("SidebarWidth was not adjustable to 650");
+        vm.SwitchTab("nets");
+        if (vm.SidebarWidth != 340) throw new Exception("SidebarWidth should revert to non-BOM width (340)");
+        vm.SwitchTab("bom");
+        if (vm.SidebarWidth != 650) throw new Exception("SidebarWidth should restore last BOM width (650)");
+
+        vm.BomColRefWidth = 160;
+        vm.BomColValWidth = 140;
+        vm.BomColFpWidth = 220;
+        if (vm.BomColRefWidth != 160 || vm.BomColValWidth != 140 || vm.BomColFpWidth != 220)
+            throw new Exception("BOM column widths were not adjustable");
+        Console.WriteLine($"[PASS] Verified adjustable sidebar width ({vm.SidebarWidth}px) and adjustable BOM columns (Ref:{vm.BomColRefWidth}, Val:{vm.BomColValWidth}, FP:{vm.BomColFpWidth}).");
+
+        // 5. Test Settings Panel, Tab Switching, and Persistence
+        string tempSettingsFile = Path.Combine(Path.GetTempPath(), $"copper_settings_test_{Guid.NewGuid():N}.json");
+        try
+        {
+            var testSettingsService = new CopperCalzone.Services.SettingsService(tempSettingsFile);
+            var settingsVm = new CopperCalzone.ViewModels.SettingsViewModel(testSettingsService, vm.ApplySettings);
+
+            // Test tab switching: Viewer -> Settings -> Viewer
+            vm.OpenSettings();
+            if (!vm.IsSettingsTabActive || vm.IsViewerTabActive)
+                throw new Exception("OpenSettings did not activate Settings tab");
+
+            vm.SwitchToViewer();
+            if (!vm.IsViewerTabActive || vm.IsSettingsTabActive)
+                throw new Exception("SwitchToViewer did not activate Viewer tab");
+
+            // Test setting persistence: default sidebar tab, layer options, zone mode
+            settingsVm.SetDefaultSidebarTab("layers");
+            settingsVm.SetDefaultLayerPreset("top");
+            settingsVm.SetZoneMode("hatch");
+            settingsVm.ShowPadNetNames = false;
+            settingsVm.AutoSave();
+
+            // Load new service instance from file to verify persistence
+            var loadedService = new CopperCalzone.Services.SettingsService(tempSettingsFile);
+            var loadedSettings = loadedService.Current;
+
+            if (loadedSettings.DefaultSidebarTab != "layers")
+                throw new Exception($"Expected DefaultSidebarTab='layers', got '{loadedSettings.DefaultSidebarTab}'");
+            if (loadedSettings.DefaultLayerPreset != "top")
+                throw new Exception($"Expected DefaultLayerPreset='top', got '{loadedSettings.DefaultLayerPreset}'");
+            if (loadedSettings.ZoneMode != "hatch")
+                throw new Exception($"Expected ZoneMode='hatch', got '{loadedSettings.ZoneMode}'");
+            if (loadedSettings.ShowPadNetNames != false)
+                throw new Exception("Expected ShowPadNetNames=false");
+
+            Console.WriteLine($"[PASS] Verified Settings persistence round-trip (DefaultTab={loadedSettings.DefaultSidebarTab}, Preset={loadedSettings.DefaultLayerPreset}, ZoneMode={loadedSettings.ZoneMode}, PadNetNames={loadedSettings.ShowPadNetNames})");
+        }
+        finally
+        {
+            if (File.Exists(tempSettingsFile)) File.Delete(tempSettingsFile);
+            if (File.Exists(tempSettingsFile + ".tmp")) File.Delete(tempSettingsFile + ".tmp");
+        }
+
+        // 6. Test Sub-ViewModel decomposition (Option A)
+        if (vm.Nets == null || vm.Bom == null || vm.Layers == null || vm.Inspector == null)
+            throw new Exception("Sub-ViewModels were not instantiated properly");
+
+        if (vm.Nets.TotalNetCount != vm.TotalNetCount || vm.Nets.TotalNetCount != 4)
+            throw new Exception("NetsViewModel TotalNetCount mismatch");
+
+        if (vm.Bom.TotalBomCount != vm.TotalBomCount || vm.Bom.TotalBomCount != 2)
+            throw new Exception("BomViewModel TotalBomCount mismatch");
+
+        if (vm.Layers.CopperLayers.Count == 0 || vm.Layers.TechLayers.Count == 0)
+            throw new Exception("LayersViewModel layer collections were not populated");
+
+        // 6b. Test PropertyChanged propagation from sub-viewmodels to MainViewModel
+        var propVm = new MainViewModel();
+        var changedProps = new HashSet<string>();
+        propVm.PropertyChanged += (s, e) => { if (!string.IsNullOrEmpty(e.PropertyName)) changedProps.Add(e.PropertyName); };
+        propVm.LoadBoard(renderBoard);
+        if (!changedProps.Contains(nameof(MainViewModel.TotalNetCount)))
+            throw new Exception("MainViewModel did not receive PropertyChanged for TotalNetCount from NetsViewModel");
+        if (!changedProps.Contains(nameof(MainViewModel.TotalBomCount)))
+            throw new Exception("MainViewModel did not receive PropertyChanged for TotalBomCount from BomViewModel");
+        Console.WriteLine($"[PASS] Verified PropertyChanged propagation: TotalNetCount ({propVm.TotalNetCount}) and TotalBomCount ({propVm.TotalBomCount}) notified reactively.");
+
+        Console.WriteLine($"[PASS] Verified Sub-ViewModel decomposition: NetsVM ({vm.Nets.TotalNetCount} nets), BomVM ({vm.Bom.TotalBomCount} groups), LayersVM ({vm.Layers.CopperLayers.Count} Cu + {vm.Layers.TechLayers.Count} tech), InspectorVM.");
+
+        // 7. Test Skia rendering pipeline offscreen if requested
         if (!string.IsNullOrEmpty(screenshotOutputPath))
         {
             int width = 1280, height = 800;
