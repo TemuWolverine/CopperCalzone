@@ -13,6 +13,7 @@ public partial class MainView : UserControl
 {
     private static Thickness _osSafeInsets = OperatingSystem.IsAndroid() ? new Thickness(0, 24, 0, 0) : default;
     private static MainView? _currentInstance;
+    public static Action<bool>? ImmersiveModeHandler { get; set; }
 
     public static void SetOsSafeInsets(double left, double top, double right, double bottom)
     {
@@ -36,6 +37,8 @@ public partial class MainView : UserControl
             vm.AttachCanvas(PcbCanvas);
             vm.OpenFileRequested -= OnOpenFileRequestedAsync;
             vm.OpenFileRequested += OnOpenFileRequestedAsync;
+            vm.ImmersiveModeChanged -= OnImmersiveModeChanged;
+            vm.ImmersiveModeChanged += OnImmersiveModeChanged;
             vm.PropertyChanged += (s, ev) =>
             {
                 if (ev?.PropertyName is nameof(MainViewModel.SidebarWidth) or nameof(MainViewModel.IsBomTabActive))
@@ -77,6 +80,11 @@ public partial class MainView : UserControl
         UpdateLayoutMode(e.NewSize.Width);
     }
 
+    private void OnImmersiveModeChanged(bool isImmersive)
+    {
+        ImmersiveModeHandler?.Invoke(isImmersive);
+    }
+
     public void ApplySafeArea(Thickness safeArea)
     {
         TopToolbar.Padding = new Thickness(
@@ -85,7 +93,10 @@ public partial class MainView : UserControl
             Math.Max(12, safeArea.Right + 12),
             0);
 
-        ViewportOverlay.Margin = new Thickness(0, 0, safeArea.Right, safeArea.Bottom);
+        if (MainContentContainer != null)
+        {
+            MainContentContainer.Margin = new Thickness(safeArea.Left, 0, safeArea.Right, safeArea.Bottom);
+        }
     }
 
     private void UpdateLayoutMode(double width)

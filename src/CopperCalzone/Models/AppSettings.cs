@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace CopperCalzone.Models;
 
@@ -69,6 +69,9 @@ public sealed class AppSettings
     [JsonPropertyName("isDarkTheme")]
     public bool IsDarkTheme { get; set; } = true;
 
+    [JsonPropertyName("isImmersiveMode")]
+    public bool IsImmersiveMode { get; set; } = false;
+
     public AppSettings Clone()
     {
         return new AppSettings
@@ -91,7 +94,8 @@ public sealed class AppSettings
             BomColValWidth = BomColValWidth,
             BomColFpWidth = BomColFpWidth,
             BomColQtyWidth = BomColQtyWidth,
-            IsDarkTheme = IsDarkTheme
+            IsDarkTheme = IsDarkTheme,
+            IsImmersiveMode = IsImmersiveMode
         };
     }
 }

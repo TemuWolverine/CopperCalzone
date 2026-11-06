@@ -321,6 +321,19 @@
                       VerticalAlignment="Center" />
           </Grid>
 
+          <!-- Immersive Mode (Android Nav Bar / Desktop Fullscreen) -->
+          <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+              <TextBlock Classes="m3-label-large" Text="Immersive Mode (Hide System Bars)" />
+              <TextBlock Classes="m3-caption" Text="Auto-hides the system navigation bar for maximum screen area (slide up from bottom to reveal)" />
+            </StackPanel>
+
+            <CheckBox Grid.Column="1"
+                      IsChecked="{Binding IsImmersiveMode}"
+                      Content="Immersive"
+                      VerticalAlignment="Center" />
+          </Grid>
+
           <!-- Settings File Path -->
           <Grid ColumnDefinitions="*,Auto" Margin="0,6,0,0">
             <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">

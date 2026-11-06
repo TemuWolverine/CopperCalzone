@@ -1,4 +1,4 @@
-﻿using Android.Content.PM;
+using Android.Content.PM;
 using Android.Views;
 using AndroidX.Core.View;
 using Avalonia;
@@ -15,9 +15,14 @@ namespace CopperCalzone.Android;
     ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
 public class MainActivity : AvaloniaMainActivity<App>
 {
+    private bool _isImmersive;
+
     protected override void OnCreate(Bundle? savedInstanceState)
     {
         base.OnCreate(savedInstanceState);
+
+        // Connect immersive mode toggle handler
+        MainView.ImmersiveModeHandler = SetImmersiveMode;
 
         // 1. Initial measurement from Android system dimensions
         try
@@ -43,6 +48,37 @@ public class MainActivity : AvaloniaMainActivity<App>
         if (Window?.DecorView != null)
         {
             ViewCompat.SetOnApplyWindowInsetsListener(Window.DecorView, new WindowInsetsHandler(this));
+        }
+    }
+
+    public void SetImmersiveMode(bool enabled)
+    {
+        _isImmersive = enabled;
+        RunOnUiThread(() =>
+        {
+            if (Window == null) return;
+            var controller = WindowCompat.GetInsetsController(Window, Window.DecorView);
+            if (controller != null)
+            {
+                controller.SystemBarsBehavior = WindowInsetsControllerCompat.BehaviorShowTransientBarsBySwipe;
+                if (enabled)
+                {
+                    controller.Hide(WindowInsetsCompat.Type.NavigationBars());
+                }
+                else
+                {
+                    controller.Show(WindowInsetsCompat.Type.NavigationBars());
+                }
+            }
+        });
+    }
+
+    public override void OnWindowFocusChanged(bool hasFocus)
+    {
+        base.OnWindowFocusChanged(hasFocus);
+        if (hasFocus && _isImmersive)
+        {
+            SetImmersiveMode(true);
         }
     }
 

@@ -30,6 +30,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool _isDarkTheme = true;
 
+    [ObservableProperty]
+    private bool _isImmersiveMode;
+
     private bool _isLoading;
 
     [ObservableProperty]
@@ -120,6 +123,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             DefaultBomFilter = s.DefaultBomFilter;
 
             IsDarkTheme = s.IsDarkTheme;
+            IsImmersiveMode = s.IsImmersiveMode;
 
             // Initialize layer collections
             var activeSet = new HashSet<string>(s.VisibleLayers, StringComparer.OrdinalIgnoreCase);
@@ -256,6 +260,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         s.DefaultBomFilter = DefaultBomFilter;
 
         s.IsDarkTheme = IsDarkTheme;
+        s.IsImmersiveMode = IsImmersiveMode;
 
         var visible = new List<string>();
         foreach (var l in DefaultCopperLayers)
@@ -294,6 +299,8 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
 
     partial void OnIsDarkThemeChanged(bool value) => AutoSave();
+
+    partial void OnIsImmersiveModeChanged(bool value) => AutoSave();
 
     partial void OnIsSidebarOpenByDefaultChanged(bool value) => AutoSave();
 

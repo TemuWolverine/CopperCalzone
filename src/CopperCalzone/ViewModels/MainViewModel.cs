@@ -33,6 +33,11 @@ public sealed partial class MainViewModel : ObservableObject
     private bool _isDarkTheme = true;
 
     [ObservableProperty]
+    private bool _isImmersiveMode;
+
+    public event Action<bool>? ImmersiveModeChanged;
+
+    [ObservableProperty]
     private bool _isFlipped;
 
     [ObservableProperty]
@@ -318,6 +323,12 @@ public sealed partial class MainViewModel : ObservableObject
             ThemeChanged?.Invoke(IsDarkTheme);
             _canvas?.SetTheme(!IsDarkTheme);
         }
+
+        if (IsImmersiveMode != s.IsImmersiveMode)
+        {
+            IsImmersiveMode = s.IsImmersiveMode;
+            ImmersiveModeChanged?.Invoke(IsImmersiveMode);
+        }
     }
 
     public void AttachCanvas(PcbCanvasControl canvas)
@@ -504,6 +515,20 @@ public sealed partial class MainViewModel : ObservableObject
         IsDarkTheme = !IsDarkTheme;
         _canvas?.SetTheme(!IsDarkTheme);
         ThemeChanged?.Invoke(IsDarkTheme);
+    }
+
+    [RelayCommand]
+    public void ToggleImmersiveMode()
+    {
+        IsImmersiveMode = !IsImmersiveMode;
+        ImmersiveModeChanged?.Invoke(IsImmersiveMode);
+
+        var s = SettingsService.Instance.Current;
+        if (s.IsImmersiveMode != IsImmersiveMode)
+        {
+            s.IsImmersiveMode = IsImmersiveMode;
+            SettingsService.Instance.Save();
+        }
     }
 
     [RelayCommand]

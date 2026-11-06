@@ -135,6 +135,12 @@
                     <TextBlock Text="Labels" VerticalAlignment="Center" />
                   </StackPanel>
                 </Button>
+                <Button Classes="tool-btn"
+                        Classes.active="{Binding IsImmersiveMode}"
+                        Command="{Binding ToggleImmersiveModeCommand}"
+                        ToolTip.Tip="Toggle Immersive / Fullscreen Mode (Hide System Bars)">
+                  <materialIcons:MaterialIcon Kind="Fullscreen" Width="18" Height="18" />
+                </Button>
               </StackPanel>
             </Border>
           </StackPanel>
@@ -307,6 +313,16 @@
                         Padding="10,6"
                         ToolTip.Tip="Toggle Net Names on Pads">
                   <TextBlock Text="Labels" />
+                </Button>
+                <Button Classes="tool-btn"
+                        Classes.active="{Binding IsImmersiveMode}"
+                        Command="{Binding ToggleImmersiveModeCommand}"
+                        Padding="10,6"
+                        ToolTip.Tip="Toggle Immersive Mode (Hide System Bars)">
+                  <StackPanel Orientation="Horizontal" Spacing="4">
+                    <materialIcons:MaterialIcon Kind="Fullscreen" Width="16" Height="16" />
+                    <TextBlock Text="Immersive" />
+                  </StackPanel>
                 </Button>
               </StackPanel>
             </Border>
