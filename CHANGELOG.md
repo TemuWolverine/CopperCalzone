@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/TemuWolverine/CopperCalzone/compare/v1.0.1...v1.0.2) (2026-11-06)
+
+
+### Bug Fixes
+
+* padding/margins and full screen mode ([ea7a32e](https://github.com/TemuWolverine/CopperCalzone/commit/ea7a32e3c2197738fd656c15904fc8b44b8ea1b1))
+
 ## [1.0.1](https://github.com/TemuWolverine/CopperCalzone/compare/v1.0.0...v1.0.1) (2026-11-02)
 
 
