@@ -8,6 +8,7 @@ public sealed class PcbRenderState
     public int? ActiveNetId { get; init; }
     public PcbBoard? Board { get; init; }
     public HashSet<string> HighlightedFootprintRefs { get; init; } = [];
+    public HashSet<string> PlacedFootprintRefs { get; init; } = [];
     public PcbPad? HoveredPad { get; init; }
     public bool IsFlipped { get; init; }
     public bool IsLightTheme { get; init; }

@@ -68,6 +68,9 @@ public sealed partial class BomViewModel : ObservableObject
     private int _totalComponentCount;
 
     public event Action<IReadOnlyList<string>, string?>? FootprintHighlightRequested;
+    public event Action<IReadOnlySet<string>>? PlacedFootprintsChanged;
+
+    private bool _suppressPlacedNotification;
 
     public ObservableCollection<BomItemViewModel> FilteredBomItems { get; } = [];
     public bool IsBomFilterAll => BomActiveFilter == "all";
@@ -172,15 +175,25 @@ public sealed partial class BomViewModel : ObservableObject
 
         ClearSelection();
         ApplyBomFilters();
+        NotifyPlacedFootprintsChanged();
     }
 
     [RelayCommand]
     public void MarkAllBomPlaced()
     {
-        foreach (var item in _allBomItems)
-            item.IsPlaced = true;
+        _suppressPlacedNotification = true;
+        try
+        {
+            foreach (var item in _allBomItems)
+                item.IsPlaced = true;
+        }
+        finally
+        {
+            _suppressPlacedNotification = false;
+        }
         UpdateAssemblyProgress();
         if (BomActiveFilter == "unplaced") ApplyBomFilters();
+        NotifyPlacedFootprintsChanged();
     }
 
     [RelayCommand]
@@ -204,10 +217,19 @@ public sealed partial class BomViewModel : ObservableObject
     [RelayCommand]
     public void ResetBomPlaced()
     {
-        foreach (var item in _allBomItems)
-            item.IsPlaced = false;
+        _suppressPlacedNotification = true;
+        try
+        {
+            foreach (var item in _allBomItems)
+                item.IsPlaced = false;
+        }
+        finally
+        {
+            _suppressPlacedNotification = false;
+        }
         UpdateAssemblyProgress();
         if (BomActiveFilter == "unplaced") ApplyBomFilters();
+        NotifyPlacedFootprintsChanged();
     }
 
     [RelayCommand]
@@ -331,6 +353,31 @@ public sealed partial class BomViewModel : ObservableObject
         {
             ApplyBomFilters();
         }
+        if (!_suppressPlacedNotification)
+        {
+            NotifyPlacedFootprintsChanged();
+        }
+    }
+
+    public HashSet<string> GetPlacedFootprintRefs()
+    {
+        var placed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var item in _allBomItems)
+        {
+            if (item.IsPlaced)
+            {
+                foreach (var r in item.References)
+                {
+                    placed.Add(r);
+                }
+            }
+        }
+        return placed;
+    }
+
+    public void NotifyPlacedFootprintsChanged()
+    {
+        PlacedFootprintsChanged?.Invoke(GetPlacedFootprintRefs());
     }
 
     partial void OnBomSearchQueryChanged(string value) => ApplyBomFilters();

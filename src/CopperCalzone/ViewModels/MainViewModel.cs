@@ -231,7 +231,18 @@ public sealed partial class MainViewModel : ObservableObject
 
         Bom.FootprintHighlightRequested += (refs, activeRef) =>
         {
-            _canvas?.SetHighlightedFootprints(refs, activeRef, flyTo: false);
+            if (IsBomTabActive)
+            {
+                _canvas?.SetHighlightedFootprints(refs, activeRef, flyTo: false);
+            }
+        };
+
+        Bom.PlacedFootprintsChanged += placedRefs =>
+        {
+            if (IsBomTabActive)
+            {
+                _canvas?.SetPlacedFootprints(placedRefs);
+            }
         };
 
         Layers.LayerVisibilityChanged += (layerName, isVis) =>
@@ -343,6 +354,10 @@ public sealed partial class MainViewModel : ObservableObject
         {
             _canvas.SetBoard(_currentBoard);
             SyncLayersToCanvas();
+            if (IsBomTabActive)
+            {
+                _canvas.SetPlacedFootprints(Bom.GetPlacedFootprintRefs());
+            }
         }
     }
 
@@ -466,11 +481,18 @@ public sealed partial class MainViewModel : ObservableObject
         {
             _lastBomSidebarWidth = SidebarWidth;
             SidebarWidth = _lastNonBomSidebarWidth;
+            _canvas?.SetHighlightedFootprints(null);
+            _canvas?.SetPlacedFootprints(null);
         }
         else if (!wasBom && IsBomTabActive)
         {
             _lastNonBomSidebarWidth = SidebarWidth;
             SidebarWidth = Math.Max(520, _lastBomSidebarWidth);
+            _canvas?.SetPlacedFootprints(Bom.GetPlacedFootprintRefs());
+            if (Bom.SelectedBomItem is not null)
+            {
+                _canvas?.SetHighlightedFootprints(Bom.SelectedBomItem.References, Bom.SelectedComponentRef, flyTo: false);
+            }
         }
     }
 

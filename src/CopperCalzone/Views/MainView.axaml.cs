@@ -205,6 +205,14 @@ public partial class MainView : UserControl
                 e.Handled = true;
                 break;
 
+            case Key.D:
+                if (vm.IsBomTabActive && vm.Bom.SelectedBomItem is not null)
+                {
+                    vm.Bom.SelectedBomItem.IsPlaced = !vm.Bom.SelectedBomItem.IsPlaced;
+                    e.Handled = true;
+                }
+                break;
+
             case Key.Escape:
                 vm.ClearSelection();
                 e.Handled = true;

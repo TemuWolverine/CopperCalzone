@@ -41,6 +41,9 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
     private static readonly SKColor HighlightColor = new(0x00, 0xF0, 0xFF);
     private static readonly SKColor BomPrimaryGlow = new(0xFF, 0xB1, 0x42); // Vibrant Golden Amber
     private static readonly SKColor BomActiveGlow = new(0x00, 0xE5, 0xFF);  // Neon Cyan for active component
+    private static readonly SKColor BomPlacedGlow = new(0x22, 0xC5, 0x5E);  // Vibrant Emerald Green for placed components
+    private static readonly SKColor BomPlacedGlowLight = new(0x16, 0xA3, 0x4A); // Rich Green for light theme
+    private static readonly SKColor BomPlacedActiveGlow = new(0x4A, 0xDE, 0x80); // Electric Mint Green for active placed component
     private static readonly SKColor Pin1Color = new(0xFF, 0x38, 0x38);      // Vibrant Coral Red for Pin 1 indicator
     private static readonly SKColor ViaCopperColor = new(0xB8, 0x86, 0x0B);
 
@@ -108,7 +111,7 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
             RenderHighlightLayer(canvas, board, bgColor, screenMatrix, worldMatrix);
         }
 
-        if (_state.HighlightedFootprintRefs.Count > 0)
+        if (_state.HighlightedFootprintRefs.Count > 0 || _state.PlacedFootprintRefs.Count > 0)
         {
             canvas.SetMatrix(worldMatrix);
             RenderBomHighlightLayer(canvas, board, bgColor, screenMatrix, worldMatrix);
@@ -315,6 +318,7 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
             if (!_state.IsPadVisible(pad)) continue;
             if (hasActiveNet && pad.Net == activeNet) continue;
             if (hasBomHighlight && _state.HighlightedFootprintRefs.Contains(pad.FpRef)) continue;
+            if (_state.PlacedFootprintRefs.Contains(pad.FpRef)) continue;
 
             bool isThroughHole = pad.Drill > 0 || pad.Layers.Contains("*.Cu");
             string colorLayer = isThroughHole
@@ -363,6 +367,7 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
                 if (!_state.IsPadVisible(pad)) continue;
                 if (hasActiveNet && pad.Net == activeNet) continue;
                 if (hasBomHighlight && _state.HighlightedFootprintRefs.Contains(pad.FpRef)) continue;
+                if (_state.PlacedFootprintRefs.Contains(pad.FpRef)) continue;
                 DrawPadText(canvas, screenMatrix, pad, false);
             }
 
@@ -501,7 +506,8 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
         SKMatrix worldMatrix)
     {
         var highlighted = _state.HighlightedFootprintRefs;
-        if (highlighted.Count == 0) return;
+        var placed = _state.PlacedFootprintRefs;
+        if (highlighted.Count == 0 && placed.Count == 0) return;
 
         using var strokePaint = new SKPaint
         {
@@ -518,17 +524,34 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
         };
 
         var padsByRef = board.Pads
-            .Where(p => highlighted.Contains(p.FpRef))
+            .Where(p => highlighted.Contains(p.FpRef) || placed.Contains(p.FpRef))
             .GroupBy(p => p.FpRef, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
 
-        // 1. Draw component boundary bounding reticles and silkscreen outlines in World Space
-        foreach (var fp in board.Footprints)
-        {
-            if (!highlighted.Contains(fp.Ref)) continue;
+        SKColor placedBaseColor = _state.IsLightTheme ? BomPlacedGlowLight : BomPlacedGlow;
 
-            bool isCurrentActive = string.Equals(fp.Ref, _state.ActiveFootprintRef, StringComparison.OrdinalIgnoreCase);
-            SKColor compColor = isCurrentActive ? BomActiveGlow : BomPrimaryGlow;
+        // 1. Draw component boundary bounding reticles and silkscreen outlines in World Space
+        // Render placed-only footprints first, then selected footprints on top
+        var footprintsToRender = board.Footprints
+            .Where(fp => highlighted.Contains(fp.Ref) || placed.Contains(fp.Ref))
+            .OrderBy(fp => highlighted.Contains(fp.Ref) ? 1 : 0)
+            .ToList();
+
+        foreach (var fp in footprintsToRender)
+        {
+            bool isHighlighted = highlighted.Contains(fp.Ref);
+            bool isPlaced = placed.Contains(fp.Ref);
+            bool isCurrentActive = isHighlighted && string.Equals(fp.Ref, _state.ActiveFootprintRef, StringComparison.OrdinalIgnoreCase);
+
+            SKColor compColor;
+            if (isPlaced)
+            {
+                compColor = isCurrentActive ? BomPlacedActiveGlow : placedBaseColor;
+            }
+            else
+            {
+                compColor = isCurrentActive ? BomActiveGlow : BomPrimaryGlow;
+            }
 
             // Footprint drawings (silkscreen & fab lines) with high opacity
             strokePaint.Color = compColor;
@@ -537,15 +560,19 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
 
             foreach (var dwg in fp.Drawings)
             {
+                if (_state.VisibleLayers.Count > 0 && !_state.VisibleLayers.Contains(dwg.Layer)) continue;
                 DrawGraphicItem(canvas, dwg, strokePaint, fillPaint);
             }
 
             // Calculate component bounding box from pads
             if (padsByRef.TryGetValue(fp.Ref, out var fpPads) && fpPads.Count > 0)
             {
+                var visiblePads = fpPads.Where(p => _state.IsPadVisible(p)).ToList();
+                if (visiblePads.Count == 0) continue;
+
                 double minX = double.MaxValue, minY = double.MaxValue;
                 double maxX = double.MinValue, maxY = double.MinValue;
-                foreach (var p in fpPads)
+                foreach (var p in visiblePads)
                 {
                     double hw = Math.Max(p.W, 0.4) / 2.0;
                     double hh = Math.Max(p.H, 0.4) / 2.0;
@@ -566,7 +593,7 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
                 canvas.DrawRoundRect(rect, 0.35f, 0.35f, strokePaint);
 
                 // Highlight all component pads
-                foreach (var pad in fpPads)
+                foreach (var pad in visiblePads)
                 {
                     fillPaint.Color = compColor;
                     DrawPadShape(canvas, pad, fillPaint, 1.15f);
@@ -578,7 +605,7 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
                     }
 
                     // Pin 1 indicator
-                    if (pad.Num == "1")
+                    if (pad.Num == "1" && (isHighlighted || isCurrentActive))
                     {
                         using var pin1Paint = new SKPaint
                         {
@@ -603,64 +630,78 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
             }
         }
 
-        // 2. Component Badges in Screen Space
-        canvas.SetMatrix(screenMatrix);
-        foreach (var fp in board.Footprints)
+        // 2. Component Badges in Screen Space (rendered for currently selected footprints)
+        if (highlighted.Count > 0)
         {
-            if (!highlighted.Contains(fp.Ref)) continue;
-
-            bool isCurrentActive = string.Equals(fp.Ref, _state.ActiveFootprintRef, StringComparison.OrdinalIgnoreCase);
-            SKColor compColor = isCurrentActive ? BomActiveGlow : BomPrimaryGlow;
-
-            var (sx, sy) = WorldToScreen(fp.X, fp.Y);
-            if (sx < -100 || sx > _bounds.Width + 100 || sy < -100 || sy > _bounds.Height + 100)
-                continue;
-
-            string labelText = string.IsNullOrWhiteSpace(fp.Val)
-                ? fp.Ref
-                : $"{fp.Ref}  {fp.Val}";
-
-            float fontSize = 12f;
-            using var fontPaint = new SKPaint
+            canvas.SetMatrix(screenMatrix);
+            foreach (var fp in board.Footprints)
             {
-                IsAntialias = true,
-                Typeface = SansSemiBoldTypeface,
-                TextSize = fontSize
-            };
+                if (!highlighted.Contains(fp.Ref)) continue;
 
-            float textW = fontPaint.MeasureText(labelText);
-            float pillW = textW + 16f;
-            float pillH = 22f;
-            var pillRect = new SKRect((float)sx - pillW / 2f, (float)sy - pillH - 8f, (float)sx + pillW / 2f, (float)sy - 8f);
+                bool isPlaced = placed.Contains(fp.Ref);
+                bool isCurrentActive = string.Equals(fp.Ref, _state.ActiveFootprintRef, StringComparison.OrdinalIgnoreCase);
 
-            using var pillBgPaint = new SKPaint
-            {
-                IsAntialias = true,
-                Style = SKPaintStyle.Fill,
-                Color = new SKColor(0x12, 0x16, 0x22, 0xF0)
-            };
-            canvas.DrawRoundRect(pillRect, 6f, 6f, pillBgPaint);
+                SKColor compColor;
+                if (isPlaced)
+                {
+                    compColor = isCurrentActive ? BomPlacedActiveGlow : placedBaseColor;
+                }
+                else
+                {
+                    compColor = isCurrentActive ? BomActiveGlow : BomPrimaryGlow;
+                }
 
-            using var pillBorderPaint = new SKPaint
-            {
-                IsAntialias = true,
-                Style = SKPaintStyle.Stroke,
-                StrokeWidth = isCurrentActive ? 2.0f : 1.2f,
-                Color = compColor
-            };
-            canvas.DrawRoundRect(pillRect, 6f, 6f, pillBorderPaint);
+                var (sx, sy) = WorldToScreen(fp.X, fp.Y);
+                if (sx < -100 || sx > _bounds.Width + 100 || sy < -100 || sy > _bounds.Height + 100)
+                    continue;
 
-            DrawOutlinedText(
-                canvas,
-                labelText,
-                (float)sx,
-                (float)sy - 8f - pillH / 2f,
-                fontSize,
-                SansSemiBoldTypeface,
-                SKColors.White,
-                SKColors.Black,
-                2.5f
-            );
+                string baseText = string.IsNullOrWhiteSpace(fp.Val)
+                    ? fp.Ref
+                    : $"{fp.Ref}  {fp.Val}";
+                string labelText = isPlaced ? $"✓  {baseText}" : baseText;
+
+                float fontSize = 12f;
+                using var fontPaint = new SKPaint
+                {
+                    IsAntialias = true,
+                    Typeface = SansSemiBoldTypeface,
+                    TextSize = fontSize
+                };
+
+                float textW = fontPaint.MeasureText(labelText);
+                float pillW = textW + 16f;
+                float pillH = 22f;
+                var pillRect = new SKRect((float)sx - pillW / 2f, (float)sy - pillH - 8f, (float)sx + pillW / 2f, (float)sy - 8f);
+
+                using var pillBgPaint = new SKPaint
+                {
+                    IsAntialias = true,
+                    Style = SKPaintStyle.Fill,
+                    Color = new SKColor(0x12, 0x16, 0x22, 0xF0)
+                };
+                canvas.DrawRoundRect(pillRect, 6f, 6f, pillBgPaint);
+
+                using var pillBorderPaint = new SKPaint
+                {
+                    IsAntialias = true,
+                    Style = SKPaintStyle.Stroke,
+                    StrokeWidth = isCurrentActive ? 2.0f : 1.2f,
+                    Color = compColor
+                };
+                canvas.DrawRoundRect(pillRect, 6f, 6f, pillBorderPaint);
+
+                DrawOutlinedText(
+                    canvas,
+                    labelText,
+                    (float)sx,
+                    (float)sy - 8f - pillH / 2f,
+                    fontSize,
+                    SansSemiBoldTypeface,
+                    SKColors.White,
+                    SKColors.Black,
+                    2.5f
+                );
+            }
         }
 
         canvas.SetMatrix(worldMatrix);

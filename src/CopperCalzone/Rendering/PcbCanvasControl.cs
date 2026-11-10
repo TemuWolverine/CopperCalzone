@@ -16,6 +16,7 @@ public sealed class PcbCanvasControl : Control
 
     private readonly Stopwatch _flyStopwatch = new();
     private readonly HashSet<string> _highlightedFootprintRefs = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _placedFootprintRefs = new(StringComparer.OrdinalIgnoreCase);
     private readonly SpatialIndex _spatialIndex = new();
 
     private readonly HashSet<string> _visibleLayers = new(StringComparer.Ordinal)
@@ -286,6 +287,7 @@ public sealed class PcbCanvasControl : Control
         _hoveredPad = null;
         _selectedPad = null;
         _highlightedFootprintRefs.Clear();
+        _placedFootprintRefs.Clear();
         _activeFootprintRef = null;
         _spatialIndex.Build(board?.Pads);
 
@@ -352,6 +354,20 @@ public sealed class PcbCanvasControl : Control
         {
             InvalidateVisual();
         }
+    }
+
+    public void SetPlacedFootprints(IEnumerable<string>? refs)
+    {
+        _placedFootprintRefs.Clear();
+        if (refs is not null)
+        {
+            foreach (var r in refs)
+            {
+                if (!string.IsNullOrWhiteSpace(r))
+                    _placedFootprintRefs.Add(r);
+            }
+        }
+        InvalidateVisual();
     }
 
     public void SetLayerVisibility(string layerName, bool visible)
@@ -646,6 +662,7 @@ public sealed class PcbCanvasControl : Control
             HoveredPad = _hoveredPad,
             SelectedPad = _selectedPad,
             HighlightedFootprintRefs = new HashSet<string>(_highlightedFootprintRefs, StringComparer.OrdinalIgnoreCase),
+            PlacedFootprintRefs = new HashSet<string>(_placedFootprintRefs, StringComparer.OrdinalIgnoreCase),
             ActiveFootprintRef = _activeFootprintRef,
             VisibleLayers = new HashSet<string>(_visibleLayers, StringComparer.Ordinal),
             ZoneMode = _zoneMode,

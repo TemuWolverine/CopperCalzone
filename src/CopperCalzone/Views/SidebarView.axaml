@@ -587,7 +587,7 @@
                 BorderThickness="0,1,0,0"
                 Padding="14,10">
           <StackPanel Spacing="8">
-            <Grid ColumnDefinitions="*,Auto,Auto">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
               <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                 <materialIcons:MaterialIcon Kind="Chip"
                                              Width="15" Height="15"
@@ -609,7 +609,14 @@
                            VerticalAlignment="Center" />
               </StackPanel>
 
-              <Button Grid.Column="1"
+              <CheckBox Grid.Column="1"
+                        IsChecked="{Binding SelectedBomItem.IsPlaced}"
+                        Content="Placed"
+                        Margin="8,0"
+                        VerticalAlignment="Center"
+                        ToolTip.Tip="Mark this component as placed" />
+
+              <Button Grid.Column="2"
                       Command="{Binding PrevBomComponentCommand}"
                       Classes="m3-tonal"
                       Padding="10,4"
@@ -617,7 +624,7 @@
                       ToolTip.Tip="Previous Reference in Group">
                 <materialIcons:MaterialIcon Kind="ChevronLeft" Width="15" Height="15" />
               </Button>
-              <Button Grid.Column="2"
+              <Button Grid.Column="3"
                       Margin="6,0,0,0"
                       Command="{Binding NextBomComponentCommand}"
                       Classes="m3-filled"
