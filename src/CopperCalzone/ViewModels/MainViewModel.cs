@@ -3,6 +3,7 @@ using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CopperCalzone.Models;
+using CopperCalzone.Models.Schematic;
 using CopperCalzone.Parsing;
 using CopperCalzone.Rendering;
 using CopperCalzone.Services;
@@ -130,6 +131,8 @@ public sealed partial class MainViewModel : ObservableObject
 
     public bool IsHoverTooltipVisible => Inspector.IsHoverTooltipVisible;
 
+    public bool IsSchematicTabActive => ActiveTabMode == MainTabMode.Schematic;
+
     public bool IsSettingsTabActive => ActiveTabMode == MainTabMode.Settings;
 
     public bool IsViewerTabActive => ActiveTabMode == MainTabMode.Viewer;
@@ -151,6 +154,7 @@ public sealed partial class MainViewModel : ObservableObject
     public BomItemViewModel? SelectedBomItem { get => Bom.SelectedBomItem; set => Bom.SelectedBomItem = value; }
     public string SelectedComponentRef { get => Bom.SelectedComponentRef; set => Bom.SelectedComponentRef = value; }
     public NetItemViewModel? SelectedNetItem { get => Nets.SelectedNetItem; set => Nets.SelectedNetItem = value; }
+    public SchematicViewModel Schematic { get; } = new();
     public SettingsViewModel Settings { get; }
     public string ShowingBomLabel => Bom.ShowingBomLabel;
 
@@ -175,17 +179,67 @@ public sealed partial class MainViewModel : ObservableObject
         Settings = new SettingsViewModel(SettingsService.Instance, ApplySettings);
         Settings.RequestClose += SwitchToViewer;
 
-        GitHubBrowser.PcbContentReady += (content, fileName) =>
+        GitHubBrowser.PcbContentReady += (content, fileName, schematics) =>
         {
             try
             {
-                var board = BoardLoader.LoadFromContent(content, fileName);
-                LoadBoard(board);
-                SwitchToViewer();
+                if (fileName.EndsWith(".kicad_pcb", StringComparison.OrdinalIgnoreCase))
+                {
+                    var board = BoardLoader.LoadFromContent(content, fileName);
+                    LoadBoard(board);
+                    SwitchToViewer();
+                }
+                else if (fileName.EndsWith(".kicad_sch", StringComparison.OrdinalIgnoreCase))
+                {
+                    SwitchToSchematic();
+                }
+
+                if (schematics.Count > 0)
+                {
+                    var sheets = new List<SchematicSheetItem>();
+                    string matchBase = Path.GetFileNameWithoutExtension(fileName);
+
+                    foreach (var (schName, schContent) in schematics)
+                    {
+                        try
+                        {
+                            var parser = new KiCadSchParser(schContent);
+                            var sch = parser.Parse();
+                            sch.SourceFilePath = schName;
+
+                            bool isRoot = string.Equals(Path.GetFileNameWithoutExtension(schName), matchBase, StringComparison.OrdinalIgnoreCase)
+                                || (sheets.Count == 0 && schematics.Count == 1);
+
+                            string title = !string.IsNullOrWhiteSpace(sch.Title) ? sch.Title : Path.GetFileNameWithoutExtension(schName);
+                            string displayName = isRoot ? $"Main: {title} ({schName})" : $"{title} ({schName})";
+
+                            sheets.Add(new SchematicSheetItem
+                            {
+                                Name = displayName,
+                                FilePath = schName,
+                                Schematic = sch
+                            });
+                        }
+                        catch
+                        {
+                            // Ignore individual parse errors
+                        }
+                    }
+
+                    if (sheets.Count > 0)
+                    {
+                        var rootSheet = sheets.FirstOrDefault(s => s.Name.StartsWith("Main: ", StringComparison.Ordinal)) ?? sheets[0];
+                        sheets.Remove(rootSheet);
+                        sheets.Insert(0, rootSheet);
+
+                        Schematic.LoadSheets(sheets);
+                        Schematic.SetTheme(!IsDarkTheme);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                GitHubBrowser.ErrorMessage = $"Failed to parse board '{fileName}': {ex.Message}";
+                GitHubBrowser.ErrorMessage = $"Failed to parse file '{fileName}': {ex.Message}";
             }
         };
 
@@ -235,6 +289,7 @@ public sealed partial class MainViewModel : ObservableObject
             {
                 _canvas?.SetHighlightedFootprints(refs, activeRef, flyTo: false);
             }
+            Schematic.HighlightSymbols(refs, activeRef, flyTo: false);
         };
 
         Bom.PlacedFootprintsChanged += placedRefs =>
@@ -243,6 +298,20 @@ public sealed partial class MainViewModel : ObservableObject
             {
                 _canvas?.SetPlacedFootprints(placedRefs);
             }
+            Schematic.SetPlacedSymbols(placedRefs);
+        };
+
+        Schematic.SymbolSelectedForCrossProbing += fpRef =>
+        {
+            if (Bom.SelectedBomItem is null || !Bom.SelectedBomItem.References.Contains(fpRef, StringComparer.OrdinalIgnoreCase))
+            {
+                Bom.SelectByFootprintRef(fpRef);
+            }
+            else
+            {
+                Bom.SelectBomComponent(fpRef);
+            }
+            _canvas?.FlyToHighlightedFootprints();
         };
 
         Layers.LayerVisibilityChanged += (layerName, isVis) =>
@@ -333,6 +402,7 @@ public sealed partial class MainViewModel : ObservableObject
             IsDarkTheme = s.IsDarkTheme;
             ThemeChanged?.Invoke(IsDarkTheme);
             _canvas?.SetTheme(!IsDarkTheme);
+            Schematic.SetTheme(!IsDarkTheme);
         }
 
         if (IsImmersiveMode != s.IsImmersiveMode)
@@ -373,7 +443,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     [RelayCommand] public void FocusCurrentPin() => Inspector.FocusCurrentPin();
 
-    public void LoadBoard(PcbBoard board)
+    public void LoadBoard(PcbBoard board, string? pcbFilePath = null)
     {
         _currentBoard = board;
         HasBoard = true;
@@ -392,10 +462,38 @@ public sealed partial class MainViewModel : ObservableObject
             SyncLayersToCanvas();
         }
 
+        if (!string.IsNullOrWhiteSpace(pcbFilePath))
+        {
+            _ = LoadSchematicsForBoardAsync(pcbFilePath);
+        }
+
         // Apply layer preset and default sidebar tab from settings
         var settings = SettingsService.Instance.Current;
         Layers.ApplyLayerPreset(settings.DefaultLayerPreset);
         SwitchTab(settings.DefaultSidebarTab);
+    }
+
+    private async Task LoadSchematicsForBoardAsync(string pcbFilePath)
+    {
+        try
+        {
+            var sheets = await SchematicLoader.DiscoverAndLoadSheetsAsync(pcbFilePath);
+            await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                Schematic.LoadSheets(sheets);
+                Schematic.SetTheme(!IsDarkTheme);
+            });
+        }
+        catch
+        {
+            // Ignore background schematic discovery errors
+        }
+    }
+
+    [RelayCommand]
+    public void SwitchToSchematic()
+    {
+        ActiveTabMode = MainTabMode.Schematic;
     }
 
     [RelayCommand] public void MarkAllBomPlaced() => Bom.MarkAllBomPlaced();
@@ -536,6 +634,7 @@ public sealed partial class MainViewModel : ObservableObject
     {
         IsDarkTheme = !IsDarkTheme;
         _canvas?.SetTheme(!IsDarkTheme);
+        Schematic.SetTheme(!IsDarkTheme);
         ThemeChanged?.Invoke(IsDarkTheme);
     }
 
@@ -565,6 +664,7 @@ public sealed partial class MainViewModel : ObservableObject
     partial void OnActiveTabModeChanged(MainTabMode value)
     {
         OnPropertyChanged(nameof(IsViewerTabActive));
+        OnPropertyChanged(nameof(IsSchematicTabActive));
         OnPropertyChanged(nameof(IsGitHubTabActive));
         OnPropertyChanged(nameof(IsSettingsTabActive));
     }

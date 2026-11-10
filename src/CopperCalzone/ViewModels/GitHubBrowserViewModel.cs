@@ -53,7 +53,7 @@ public partial class GitHubBrowserViewModel : ObservableObject
 
     public event Func<string, string, Task>? OpenBrowserAndCopyRequested;
 
-    public event Action<string, string>? PcbContentReady;
+    public event Action<string, string, List<(string fileName, string content)>>? PcbContentReady;
 
     public event Action? RequestClose;
 
@@ -157,12 +157,16 @@ public partial class GitHubBrowserViewModel : ObservableObject
         try
         {
             string content = await _pcbService.DownloadPcbFileAsync(SelectedRepository, item);
-            PcbContentReady?.Invoke(content, item.Name);
+
+            StatusMessage = "Checking for schematic files...";
+            var schematics = await _pcbService.DownloadSchematicFilesForPcbAsync(SelectedRepository, item.Path);
+
+            PcbContentReady?.Invoke(content, item.Name, schematics);
             RequestClose?.Invoke();
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Failed to download PCB: {ex.Message}";
+            ErrorMessage = $"Failed to download file: {ex.Message}";
         }
         finally
         {

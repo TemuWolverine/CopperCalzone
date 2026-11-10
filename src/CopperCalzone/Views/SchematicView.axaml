@@ -1,0 +1,140 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:CopperCalzone.ViewModels"
+             xmlns:render="using:CopperCalzone.Rendering.Schematic"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
+             x:Class="CopperCalzone.Views.SchematicView"
+             x:DataType="vm:SchematicViewModel"
+             Background="{DynamicResource M3SurfaceBrush}">
+
+  <Grid>
+    <!-- 1. Schematic Hardware-Accelerated Skia Canvas -->
+    <render:SchCanvasControl x:Name="Canvas"
+                             IsVisible="{Binding HasSchematic}" />
+
+    <!-- 2. Empty State Overlay (When no schematic is loaded) -->
+    <Border IsVisible="{Binding !HasSchematic}"
+            Background="{DynamicResource M3SurfaceContainerLowBrush}"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            CornerRadius="16"
+            Padding="32,24"
+            BoxShadow="0 4 16 0 #33000000">
+      <StackPanel Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="360">
+        <Border Width="64" Height="64"
+                CornerRadius="32"
+                Background="{DynamicResource M3SurfaceContainerHighBrush}"
+                HorizontalAlignment="Center">
+          <materialIcons:MaterialIcon Kind="FileDocumentOutline"
+                                     Width="32" Height="32"
+                                     Foreground="{DynamicResource M3OutlineBrush}"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center" />
+        </Border>
+        <TextBlock Classes="m3-title-medium"
+                   Text="{Binding SchematicTitle}"
+                   TextAlignment="Center" />
+        <TextBlock Classes="m3-body-medium"
+                   Text="{Binding SchematicSubtitle}"
+                   TextAlignment="Center"
+                   Foreground="{DynamicResource M3OnSurfaceVariantBrush}"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+    </Border>
+
+    <!-- 3. Top-Left Floating Sheet Selector Card -->
+    <Border IsVisible="{Binding HasSchematic}"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Margin="16,14"
+            Classes="m3-pill-bar"
+            BoxShadow="0 4 14 0 #33000000"
+            Padding="10,6">
+      <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+        <materialIcons:MaterialIcon Kind="LayersOutline"
+                                   Width="18" Height="18"
+                                   Foreground="{DynamicResource M3PrimaryBrush}"
+                                   VerticalAlignment="Center" />
+        <TextBlock Classes="m3-label-medium"
+                   Text="Sheet:"
+                   VerticalAlignment="Center"
+                   FontWeight="SemiBold"
+                   Foreground="{DynamicResource M3OnSurfaceBrush}" />
+
+        <ComboBox ItemsSource="{Binding Sheets}"
+                  SelectedItem="{Binding SelectedSheet}"
+                  MinWidth="220"
+                  MaxWidth="360"
+                  Height="32"
+                  VerticalAlignment="Center"
+                  ToolTip.Tip="Select Schematic Sheet">
+          <ComboBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:SchematicSheetItem">
+              <TextBlock Text="{Binding Name}"
+                         TextTrimming="CharacterEllipsis"
+                         VerticalAlignment="Center" />
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+      </StackPanel>
+    </Border>
+
+    <!-- 4. Top-Right Floating Viewport Zoom Controls -->
+    <Border IsVisible="{Binding HasSchematic}"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Margin="16,14"
+            Classes="m3-pill-bar"
+            BoxShadow="0 4 14 0 #33000000">
+      <StackPanel Orientation="Horizontal" Spacing="2">
+        <Button Classes="tool-btn"
+                Command="{Binding ZoomInCommand}"
+                ToolTip.Tip="Zoom In (+)">
+          <materialIcons:MaterialIcon Kind="MagnifyPlusOutline" Width="18" Height="18" />
+        </Button>
+        <Button Classes="tool-btn"
+                Command="{Binding ZoomOutCommand}"
+                ToolTip.Tip="Zoom Out (-)">
+          <materialIcons:MaterialIcon Kind="MagnifyMinusOutline" Width="18" Height="18" />
+        </Button>
+        <Button Classes="tool-btn"
+                Command="{Binding ZoomFitCommand}"
+                ToolTip.Tip="Fit to Screen (Home)">
+          <materialIcons:MaterialIcon Kind="FitToScreenOutline" Width="18" Height="18" />
+        </Button>
+      </StackPanel>
+    </Border>
+
+    <!-- 5. Bottom-Right HUD Status Pill -->
+    <Border IsVisible="{Binding HasSchematic}"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Margin="16,16"
+            Background="{DynamicResource M3SurfaceContainerHighBrush}"
+            BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+            BorderThickness="1"
+            CornerRadius="16"
+            Padding="12,6"
+            BoxShadow="0 2 8 0 #22000000">
+      <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <TextBlock Classes="m3-mono m3-label-small"
+                   Text="{Binding HudCoordinates}"
+                   Foreground="{DynamicResource M3OnSurfaceVariantBrush}"
+                   VerticalAlignment="Center" />
+        <TextBlock Text="•"
+                   Foreground="{DynamicResource M3OutlineBrush}"
+                   VerticalAlignment="Center" />
+        <TextBlock Classes="m3-mono m3-label-small"
+                   Text="{Binding HudZoom}"
+                   Foreground="{DynamicResource M3PrimaryBrush}"
+                   FontWeight="SemiBold"
+                   VerticalAlignment="Center" />
+      </StackPanel>
+    </Border>
+
+  </Grid>
+</UserControl>
+

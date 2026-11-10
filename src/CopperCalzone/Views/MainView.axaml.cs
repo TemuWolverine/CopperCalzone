@@ -232,9 +232,9 @@ public partial class MainView : UserControl
             AllowMultiple = false,
             FileTypeFilter =
             [
-                new FilePickerFileType("KiCad PCB & CopperCalzone Files")
+                new FilePickerFileType("KiCad PCB, Schematic & CopperCalzone Files")
                 {
-                    Patterns = ["*.kicad_pcb", "*.json", "*.html", "*.htm"],
+                    Patterns = ["*.kicad_pcb", "*.kicad_sch", "*.json", "*.html", "*.htm"],
                     MimeTypes = ["application/octet-stream", "application/json", "text/html", "text/plain", "*/*"]
                 },
                 FilePickerFileTypes.All
@@ -246,9 +246,29 @@ public partial class MainView : UserControl
             var file = files[0];
             try
             {
+                string? localPath = file.TryGetLocalPath();
+                if (string.IsNullOrEmpty(localPath) && file.Path.IsAbsoluteUri && file.Path.IsFile)
+                {
+                    localPath = file.Path.LocalPath;
+                }
+
+                if (file.Name.EndsWith(".kicad_sch", StringComparison.OrdinalIgnoreCase))
+                {
+                    string targetPath = localPath ?? file.Name;
+                    var sheets = await SchematicLoader.DiscoverAndLoadSheetsAsync(targetPath);
+                    if (sheets.Count > 0)
+                    {
+                        vm.Schematic.LoadSheets(sheets);
+                        var active = sheets.FirstOrDefault(s => string.Equals(s.FilePath, targetPath, StringComparison.OrdinalIgnoreCase)) ?? sheets[0];
+                        vm.Schematic.SelectedSheet = active;
+                        vm.SwitchToSchematic();
+                    }
+                    return;
+                }
+
                 await using var stream = await file.OpenReadAsync();
                 var board = await BoardLoader.LoadFromStreamAsync(stream, file.Name);
-                vm.LoadBoard(board);
+                vm.LoadBoard(board, localPath);
             }
             catch (Exception ex)
             {
@@ -266,9 +286,29 @@ public partial class MainView : UserControl
         {
             try
             {
+                string? localPath = storageFile.TryGetLocalPath();
+                if (string.IsNullOrEmpty(localPath) && storageFile.Path.IsAbsoluteUri && storageFile.Path.IsFile)
+                {
+                    localPath = storageFile.Path.LocalPath;
+                }
+
+                if (storageFile.Name.EndsWith(".kicad_sch", StringComparison.OrdinalIgnoreCase))
+                {
+                    string targetPath = localPath ?? storageFile.Name;
+                    var sheets = await SchematicLoader.DiscoverAndLoadSheetsAsync(targetPath);
+                    if (sheets.Count > 0)
+                    {
+                        vm.Schematic.LoadSheets(sheets);
+                        var active = sheets.FirstOrDefault(s => string.Equals(s.FilePath, targetPath, StringComparison.OrdinalIgnoreCase)) ?? sheets[0];
+                        vm.Schematic.SelectedSheet = active;
+                        vm.SwitchToSchematic();
+                    }
+                    return;
+                }
+
                 await using var stream = await storageFile.OpenReadAsync();
                 var board = await BoardLoader.LoadFromStreamAsync(stream, storageFile.Name);
-                vm.LoadBoard(board);
+                vm.LoadBoard(board, localPath);
             }
             catch (Exception ex)
             {

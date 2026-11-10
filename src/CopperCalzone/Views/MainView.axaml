@@ -54,12 +54,17 @@
         </Border>
       </Grid>
 
-      <!-- TAB 2: Full-Screen GitHub PCB Browser -->
+      <!-- TAB 2: Schematic Viewer -->
+      <views:SchematicView
+                           DataContext="{Binding Schematic}"
+                           IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsSchematicTabActive}" />
+
+      <!-- TAB 3: Full-Screen GitHub PCB Browser -->
       <views:GitHubBrowserView
                                DataContext="{Binding GitHubBrowser}"
                                IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsGitHubTabActive}" />
 
-      <!-- TAB 3: Preferences & Settings Panel -->
+      <!-- TAB 4: Preferences & Settings Panel -->
       <views:SettingsView
                           DataContext="{Binding Settings}"
                           IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsSettingsTabActive}" />

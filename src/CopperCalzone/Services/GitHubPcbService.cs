@@ -62,7 +62,7 @@ public class GitHubPcbService
                     Sha = item.Sha
                 });
             }
-            else if (item.Type == ContentType.File && item.Name.EndsWith(".kicad_pcb", StringComparison.OrdinalIgnoreCase))
+            else if (item.Type == ContentType.File && (item.Name.EndsWith(".kicad_pcb", StringComparison.OrdinalIgnoreCase) || item.Name.EndsWith(".kicad_sch", StringComparison.OrdinalIgnoreCase)))
             {
                 results.Add(new GitHubItemModel
                 {
@@ -81,16 +81,16 @@ public class GitHubPcbService
             .ToList();
     }
 
-    public async Task<string> DownloadPcbFileAsync(Repository repository, GitHubItemModel item)
+    public async Task<string> DownloadFileAsync(Repository repository, string path, string? sha = null, long? size = null)
     {
         var client = _authService.Client;
 
         // If file is reasonably sized (e.g., <= 1MB), use GetRawContent
-        if (!item.Size.HasValue || item.Size.Value <= 1024 * 1024)
+        if (!size.HasValue || size.Value <= 1024 * 1024)
         {
             try
             {
-                byte[] raw = await client.Repository.Content.GetRawContent(repository.Owner.Login, repository.Name, item.Path);
+                byte[] raw = await client.Repository.Content.GetRawContent(repository.Owner.Login, repository.Name, path);
                 return Encoding.UTF8.GetString(raw);
             }
             catch
@@ -100,9 +100,9 @@ public class GitHubPcbService
         }
 
         // For larger files or fallback, use the Git Blob API
-        if (!string.IsNullOrEmpty(item.Sha))
+        if (!string.IsNullOrEmpty(sha))
         {
-            var blob = await client.Git.Blob.Get(repository.Id, item.Sha);
+            var blob = await client.Git.Blob.Get(repository.Id, sha);
             if (blob.Encoding == EncodingType.Base64)
             {
                 byte[] bytes = Convert.FromBase64String(blob.Content);
@@ -111,6 +111,53 @@ public class GitHubPcbService
             return blob.Content;
         }
 
-        throw new InvalidOperationException($"Unable to download PCB file '{item.Path}'.");
+        throw new InvalidOperationException($"Unable to download file '{path}'.");
+    }
+
+    public Task<string> DownloadPcbFileAsync(Repository repository, GitHubItemModel item)
+    {
+        return DownloadFileAsync(repository, item.Path, item.Sha, item.Size);
+    }
+
+    public async Task<List<(string fileName, string content)>> DownloadSchematicFilesForPcbAsync(Repository repository, string pcbPath)
+    {
+        var result = new List<(string fileName, string content)>();
+        try
+        {
+            string folder = Path.GetDirectoryName(pcbPath)?.Replace('\\', '/') ?? "";
+            var client = _authService.Client;
+            IReadOnlyList<RepositoryContent> contents;
+            if (string.IsNullOrWhiteSpace(folder))
+            {
+                contents = await client.Repository.Content.GetAllContents(repository.Id);
+            }
+            else
+            {
+                contents = await client.Repository.Content.GetAllContents(repository.Id, folder);
+            }
+
+            var schItems = contents
+                .Where(c => c.Type == ContentType.File && c.Name.EndsWith(".kicad_sch", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var sch in schItems)
+            {
+                try
+                {
+                    string schContent = await DownloadFileAsync(repository, sch.Path, sch.Sha, sch.Size);
+                    result.Add((sch.Name, schContent));
+                }
+                catch
+                {
+                    // Ignore individual schematic download failure
+                }
+            }
+        }
+        catch
+        {
+            // Ignore directory enumeration failures
+        }
+
+        return result;
     }
 }
