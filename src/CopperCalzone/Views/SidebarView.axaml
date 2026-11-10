@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -21,7 +21,7 @@
       <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="12,12,12,6">
         <Border Grid.Column="0"
                 Background="{DynamicResource M3SurfaceContainerHighestBrush}"
-                CornerRadius="22"
+                CornerRadius="16"
                 Padding="4">
           <Grid ColumnDefinitions="*,*,*">
             <Button Grid.Column="0"
@@ -30,11 +30,11 @@
                     Command="{Binding SwitchTabCommand}"
                     CommandParameter="nets"
                     Padding="10,8">
-              <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+              <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                 <materialIcons:MaterialIcon Kind="LanConnect" Width="15" Height="15" VerticalAlignment="Center" />
-                <TextBlock Text="Nets (" VerticalAlignment="Center" FontSize="12.5" />
-                <TextBlock Text="{Binding Nets.TotalNetCount}" VerticalAlignment="Center" FontSize="12.5" />
-                <TextBlock Text=")" VerticalAlignment="Center" FontSize="12.5" />
+                <TextBlock Text="Nets (" VerticalAlignment="Center" Classes="m3-label-medium" />
+                <TextBlock Text="{Binding Nets.TotalNetCount}" VerticalAlignment="Center" Classes="m3-label-medium" />
+                <TextBlock Text=")" VerticalAlignment="Center" Classes="m3-label-medium" />
               </StackPanel>
             </Button>
 
@@ -44,11 +44,11 @@
                     Command="{Binding SwitchTabCommand}"
                     CommandParameter="bom"
                     Padding="10,8">
-              <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+              <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                 <materialIcons:MaterialIcon Kind="FormatListChecks" Width="15" Height="15" VerticalAlignment="Center" />
-                <TextBlock Text="BOM (" VerticalAlignment="Center" FontSize="12.5" />
-                <TextBlock Text="{Binding Bom.TotalBomCount}" VerticalAlignment="Center" FontSize="12.5" />
-                <TextBlock Text=")" VerticalAlignment="Center" FontSize="12.5" />
+                <TextBlock Text="BOM (" VerticalAlignment="Center" Classes="m3-label-medium" />
+                <TextBlock Text="{Binding Bom.TotalBomCount}" VerticalAlignment="Center" Classes="m3-label-medium" />
+                <TextBlock Text=")" VerticalAlignment="Center" Classes="m3-label-medium" />
               </StackPanel>
             </Button>
 
@@ -58,9 +58,9 @@
                     Command="{Binding SwitchTabCommand}"
                     CommandParameter="layers"
                     Padding="10,8">
-              <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+              <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                 <materialIcons:MaterialIcon Kind="LayersOutline" Width="15" Height="15" VerticalAlignment="Center" />
-                <TextBlock Text="Layers" VerticalAlignment="Center" FontSize="12.5" />
+                <TextBlock Text="Layers" VerticalAlignment="Center" Classes="m3-label-medium" />
               </StackPanel>
             </Button>
           </Grid>

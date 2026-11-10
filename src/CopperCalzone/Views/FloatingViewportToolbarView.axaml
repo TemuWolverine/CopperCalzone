@@ -1,0 +1,100 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:CopperCalzone.ViewModels"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="70"
+             x:Class="CopperCalzone.Views.FloatingViewportToolbarView"
+             x:DataType="vm:MainViewModel">
+
+  <!-- M3 Expressive Floating Viewport Pill Toolbar -->
+  <Border Classes="m3-floating-toolbar"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Bottom"
+          Margin="16,0,16,20">
+    <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+
+      <!-- SLOT 1: Zoom & View Navigation -->
+      <Button Classes="tool-btn"
+              Command="{Binding ZoomInCommand}"
+              ToolTip.Tip="Zoom In (+)">
+        <materialIcons:MaterialIcon Kind="MagnifyPlusOutline" Width="18" Height="18" />
+      </Button>
+
+      <Button Classes="tool-btn"
+              Command="{Binding ZoomOutCommand}"
+              ToolTip.Tip="Zoom Out (-)">
+        <materialIcons:MaterialIcon Kind="MagnifyMinusOutline" Width="18" Height="18" />
+      </Button>
+
+      <Button Classes="tool-btn"
+              Command="{Binding ZoomFitCommand}"
+              ToolTip.Tip="Fit Board to View (Home)"
+              Padding="12,6">
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <materialIcons:MaterialIcon Kind="FitToScreenOutline" Width="16" Height="16" VerticalAlignment="Center" />
+          <TextBlock Text="Fit" VerticalAlignment="Center" Classes="m3-label-medium" />
+        </StackPanel>
+      </Button>
+
+      <!-- Divider 1 -->
+      <Border Width="1" Height="24"
+              Background="{DynamicResource M3OutlineVariantBrush}"
+              Opacity="0.5"
+              Margin="4,0"
+              VerticalAlignment="Center" />
+
+      <!-- SLOT 2: Orientation & Board Transforms -->
+      <Button Classes="tool-btn"
+              Command="{Binding RotateCounterClockwiseCommand}"
+              ToolTip.Tip="Rotate 90° CCW (Shift+R)">
+        <materialIcons:MaterialIcon Kind="RotateLeft" Width="18" Height="18" />
+      </Button>
+
+      <Button Classes="tool-btn"
+              Command="{Binding RotateClockwiseCommand}"
+              ToolTip.Tip="Rotate 90° CW (R)">
+        <materialIcons:MaterialIcon Kind="RotateRight" Width="18" Height="18" />
+      </Button>
+
+      <Button Classes="tool-btn"
+              Classes.active="{Binding IsFlipped}"
+              Command="{Binding ToggleFlipBoardCommand}"
+              ToolTip.Tip="Flip Board View / Mirror X (F)"
+              Padding="12,6">
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <materialIcons:MaterialIcon Kind="FlipHorizontal" Width="16" Height="16" VerticalAlignment="Center" />
+          <TextBlock Text="Flip" VerticalAlignment="Center" Classes="m3-label-medium" />
+        </StackPanel>
+      </Button>
+
+      <!-- Divider 2 -->
+      <Border Width="1" Height="24"
+              Background="{DynamicResource M3OutlineVariantBrush}"
+              Opacity="0.5"
+              Margin="4,0"
+              VerticalAlignment="Center" />
+
+      <!-- SLOT 3: Inspection & View Overlays -->
+      <Button Classes="tool-btn"
+              Classes.active="{Binding ShowPadNetNames}"
+              Command="{Binding TogglePadLabelsCommand}"
+              ToolTip.Tip="Toggle Net Names on Pads (N)"
+              Padding="12,6">
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <materialIcons:MaterialIcon Kind="TagTextOutline" Width="16" Height="16" VerticalAlignment="Center" />
+          <TextBlock Text="Labels" VerticalAlignment="Center" Classes="m3-label-medium" />
+        </StackPanel>
+      </Button>
+
+      <Button Classes="tool-btn"
+              Classes.active="{Binding IsImmersiveMode}"
+              Command="{Binding ToggleImmersiveModeCommand}"
+              ToolTip.Tip="Toggle Immersive / Fullscreen Mode">
+        <materialIcons:MaterialIcon Kind="Fullscreen" Width="18" Height="18" />
+      </Button>
+
+    </StackPanel>
+  </Border>
+</UserControl>

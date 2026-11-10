@@ -48,6 +48,12 @@ public sealed partial class MainViewModel : ObservableObject
     private bool _isLeftSidebarOpen = !OperatingSystem.IsAndroid();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NavRailWidth))]
+    private bool _isNavRailExpanded;
+
+    public double NavRailWidth => IsNavRailExpanded ? 220 : 80;
+
+    [ObservableProperty]
     private bool _isNetsTabActive = true;
 
     private double _lastBomSidebarWidth = 520;
@@ -621,6 +627,12 @@ public sealed partial class MainViewModel : ObservableObject
     public void ToggleLeftSidebar()
     {
         IsLeftSidebarOpen = !IsLeftSidebarOpen;
+    }
+
+    [RelayCommand]
+    public void ToggleNavRail()
+    {
+        IsNavRailExpanded = !IsNavRailExpanded;
     }
 
     [RelayCommand]

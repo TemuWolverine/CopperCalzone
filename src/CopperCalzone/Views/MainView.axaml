@@ -11,64 +11,75 @@
              Background="{DynamicResource M3SurfaceBrush}"
              DragDrop.AllowDrop="True">
 
-  <Grid RowDefinitions="Auto,*">
-    <!-- M3 Expressive Top App Bar & Floating Pill Toolbar -->
-    <views:TopToolbarView Grid.Row="0" x:Name="TopToolbar" />
+  <Grid ColumnDefinitions="Auto,*">
+    <!-- M3 Expressive Navigation Rail (Leading Edge: Desktop & Tablet) -->
+    <views:NavigationRailView Grid.Column="0"
+                              x:Name="NavigationRail"
+                              IsVisible="{Binding !IsCompact, ElementName=TopToolbar}" />
 
-    <!-- Main Content Container with Safe Insets Margin -->
-    <Grid Grid.Row="1" x:Name="MainContentContainer">
-      <!-- TAB 1: PCB Viewer (M3 Side Sheet + Expressive Rounded Viewport) -->
-      <Grid ColumnDefinitions="Auto,Auto,*"
-            x:Name="ContentGrid"
-            IsVisible="{Binding IsViewerTabActive}">
+    <!-- Main Content Work Area -->
+    <Grid Grid.Column="1" RowDefinitions="Auto,*">
+      <!-- M3 Expressive Top App Bar -->
+      <views:TopToolbarView Grid.Row="0" x:Name="TopToolbar" />
 
-        <!-- Left M3 Side Sheet / Navigation Drawer (Nets & Layers & BOM) -->
-        <views:SidebarView Grid.Column="0" x:Name="Sidebar" />
+      <!-- Main Content Container with Safe Insets Margin -->
+      <Grid Grid.Row="1" x:Name="MainContentContainer">
+        <!-- TAB 1: PCB Viewer (M3 Side Sheet + Expressive Rounded Viewport) -->
+        <Grid ColumnDefinitions="Auto,Auto,*"
+              x:Name="ContentGrid"
+              IsVisible="{Binding IsViewerTabActive}">
 
-        <!-- Side panel resize splitter thumb -->
-        <Thumb Grid.Column="1"
-               x:Name="SidebarResizer"
-               Classes="sidebar-resizer"
-               Width="8"
-               Margin="-3,0,-3,0"
-               Cursor="SizeWestEast"
-               DragDelta="OnSidebarResizerDragDelta"
-               DoubleTapped="OnSidebarResizerDoubleTapped"
-               IsVisible="{Binding IsLeftSidebarOpen}"
-               ToolTip.Tip="Drag to resize side panel (Double-click to reset)" />
+          <!-- Left M3 Side Sheet / Navigation Drawer (Nets & Layers & BOM) -->
+          <views:SidebarView Grid.Column="0" x:Name="Sidebar" />
 
-        <!-- Center Expressive Viewport Container -->
-        <Border Grid.Column="2"
-                Classes="m3-surface-sheet"
-                Margin="4,0,8,8">
-          <Grid ClipToBounds="True">
-            <!-- Hardware-Accelerated Skia PCB Canvas -->
-            <render:PcbCanvasControl x:Name="PcbCanvas" />
+          <!-- Side panel resize splitter thumb -->
+          <Thumb Grid.Column="1"
+                 x:Name="SidebarResizer"
+                 Classes="sidebar-resizer"
+                 Width="8"
+                 Margin="-3,0,-3,0"
+                 Cursor="SizeWestEast"
+                 DragDelta="OnSidebarResizerDragDelta"
+                 DoubleTapped="OnSidebarResizerDoubleTapped"
+                 IsVisible="{Binding IsLeftSidebarOpen}"
+                 ToolTip.Tip="Drag to resize side panel (Double-click to reset)" />
 
-            <!-- Floating M3 Elevated Card Pin Inspector & Pin-to-Pin Navigation Bar -->
-            <views:PinInspectorView />
+          <!-- Center Expressive Viewport Container -->
+          <Border Grid.Column="2"
+                  Classes="m3-surface-sheet"
+                  Margin="4,0,8,8">
+            <Grid ClipToBounds="True">
+              <!-- Hardware-Accelerated Skia PCB Canvas -->
+              <render:PcbCanvasControl x:Name="PcbCanvas" />
 
-            <!-- M3 Hover Tooltip & Bottom-Right HUD Tonal Status Pill -->
-            <views:ViewportOverlayView x:Name="ViewportOverlay" />
-          </Grid>
-        </Border>
+              <!-- Floating M3 Elevated Card Pin Inspector & Pin-to-Pin Navigation Bar -->
+              <views:PinInspectorView />
+
+              <!-- M3 Expressive Floating Viewport Toolbar (Bottom-Center) -->
+              <views:FloatingViewportToolbarView
+                  IsVisible="{Binding !IsCompact, ElementName=TopToolbar}" />
+
+              <!-- M3 Hover Tooltip & Bottom-Right HUD Tonal Status Pill -->
+              <views:ViewportOverlayView x:Name="ViewportOverlay" />
+            </Grid>
+          </Border>
+        </Grid>
+
+        <!-- TAB 2: Schematic Viewer -->
+        <views:SchematicView
+                             DataContext="{Binding Schematic}"
+                             IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsSchematicTabActive}" />
+
+        <!-- TAB 3: Full-Screen GitHub PCB Browser -->
+        <views:GitHubBrowserView
+                                 DataContext="{Binding GitHubBrowser}"
+                                 IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsGitHubTabActive}" />
+
+        <!-- TAB 4: Preferences & Settings Panel -->
+        <views:SettingsView
+                            DataContext="{Binding Settings}"
+                            IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsSettingsTabActive}" />
       </Grid>
-
-      <!-- TAB 2: Schematic Viewer -->
-      <views:SchematicView
-                           DataContext="{Binding Schematic}"
-                           IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsSchematicTabActive}" />
-
-      <!-- TAB 3: Full-Screen GitHub PCB Browser -->
-      <views:GitHubBrowserView
-                               DataContext="{Binding GitHubBrowser}"
-                               IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsGitHubTabActive}" />
-
-      <!-- TAB 4: Preferences & Settings Panel -->
-      <views:SettingsView
-                          DataContext="{Binding Settings}"
-                          IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsSettingsTabActive}" />
     </Grid>
-
   </Grid>
 </UserControl>

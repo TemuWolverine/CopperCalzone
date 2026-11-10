@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -52,9 +52,9 @@
         </Button>
       </Grid>
 
-      <!-- Current Pin Inspector Sub-Card -->
+      <!-- Current Pin Inspector Sub-Card (Optical Radius: outer 20 - padding 12 = 8dp) -->
       <Border Background="{DynamicResource M3SurfaceContainerHighestBrush}"
-              CornerRadius="16"
+              CornerRadius="8"
               Padding="12,10">
         <StackPanel Spacing="4">
           <Grid ColumnDefinitions="*,Auto">
@@ -63,14 +63,13 @@
                                           Width="15" Height="15"
                                           Foreground="{DynamicResource M3TertiaryBrush}" />
               <TextBlock Text="{Binding InspectorPinTitle}"
-                         FontSize="13.5"
-                         FontWeight="Bold"
+                         Classes="m3-label-large"
                          Foreground="{DynamicResource M3TertiaryBrush}"
                          VerticalAlignment="Center" />
             </StackPanel>
             <Border Grid.Column="1"
                     Classes="m3-badge-tertiary"
-                    Padding="9,3">
+                    Padding="8,3">
               <TextBlock Classes="m3-label-small"
                          Text="{Binding InspectorPinBadge}"
                          Foreground="{DynamicResource M3OnTertiaryContainerBrush}" />
@@ -89,39 +88,43 @@
         </StackPanel>
       </Border>
 
-      <!-- M3 Expressive Pin-to-Pin Navigation Buttons -->
-      <Grid ColumnDefinitions="*,Auto,*" Margin="0,2,0,0">
+      <!-- M3 Expressive Connected Segmented Navigation Buttons -->
+      <Grid ColumnDefinitions="*,Auto,*" Margin="0,4,0,0">
         <Button Grid.Column="0"
                 Command="{Binding PrevPinCommand}"
                 ToolTip.Tip="Fly to Previous Pin on Net ([ or Left Arrow)"
-                Classes="m3-tonal"
+                Classes="segmented-left"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Center">
           <StackPanel Orientation="Horizontal" Spacing="6">
             <materialIcons:MaterialIcon Kind="ChevronLeft" Width="16" Height="16" />
-            <TextBlock Text="Prev Pin" VerticalAlignment="Center" />
+            <TextBlock Text="Prev Pin" VerticalAlignment="Center" Classes="m3-label-medium" />
           </StackPanel>
         </Button>
 
         <Button Grid.Column="1"
-                Margin="8,0"
                 Command="{Binding FocusCurrentPinCommand}"
                 ToolTip.Tip="Center camera on current pin"
-                Classes="m3-tonal">
+                Classes="tool-btn"
+                Background="{DynamicResource M3SurfaceContainerHighBrush}"
+                BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+                BorderThickness="0.5,1,0.5,1"
+                CornerRadius="0"
+                Padding="12,9">
           <StackPanel Orientation="Horizontal" Spacing="5">
             <materialIcons:MaterialIcon Kind="CrosshairsGps" Width="15" Height="15" />
-            <TextBlock Text="Center" VerticalAlignment="Center" />
+            <TextBlock Text="Center" VerticalAlignment="Center" Classes="m3-label-medium" />
           </StackPanel>
         </Button>
 
         <Button Grid.Column="2"
                 Command="{Binding NextPinCommand}"
                 ToolTip.Tip="Fly to Next Pin on Net (] or Right Arrow)"
-                Classes="m3-filled"
+                Classes="segmented-right"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Center">
           <StackPanel Orientation="Horizontal" Spacing="6">
-            <TextBlock Text="Next Pin" VerticalAlignment="Center" />
+            <TextBlock Text="Next Pin" VerticalAlignment="Center" Classes="m3-label-medium" />
             <materialIcons:MaterialIcon Kind="ChevronRight" Width="16" Height="16" />
           </StackPanel>
         </Button>
