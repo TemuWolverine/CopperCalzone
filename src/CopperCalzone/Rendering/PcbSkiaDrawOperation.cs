@@ -42,7 +42,6 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
     private static readonly SKColor BomPrimaryGlow = new(0xFF, 0xB1, 0x42); // Vibrant Golden Amber
     private static readonly SKColor BomActiveGlow = new(0x00, 0xE5, 0xFF);  // Neon Cyan for active component
     private static readonly SKColor BomPlacedGlow = new(0x22, 0xC5, 0x5E);  // Vibrant Emerald Green for placed components
-    private static readonly SKColor BomPlacedGlowLight = new(0x16, 0xA3, 0x4A); // Rich Green for light theme
     private static readonly SKColor BomPlacedActiveGlow = new(0x4A, 0xDE, 0x80); // Electric Mint Green for active placed component
     private static readonly SKColor Pin1Color = new(0xFF, 0x38, 0x38);      // Vibrant Coral Red for Pin 1 indicator
     private static readonly SKColor ViaCopperColor = new(0xB8, 0x86, 0x0B);
@@ -78,9 +77,7 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
         canvas.Save();
         canvas.ClipRect(new SKRect(0, 0, (float)_bounds.Width, (float)_bounds.Height));
 
-        SKColor bgColor = _state.IsLightTheme
-            ? new SKColor(0xF7, 0xF2, 0xFA)
-            : new SKColor(0x0E, 0x0C, 0x12);
+        SKColor bgColor = new SKColor(0x0E, 0x0C, 0x12);
         canvas.DrawColor(bgColor);
 
         var board = _state.Board;
@@ -125,11 +122,6 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
 
     private SKColor GetLayerColor(string layerName, byte alpha = 255)
     {
-        if (_state.IsLightTheme && layerName == "F.SilkS")
-            return new SKColor(0x1E, 0x29, 0x3B, alpha);
-        if (_state.IsLightTheme && layerName == "B.SilkS")
-            return new SKColor(0x03, 0x69, 0xA1, alpha);
-
         if (LayerColors.TryGetValue(layerName, out var c))
             return c.WithAlpha(alpha);
 
@@ -528,7 +520,7 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
             .GroupBy(p => p.FpRef, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
 
-        SKColor placedBaseColor = _state.IsLightTheme ? BomPlacedGlowLight : BomPlacedGlow;
+        SKColor placedBaseColor = BomPlacedGlow;
 
         // 1. Draw component boundary bounding reticles and silkscreen outlines in World Space
         // Render placed-only footprints first, then selected footprints on top

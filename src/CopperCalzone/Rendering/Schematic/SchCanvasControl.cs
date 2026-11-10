@@ -18,10 +18,13 @@ public sealed class SchCanvasControl : Control
     private KiCadSchematic? _schematic;
     private double _scale = 6.0;
     private double _panX, _panY;
-    private bool _isLightTheme;
 
-    private Point? _lastPanPoint;
-    private bool _isPanning;
+    // Multi-touch & pointer tracking
+    private readonly Dictionary<int, Point> _activePointers = [];
+    private double _lastPinchDistance;
+    private Point _lastPinchMidpoint;
+    private Point _pointerDownPos;
+    private bool _movedBeyondTapThreshold;
 
     // Smooth FlyTo animation
     private double _flyStartPanX, _flyEndPanX;
@@ -56,12 +59,6 @@ public sealed class SchCanvasControl : Control
         _activeSymbolRef = null;
 
         FitSchematicToView();
-        InvalidateVisual();
-    }
-
-    public void SetTheme(bool isLightTheme)
-    {
-        _isLightTheme = isLightTheme;
         InvalidateVisual();
     }
 
@@ -211,6 +208,29 @@ public sealed class SchCanvasControl : Control
         _flyStopwatch.Stop();
     }
 
+    public (double X, double Y) ScreenToWorld(double sx, double sy)
+    {
+        return ((sx - _panX) / _scale, (sy - _panY) / _scale);
+    }
+
+    private static double GetDistance(Point a, Point b)
+    {
+        double dx = a.X - b.X;
+        double dy = a.Y - b.Y;
+        return Math.Sqrt(dx * dx + dy * dy);
+    }
+
+    private static Point GetMidpoint(Point a, Point b)
+    {
+        return new Point((a.X + b.X) / 2.0, (a.Y + b.Y) / 2.0);
+    }
+
+    protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
+    {
+        base.OnPointerCaptureLost(e);
+        _activePointers.Remove(e.Pointer.Id);
+    }
+
     protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
     {
         base.OnPointerWheelChanged(e);
@@ -223,32 +243,87 @@ public sealed class SchCanvasControl : Control
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
         base.OnPointerPressed(e);
-        var pt = e.GetCurrentPoint(this);
-        if (pt.Properties.IsLeftButtonPressed || pt.Properties.IsMiddleButtonPressed || pt.Properties.IsRightButtonPressed)
+        StopAnimation();
+        Focus();
+
+        var pt = e.GetPosition(this);
+        _activePointers[e.Pointer.Id] = pt;
+
+        if (_activePointers.Count == 1)
         {
-            _lastPanPoint = pt.Position;
-            _isPanning = true;
-            e.Pointer.Capture(this);
-            e.Handled = true;
+            _pointerDownPos = pt;
+            _movedBeyondTapThreshold = false;
         }
+        else if (_activePointers.Count == 2)
+        {
+            _movedBeyondTapThreshold = true;
+            var pts = _activePointers.Values.ToArray();
+            _lastPinchDistance = GetDistance(pts[0], pts[1]);
+            _lastPinchMidpoint = GetMidpoint(pts[0], pts[1]);
+        }
+
+        e.Pointer.Capture(this);
+        e.Handled = true;
     }
 
     protected override void OnPointerMoved(PointerEventArgs e)
     {
         base.OnPointerMoved(e);
-        var pos = e.GetPosition(this);
+        var pt = e.GetPosition(this);
 
         // Update coordinate HUD
-        double wx = (pos.X - _panX) / _scale;
-        double wy = (pos.Y - _panY) / _scale;
+        var (wx, wy) = ScreenToWorld(pt.X, pt.Y);
         CursorCoordinatesChanged?.Invoke($"X: {wx:F2} mm  Y: {wy:F2} mm");
 
-        if (_isPanning && _lastPanPoint.HasValue)
+        if (_activePointers.ContainsKey(e.Pointer.Id))
         {
-            _panX += pos.X - _lastPanPoint.Value.X;
-            _panY += pos.Y - _lastPanPoint.Value.Y;
-            _lastPanPoint = pos;
-            InvalidateVisual();
+            var prevPt = _activePointers[e.Pointer.Id];
+            _activePointers[e.Pointer.Id] = pt;
+
+            if (_activePointers.Count == 1)
+            {
+                var props = e.GetCurrentPoint(this).Properties;
+                bool isPressed = e.Pointer.Type != PointerType.Mouse
+                    || props.IsLeftButtonPressed
+                    || props.IsMiddleButtonPressed
+                    || props.IsRightButtonPressed;
+
+                if (isPressed)
+                {
+                    if (!_movedBeyondTapThreshold && GetDistance(_pointerDownPos, pt) > 6.0)
+                    {
+                        _movedBeyondTapThreshold = true;
+                    }
+
+                    if (_movedBeyondTapThreshold)
+                    {
+                        _panX += pt.X - prevPt.X;
+                        _panY += pt.Y - prevPt.Y;
+                        InvalidateVisual();
+                    }
+                }
+            }
+            else if (_activePointers.Count >= 2)
+            {
+                var pts = _activePointers.Values.Take(2).ToArray();
+                double dist = GetDistance(pts[0], pts[1]);
+                Point mid = GetMidpoint(pts[0], pts[1]);
+
+                // Pan by midpoint delta
+                _panX += mid.X - _lastPinchMidpoint.X;
+                _panY += mid.Y - _lastPinchMidpoint.Y;
+
+                // Zoom by pinch distance ratio (rotation not needed)
+                if (_lastPinchDistance > 5.0 && dist > 5.0)
+                {
+                    double factor = dist / _lastPinchDistance;
+                    ZoomBy(factor, mid);
+                }
+
+                _lastPinchDistance = dist;
+                _lastPinchMidpoint = mid;
+                InvalidateVisual();
+            }
             e.Handled = true;
         }
     }
@@ -256,20 +331,25 @@ public sealed class SchCanvasControl : Control
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
         base.OnPointerReleased(e);
-        if (_isPanning)
+        var pt = e.GetPosition(this);
+
+        bool wasTap = _activePointers.Count == 1 && !_movedBeyondTapThreshold;
+        _activePointers.Remove(e.Pointer.Id);
+        e.Pointer.Capture(null);
+
+        if (_activePointers.Count == 0 && wasTap)
         {
-            _isPanning = false;
-            _lastPanPoint = null;
-            e.Pointer.Capture(null);
+            var (wx, wy) = ScreenToWorld(pt.X, pt.Y);
+            var clicked = HitTestSymbol(wx, wy);
+            SymbolClicked?.Invoke(clicked);
+        }
+        else if (_activePointers.Count == 2)
+        {
+            var pts = _activePointers.Values.ToArray();
+            _lastPinchDistance = GetDistance(pts[0], pts[1]);
+            _lastPinchMidpoint = GetMidpoint(pts[0], pts[1]);
         }
 
-        // If it was a clean click without significant pan, hit test for symbol
-        var pos = e.GetPosition(this);
-        double wx = (pos.X - _panX) / _scale;
-        double wy = (pos.Y - _panY) / _scale;
-
-        var clicked = HitTestSymbol(wx, wy);
-        SymbolClicked?.Invoke(clicked);
         e.Handled = true;
     }
 
@@ -295,7 +375,6 @@ public sealed class SchCanvasControl : Control
             Scale = _scale,
             PanX = _panX,
             PanY = _panY,
-            IsLightTheme = _isLightTheme,
             HighlightedSymbolRefs = new HashSet<string>(_highlightedSymbolRefs, StringComparer.OrdinalIgnoreCase),
             PlacedSymbolRefs = new HashSet<string>(_placedSymbolRefs, StringComparer.OrdinalIgnoreCase),
             ActiveSymbolRef = _activeSymbolRef

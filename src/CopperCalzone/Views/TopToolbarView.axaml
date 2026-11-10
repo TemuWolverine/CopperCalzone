@@ -78,18 +78,6 @@
                          VerticalAlignment="Center" />
             </StackPanel>
           </Border>
-
-          <!-- Theme Toggle -->
-          <Button Command="{Binding ToggleThemeCommand}"
-                  ToolTip.Tip="Toggle Dark / Light Material 3 Theme"
-                  Classes="tool-btn"
-                  Width="40" Height="40"
-                  CornerRadius="20"
-                  Padding="0"
-                  HorizontalContentAlignment="Center"
-                  VerticalContentAlignment="Center">
-            <materialIcons:MaterialIcon Kind="ThemeLightDark" Width="20" Height="20" />
-          </Button>
         </StackPanel>
       </Grid>
 
@@ -99,8 +87,8 @@
             RowDefinitions="Auto,Auto"
             Margin="0,2,0,4">
 
-        <!-- Row 0: Drawer Toggle, Board Title, Open FAB, Theme Toggle -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto" Margin="0,2,0,6">
+        <!-- Row 0: Drawer Toggle, Board Title, Open FAB -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" Margin="0,2,0,6">
           <Button Grid.Column="0"
                   Command="{Binding ToggleLeftSidebarCommand}"
                   ToolTip.Tip="Toggle Nets &amp; Layers Drawer"
@@ -170,19 +158,6 @@
                   Padding="8"
                   Margin="0,0,4,0">
             <materialIcons:MaterialIcon Kind="CogOutline" Width="18" Height="18" />
-          </Button>
-
-          <!-- Theme Toggle -->
-          <Button Grid.Column="6"
-                  Command="{Binding ToggleThemeCommand}"
-                  ToolTip.Tip="Toggle Theme"
-                  Classes="tool-btn"
-                  Width="36" Height="36"
-                  CornerRadius="18"
-                  Padding="0"
-                  HorizontalContentAlignment="Center"
-                  VerticalContentAlignment="Center">
-            <materialIcons:MaterialIcon Kind="ThemeLightDark" Width="18" Height="18" />
           </Button>
         </Grid>
 

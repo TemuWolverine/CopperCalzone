@@ -1,184 +1,183 @@
-<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-  <!-- M3 Expressive Extended FAB Style -->
-  <Style Selector="Button.m3-extended-fab">
-    <Setter Property="Background" Value="{DynamicResource M3PrimaryContainerBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnPrimaryContainerBrush}" />
-    <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="CornerRadius" Value="16" />
-    <Setter Property="Padding" Value="16,10" />
-    <Setter Property="Height" Value="56" />
-    <Setter Property="FontSize" Value="14" />
-    <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="Cursor" Value="Hand" />
-  </Style>
-  <Style Selector="Button.m3-extended-fab:pointerover /template/ ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource M3PrimaryBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnPrimaryBrush}" />
-  </Style>
+    <!--  M3 Expressive Extended FAB Style  -->
+    <Style Selector="Button.m3-extended-fab">
+        <Setter Property="Background" Value="{DynamicResource M3PrimaryContainerBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnPrimaryContainerBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="16,10" />
+        <Setter Property="Height" Value="56" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.m3-extended-fab:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource M3PrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnPrimaryBrush}" />
+    </Style>
 
-  <!-- M3 Expressive Standard FAB (Collapsed, 56x56) -->
-  <Style Selector="Button.m3-fab">
-    <Setter Property="Background" Value="{DynamicResource M3PrimaryContainerBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnPrimaryContainerBrush}" />
-    <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="CornerRadius" Value="16" />
-    <Setter Property="Width" Value="56" />
-    <Setter Property="Height" Value="56" />
-    <Setter Property="Padding" Value="0" />
-    <Setter Property="HorizontalContentAlignment" Value="Center" />
-    <Setter Property="VerticalContentAlignment" Value="Center" />
-    <Setter Property="Cursor" Value="Hand" />
-  </Style>
-  <Style Selector="Button.m3-fab:pointerover /template/ ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource M3PrimaryBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnPrimaryBrush}" />
-  </Style>
+    <!--  M3 Expressive Standard FAB (Collapsed, 56x56)  -->
+    <Style Selector="Button.m3-fab">
+        <Setter Property="Background" Value="{DynamicResource M3PrimaryContainerBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnPrimaryContainerBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Width" Value="56" />
+        <Setter Property="Height" Value="56" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.m3-fab:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource M3PrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnPrimaryBrush}" />
+    </Style>
 
-  <!-- M3 Expressive Navigation Rail Item (Collapsed & Expanded) -->
-  <Style Selector="Button.nav-rail-item">
-    <Setter Property="Background" Value="Transparent" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariantBrush}" />
-    <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="CornerRadius" Value="16" />
-    <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="Padding" Value="0" />
-  </Style>
-  <Style Selector="Button.nav-rail-item:pointerover">
-    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
-  </Style>
-  <Style Selector="Button.nav-rail-item.active">
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSecondaryContainerBrush}" />
-  </Style>
+    <!--  M3 Expressive Navigation Rail Item (Collapsed & Expanded)  -->
+    <Style Selector="Button.nav-rail-item">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariantBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="Button.nav-rail-item:pointerover">
+        <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
+    </Style>
+    <Style Selector="Button.nav-rail-item.active">
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSecondaryContainerBrush}" />
+    </Style>
 
-  <!-- M3 Connected Segmented Button Group (Pin Navigation) -->
-  <Style Selector="Button.segmented-left">
-    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource M3OutlineVariantBrush}" />
-    <Setter Property="BorderThickness" Value="1,1,0.5,1" />
-    <Setter Property="CornerRadius" Value="16,0,0,16" />
-    <Setter Property="Padding" Value="14,9" />
-    <Setter Property="FontSize" Value="12" />
-    <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="Cursor" Value="Hand" />
-  </Style>
-  <Style Selector="Button.segmented-left:pointerover">
-    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighestBrush}" />
-  </Style>
-  <Style Selector="Button.segmented-right">
-    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource M3OutlineVariantBrush}" />
-    <Setter Property="BorderThickness" Value="0.5,1,1,1" />
-    <Setter Property="CornerRadius" Value="0,16,16,0" />
-    <Setter Property="Padding" Value="14,9" />
-    <Setter Property="FontSize" Value="12" />
-    <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="Cursor" Value="Hand" />
-  </Style>
-  <Style Selector="Button.segmented-right:pointerover">
-    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighestBrush}" />
-  </Style>
+    <!--  M3 Connected Segmented Button Group (Pin Navigation)  -->
+    <Style Selector="Button.segmented-left">
+        <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource M3OutlineVariantBrush}" />
+        <Setter Property="BorderThickness" Value="1,1,0.5,1" />
+        <Setter Property="CornerRadius" Value="16,0,0,16" />
+        <Setter Property="Padding" Value="14,9" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.segmented-left:pointerover">
+        <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighestBrush}" />
+    </Style>
+    <Style Selector="Button.segmented-right">
+        <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource M3OutlineVariantBrush}" />
+        <Setter Property="BorderThickness" Value="0.5,1,1,1" />
+        <Setter Property="CornerRadius" Value="0,16,16,0" />
+        <Setter Property="Padding" Value="14,9" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.segmented-right:pointerover">
+        <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighestBrush}" />
+    </Style>
 
-  <!-- M3 Expressive Filled Primary Button Style -->
-  <Style Selector="Button.m3-filled">
-    <Setter Property="Background" Value="{DynamicResource M3PrimaryBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnPrimaryBrush}" />
-    <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="CornerRadius" Value="20" />
-    <Setter Property="Padding" Value="18,9" />
-    <Setter Property="FontSize" Value="14" />
-    <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="Cursor" Value="Hand" />
-  </Style>
-  <Style Selector="Button.m3-filled:pointerover /template/ ContentPresenter">
-    <Setter Property="Opacity" Value="0.92" />
-  </Style>
+    <!--  M3 Expressive Filled Primary Button Style  -->
+    <Style Selector="Button.m3-filled">
+        <Setter Property="Background" Value="{DynamicResource M3PrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="Padding" Value="18,9" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.m3-filled:pointerover /template/ ContentPresenter">
+        <Setter Property="Opacity" Value="0.92" />
+    </Style>
 
-  <!-- M3 Expressive Filled Tonal Button Style -->
-  <Style Selector="Button.m3-tonal">
-    <Setter Property="Background" Value="{DynamicResource M3SecondaryContainerBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSecondaryContainerBrush}" />
-    <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="CornerRadius" Value="20" />
-    <Setter Property="Padding" Value="16,9" />
-    <Setter Property="FontSize" Value="12" />
-    <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="Cursor" Value="Hand" />
-  </Style>
-  <Style Selector="Button.m3-tonal:pointerover /template/ ContentPresenter">
-    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighestBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
-  </Style>
+    <!--  M3 Expressive Filled Tonal Button Style  -->
+    <Style Selector="Button.m3-tonal">
+        <Setter Property="Background" Value="{DynamicResource M3SecondaryContainerBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSecondaryContainerBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="Padding" Value="16,9" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.m3-tonal:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighestBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
+    </Style>
 
-  <!-- M3 Expressive Tool / Pill Button Style -->
-  <Style Selector="Button.tool-btn">
-    <Setter Property="Background" Value="Transparent" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariantBrush}" />
-    <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="Padding" Value="10,6" />
-    <Setter Property="CornerRadius" Value="16" />
-    <Setter Property="FontSize" Value="12" />
-    <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="VerticalAlignment" Value="Center" />
-    <Setter Property="Cursor" Value="Hand" />
-  </Style>
-  <Style Selector="Button.tool-btn:pointerover">
-    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighestBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
-  </Style>
-  <Style Selector="Button.tool-btn.active">
-    <Setter Property="Background" Value="{DynamicResource M3SecondaryContainerBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSecondaryContainerBrush}" />
-  </Style>
+    <!--  M3 Expressive Tool / Pill Button Style  -->
+    <Style Selector="Button.tool-btn">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariantBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.tool-btn:pointerover">
+        <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighestBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
+    </Style>
+    <Style Selector="Button.tool-btn.active">
+        <Setter Property="Background" Value="{DynamicResource M3SecondaryContainerBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSecondaryContainerBrush}" />
+    </Style>
 
-  <!-- M3 Expressive Filter Chip Button Style -->
-  <Style Selector="Button.chip-btn">
-    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariantBrush}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource M3OutlineVariantBrush}" />
-    <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="8" />
-    <Setter Property="Padding" Value="12,6" />
-    <Setter Property="FontSize" Value="12" />
-    <Setter Property="FontWeight" Value="Medium" />
-    <Setter Property="Cursor" Value="Hand" />
-  </Style>
-  <Style Selector="Button.chip-btn:pointerover">
-    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighestBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
-  </Style>
-  <Style Selector="Button.chip-btn.active">
-    <Setter Property="Background" Value="{DynamicResource M3SecondaryContainerBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSecondaryContainerBrush}" />
-    <Setter Property="BorderBrush" Value="Transparent" />
-    <Setter Property="CornerRadius" Value="8" />
-    <Setter Property="FontWeight" Value="Bold" />
-  </Style>
+    <!--  M3 Expressive Filter Chip Button Style  -->
+    <Style Selector="Button.chip-btn">
+        <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariantBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource M3OutlineVariantBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.chip-btn:pointerover">
+        <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighestBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
+    </Style>
+    <Style Selector="Button.chip-btn.active">
+        <Setter Property="Background" Value="{DynamicResource M3SecondaryContainerBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSecondaryContainerBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
 
-  <!-- M3 Expressive Segmented Pill Tab Button Style -->
-  <Style Selector="Button.tab-btn">
-    <Setter Property="Background" Value="Transparent" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariantBrush}" />
-    <Setter Property="BorderThickness" Value="0" />
-    <Setter Property="CornerRadius" Value="14" />
-    <Setter Property="Padding" Value="14,8" />
-    <Setter Property="FontSize" Value="12" />
-    <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="HorizontalAlignment" Value="Stretch" />
-    <Setter Property="HorizontalContentAlignment" Value="Center" />
-    <Setter Property="Cursor" Value="Hand" />
-  </Style>
-  <Style Selector="Button.tab-btn:pointerover">
-    <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
-  </Style>
-  <Style Selector="Button.tab-btn.active">
-    <Setter Property="Foreground" Value="{DynamicResource M3OnPrimaryContainerBrush}" />
-    <Setter Property="Background" Value="{DynamicResource M3PrimaryContainerBrush}" />
-  </Style>
+    <!--  M3 Expressive Segmented Pill Tab Button Style  -->
+    <Style Selector="Button.tab-btn">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariantBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Padding" Value="14,8" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.tab-btn:pointerover">
+        <Setter Property="Background" Value="{DynamicResource M3SurfaceContainerHighBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
+    </Style>
+    <Style Selector="Button.tab-btn.active">
+        <Setter Property="Foreground" Value="{DynamicResource M3OnPrimaryContainerBrush}" />
+        <Setter Property="Background" Value="{DynamicResource M3PrimaryContainerBrush}" />
+    </Style>
 
 </Styles>

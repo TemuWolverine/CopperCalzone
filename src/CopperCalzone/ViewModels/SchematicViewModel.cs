@@ -93,11 +93,6 @@ public sealed partial class SchematicViewModel : ObservableObject
         }
     }
 
-    public void SetTheme(bool isLightTheme)
-    {
-        _canvas?.SetTheme(isLightTheme);
-    }
-
     public void HighlightSymbols(IEnumerable<string>? refs, string? activeRef = null, bool flyTo = true)
     {
         _currentHighlightedRefs = refs is not null

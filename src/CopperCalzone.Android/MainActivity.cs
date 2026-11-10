@@ -9,6 +9,8 @@ namespace CopperCalzone.Android;
 
 [Activity(
     Label = "CopperCalzone",
+    Icon = "@mipmap/ic_launcher",
+    RoundIcon = "@mipmap/ic_launcher_round",
     Theme = "@style/MyTheme.NoActionBar",
     MainLauncher = true,
     ScreenOrientation = ScreenOrientation.FullUser,

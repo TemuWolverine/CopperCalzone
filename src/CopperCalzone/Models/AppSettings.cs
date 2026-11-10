@@ -66,9 +66,6 @@ public sealed class AppSettings
     public double BomColQtyWidth { get; set; } = 50;
 
     // Appearance
-    [JsonPropertyName("isDarkTheme")]
-    public bool IsDarkTheme { get; set; } = true;
-
     [JsonPropertyName("isImmersiveMode")]
     public bool IsImmersiveMode { get; set; } = false;
 
@@ -94,7 +91,6 @@ public sealed class AppSettings
             BomColValWidth = BomColValWidth,
             BomColFpWidth = BomColFpWidth,
             BomColQtyWidth = BomColQtyWidth,
-            IsDarkTheme = IsDarkTheme,
             IsImmersiveMode = IsImmersiveMode
         };
     }

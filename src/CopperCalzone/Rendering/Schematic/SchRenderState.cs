@@ -8,7 +8,6 @@ public sealed class SchRenderState
     public double Scale { get; init; } = 1.0;
     public double PanX { get; init; }
     public double PanY { get; init; }
-    public bool IsLightTheme { get; init; }
 
     public HashSet<string> HighlightedSymbolRefs { get; init; } = [];
     public HashSet<string> PlacedSymbolRefs { get; init; } = [];

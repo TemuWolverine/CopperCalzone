@@ -11,7 +11,6 @@ public sealed class PcbRenderState
     public HashSet<string> PlacedFootprintRefs { get; init; } = [];
     public PcbPad? HoveredPad { get; init; }
     public bool IsFlipped { get; init; }
-    public bool IsLightTheme { get; init; }
     public double PanX { get; init; }
     public double PanY { get; init; }
     public double Rotation { get; init; }

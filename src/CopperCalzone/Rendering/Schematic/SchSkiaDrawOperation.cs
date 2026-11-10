@@ -19,29 +19,14 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
         ?? SKTypeface.Default;
 
     // Palette
-    private static readonly SKColor WireColorDark = new(0x4A, 0xDE, 0x80); // Bright Green
-    private static readonly SKColor WireColorLight = new(0x15, 0x80, 0x3D); // Deep Forest Green
-
-    private static readonly SKColor BusColorDark = new(0x38, 0xBD, 0xF8); // Sky Blue
-    private static readonly SKColor BusColorLight = new(0x02, 0x84, 0xC7);
-
-    private static readonly SKColor SymbolColorDark = new(0xFB, 0xBF, 0x24); // Warm Amber/Yellow for symbol lines
-    private static readonly SKColor SymbolColorLight = new(0x85, 0x4D, 0x0E);
-
-    private static readonly SKColor TextRefColorDark = new(0x67, 0xE8, 0xF9); // Cyan
-    private static readonly SKColor TextRefColorLight = new(0x0E, 0x74, 0x90);
-
-    private static readonly SKColor TextValColorDark = new(0xF1, 0xF5, 0xF9); // Soft White
-    private static readonly SKColor TextValColorLight = new(0x0F, 0x17, 0x2A);
-
-    private static readonly SKColor PinNameColorDark = new(0xC0, 0x84, 0xFC); // Lavender
-    private static readonly SKColor PinNameColorLight = new(0x7E, 0x22, 0xCE);
-
-    private static readonly SKColor PinNumColorDark = new(0xFB, 0x92, 0x3C); // Orange
-    private static readonly SKColor PinNumColorLight = new(0xC2, 0x41, 0x0C);
-
-    private static readonly SKColor LabelColorDark = new(0xF4, 0x72, 0xB6); // Pink / Rose
-    private static readonly SKColor LabelColorLight = new(0xBE, 0x18, 0x5D);
+    private static readonly SKColor WireColor = new(0x4A, 0xDE, 0x80); // Bright Green
+    private static readonly SKColor BusColor = new(0x38, 0xBD, 0xF8); // Sky Blue
+    private static readonly SKColor SymbolColor = new(0xFB, 0xBF, 0x24); // Warm Amber/Yellow for symbol lines
+    private static readonly SKColor TextRefColor = new(0x67, 0xE8, 0xF9); // Cyan
+    private static readonly SKColor TextValColor = new(0xF1, 0xF5, 0xF9); // Soft White
+    private static readonly SKColor PinNameColor = new(0xC0, 0x84, 0xFC); // Lavender
+    private static readonly SKColor PinNumColor = new(0xFB, 0x92, 0x3C); // Orange
+    private static readonly SKColor LabelColor = new(0xF4, 0x72, 0xB6); // Pink / Rose
 
     private static readonly SKColor ActiveGlow = new(0x00, 0xE5, 0xFF); // Neon Cyan
     private static readonly SKColor PrimaryGlow = new(0xFF, 0xB1, 0x42); // Golden Amber
@@ -77,9 +62,7 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
         canvas.Save();
         canvas.ClipRect(new SKRect(0, 0, (float)_bounds.Width, (float)_bounds.Height));
 
-        SKColor bgColor = _state.IsLightTheme
-            ? new SKColor(0xFA, 0xFA, 0xF9)
-            : new SKColor(0x0F, 0x13, 0x1D);
+        SKColor bgColor = new SKColor(0x0F, 0x13, 0x1D);
         canvas.DrawColor(bgColor);
 
         var sch = _state.Schematic;
@@ -144,9 +127,7 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
         {
             IsAntialias = true,
             Style = SKPaintStyle.Fill,
-            Color = _state.IsLightTheme
-                ? new SKColor(0xDC, 0xD6, 0xCD, 140)
-                : new SKColor(0x28, 0x30, 0x46, 160)
+            Color = new SKColor(0x28, 0x30, 0x46, 160)
         };
 
         float dotRadius = (float)Math.Max(0.04, 0.6 / _state.Scale);
@@ -169,7 +150,7 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
         {
             IsAntialias = true,
             Style = SKPaintStyle.Stroke,
-            Color = _state.IsLightTheme ? new SKColor(0x78, 0x35, 0x0F) : new SKColor(0xFB, 0x92, 0x3C),
+            Color = new SKColor(0xFB, 0x92, 0x3C),
             StrokeWidth = (float)Math.Max(0.2, 1.5 / _state.Scale)
         };
 
@@ -177,7 +158,7 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
         {
             IsAntialias = true,
             Style = SKPaintStyle.Fill,
-            Color = _state.IsLightTheme ? new SKColor(0xFF, 0xFB, 0xEB, 90) : new SKColor(0x45, 0x1A, 0x03, 70)
+            Color = new SKColor(0x45, 0x1A, 0x03, 70)
         };
 
         using var textPaint = new SKPaint
@@ -208,12 +189,11 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
     {
         if (sch.Wires.Count == 0) return;
 
-        SKColor wireColor = _state.IsLightTheme ? WireColorLight : WireColorDark;
         using var paint = new SKPaint
         {
             IsAntialias = true,
             Style = SKPaintStyle.Stroke,
-            Color = wireColor,
+            Color = WireColor,
             StrokeCap = SKStrokeCap.Round,
             StrokeJoin = SKStrokeJoin.Round,
             StrokeWidth = (float)Math.Max(0.18, 1.4 / _state.Scale)
@@ -236,12 +216,11 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
     {
         if (sch.Buses.Count == 0) return;
 
-        SKColor busColor = _state.IsLightTheme ? BusColorLight : BusColorDark;
         using var paint = new SKPaint
         {
             IsAntialias = true,
             Style = SKPaintStyle.Stroke,
-            Color = busColor,
+            Color = BusColor,
             StrokeCap = SKStrokeCap.Round,
             StrokeJoin = SKStrokeJoin.Round,
             StrokeWidth = (float)Math.Max(0.45, 2.8 / _state.Scale)
@@ -264,12 +243,11 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
     {
         if (sch.Junctions.Count == 0) return;
 
-        SKColor wireColor = _state.IsLightTheme ? WireColorLight : WireColorDark;
         using var paint = new SKPaint
         {
             IsAntialias = true,
             Style = SKPaintStyle.Fill,
-            Color = wireColor
+            Color = WireColor
         };
 
         foreach (var j in sch.Junctions)
@@ -306,12 +284,11 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
     {
         if (sch.Labels.Count == 0) return;
 
-        SKColor labelColor = _state.IsLightTheme ? LabelColorLight : LabelColorDark;
         using var strokePaint = new SKPaint
         {
             IsAntialias = true,
             Style = SKPaintStyle.Stroke,
-            Color = labelColor,
+            Color = LabelColor,
             StrokeWidth = (float)Math.Max(0.18, 1.2 / _state.Scale)
         };
 
@@ -319,7 +296,7 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
         {
             IsAntialias = true,
             Typeface = SansSemiBoldTypeface,
-            Color = labelColor
+            Color = LabelColor
         };
 
         foreach (var lbl in sch.Labels)
@@ -390,13 +367,11 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
 
     private void DrawSymbols(SKCanvas canvas, KiCadSchematic sch)
     {
-        SKColor symColor = _state.IsLightTheme ? SymbolColorLight : SymbolColorDark;
-
         using var strokePaint = new SKPaint
         {
             IsAntialias = true,
             Style = SKPaintStyle.Stroke,
-            Color = symColor,
+            Color = SymbolColor,
             StrokeCap = SKStrokeCap.Round,
             StrokeJoin = SKStrokeJoin.Round,
             StrokeWidth = (float)Math.Max(0.18, 1.4 / _state.Scale)
@@ -406,35 +381,35 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
         {
             IsAntialias = true,
             Style = SKPaintStyle.Fill,
-            Color = symColor.WithAlpha(40)
+            Color = SymbolColor.WithAlpha(40)
         };
 
         using var refTextPaint = new SKPaint
         {
             IsAntialias = true,
             Typeface = MonoBoldTypeface,
-            Color = _state.IsLightTheme ? TextRefColorLight : TextRefColorDark
+            Color = TextRefColor
         };
 
         using var valTextPaint = new SKPaint
         {
             IsAntialias = true,
             Typeface = SansSemiBoldTypeface,
-            Color = _state.IsLightTheme ? TextValColorLight : TextValColorDark
+            Color = TextValColor
         };
 
         using var pinNamePaint = new SKPaint
         {
             IsAntialias = true,
             Typeface = SansSemiBoldTypeface,
-            Color = _state.IsLightTheme ? PinNameColorLight : PinNameColorDark
+            Color = PinNameColor
         };
 
         using var pinNumPaint = new SKPaint
         {
             IsAntialias = true,
             Typeface = MonoBoldTypeface,
-            Color = _state.IsLightTheme ? PinNumColorLight : PinNumColorDark
+            Color = PinNumColor
         };
 
         foreach (var sym in sch.Symbols)

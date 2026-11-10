@@ -18,7 +18,7 @@
       </Transitions>
     </Border.Transitions>
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="0,12,0,16">
+    <Grid RowDefinitions="Auto,Auto,*" Margin="0,12,0,16">
 
       <!-- 1. Rail Toggle Menu Button -->
       <Grid Grid.Row="0" Margin="12,0,12,12">
@@ -274,36 +274,6 @@
                        VerticalAlignment="Center"
                        Margin="16,0,0,0" />
           </Grid>
-        </Button>
-
-      </StackPanel>
-
-      <!-- 4. Bottom Rail Controls: Theme Toggle & Sidebar Sheet Toggle -->
-      <StackPanel Grid.Row="3" Spacing="8" Margin="8,0">
-
-        <!-- Theme Toggle -->
-        <Button Command="{Binding ToggleThemeCommand}"
-                ToolTip.Tip="Toggle Dark / Light Theme"
-                Classes="tool-btn"
-                Width="48" Height="48"
-                CornerRadius="24"
-                HorizontalAlignment="Center"
-                IsVisible="{Binding !IsNavRailExpanded}">
-          <materialIcons:MaterialIcon Kind="ThemeLightDark" Width="20" Height="20" />
-        </Button>
-
-        <Button Command="{Binding ToggleThemeCommand}"
-                ToolTip.Tip="Toggle Dark / Light Theme"
-                Classes="tool-btn"
-                Height="48"
-                CornerRadius="24"
-                HorizontalAlignment="Stretch"
-                Padding="16,0"
-                IsVisible="{Binding IsNavRailExpanded}">
-          <StackPanel Orientation="Horizontal" Spacing="14">
-            <materialIcons:MaterialIcon Kind="ThemeLightDark" Width="20" Height="20" VerticalAlignment="Center" />
-            <TextBlock Text="Theme" Classes="m3-label-large" VerticalAlignment="Center" />
-          </StackPanel>
         </Button>
 
       </StackPanel>

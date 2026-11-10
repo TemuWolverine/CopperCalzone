@@ -31,9 +31,6 @@ public sealed partial class MainViewModel : ObservableObject
     private bool _isBomTabActive;
 
     [ObservableProperty]
-    private bool _isDarkTheme = true;
-
-    [ObservableProperty]
     private bool _isImmersiveMode;
 
     public event Action<bool>? ImmersiveModeChanged;
@@ -64,8 +61,6 @@ public sealed partial class MainViewModel : ObservableObject
     private double _sidebarWidth = 340;
 
     public event Func<Task>? OpenFileRequested;
-
-    public event Action<bool>? ThemeChanged;
 
     public double AssemblyProgressRatio => Bom.AssemblyProgressRatio;
 
@@ -239,7 +234,6 @@ public sealed partial class MainViewModel : ObservableObject
                         sheets.Insert(0, rootSheet);
 
                         Schematic.LoadSheets(sheets);
-                        Schematic.SetTheme(!IsDarkTheme);
                     }
                 }
             }
@@ -403,14 +397,6 @@ public sealed partial class MainViewModel : ObservableObject
 
         SwitchTab(s.DefaultSidebarTab);
 
-        if (IsDarkTheme != s.IsDarkTheme)
-        {
-            IsDarkTheme = s.IsDarkTheme;
-            ThemeChanged?.Invoke(IsDarkTheme);
-            _canvas?.SetTheme(!IsDarkTheme);
-            Schematic.SetTheme(!IsDarkTheme);
-        }
-
         if (IsImmersiveMode != s.IsImmersiveMode)
         {
             IsImmersiveMode = s.IsImmersiveMode;
@@ -487,7 +473,6 @@ public sealed partial class MainViewModel : ObservableObject
             await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Schematic.LoadSheets(sheets);
-                Schematic.SetTheme(!IsDarkTheme);
             });
         }
         catch
@@ -639,15 +624,6 @@ public sealed partial class MainViewModel : ObservableObject
     public void TogglePadLabels()
     {
         Layers.TogglePadLabels();
-    }
-
-    [RelayCommand]
-    public void ToggleTheme()
-    {
-        IsDarkTheme = !IsDarkTheme;
-        _canvas?.SetTheme(!IsDarkTheme);
-        Schematic.SetTheme(!IsDarkTheme);
-        ThemeChanged?.Invoke(IsDarkTheme);
     }
 
     [RelayCommand]

@@ -2,8 +2,6 @@
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
-using Material.Styles.Themes;
-using Material.Styles.Themes.Base;
 using CopperCalzone.Parsing;
 using CopperCalzone.ViewModels;
 using CopperCalzone.Views;
@@ -20,15 +18,6 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         var vm = new MainViewModel();
-        vm.ThemeChanged += isDark =>
-        {
-            RequestedThemeVariant = isDark ? ThemeVariant.Dark : ThemeVariant.Light;
-            var materialTheme = this.LocateMaterialTheme<MaterialTheme>();
-            if (materialTheme != null)
-            {
-                materialTheme.BaseTheme = isDark ? BaseThemeMode.Dark : BaseThemeMode.Light;
-            }
-        };
 
         // Load initial board from CLI argument on Desktop if specified
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopArgs &&

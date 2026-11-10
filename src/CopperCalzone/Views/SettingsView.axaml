@@ -308,19 +308,6 @@
             <TextBlock Classes="m3-section-title" Text="APPEARANCE &amp; CONFIGURATION STORAGE" />
           </StackPanel>
 
-          <!-- Theme -->
-          <Grid ColumnDefinitions="*,Auto" Margin="0,4">
-            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
-              <TextBlock Classes="m3-label-large" Text="Material 3 Theme" />
-              <TextBlock Classes="m3-caption" Text="Dark theme optimized for PCB contrast, or Light theme for documentation" />
-            </StackPanel>
-
-            <CheckBox Grid.Column="1"
-                      IsChecked="{Binding IsDarkTheme}"
-                      Content="Dark Theme"
-                      VerticalAlignment="Center" />
-          </Grid>
-
           <!-- Immersive Mode (Android Nav Bar / Desktop Fullscreen) -->
           <Grid ColumnDefinitions="*,Auto" Margin="0,4">
             <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">

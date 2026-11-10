@@ -54,51 +54,6 @@
           <SolidColorBrush x:Key="AppAccentBrush" Color="#D0BCFF" />
           <SolidColorBrush x:Key="AppAccentDimBrush" Color="#4F378B" />
         </ResourceDictionary>
-
-        <!-- Google Material 3 Expressive Light Palette -->
-        <ResourceDictionary x:Key="Light">
-          <!-- M3 Surface Hierarchy -->
-          <SolidColorBrush x:Key="M3SurfaceBrush" Color="#FEF7FF" />
-          <SolidColorBrush x:Key="M3SurfaceContainerLowBrush" Color="#F7F2FA" />
-          <SolidColorBrush x:Key="M3SurfaceContainerBrush" Color="#F3EDF7" />
-          <SolidColorBrush x:Key="M3SurfaceContainerHighBrush" Color="#ECE6F0" />
-          <SolidColorBrush x:Key="M3SurfaceContainerHighestBrush" Color="#E6E0E9" />
-          <SolidColorBrush x:Key="M3SurfaceOverlayBrush" Color="#F2ECE6F0" />
-
-          <!-- M3 Expressive Primary, Secondary & Tertiary Roles -->
-          <SolidColorBrush x:Key="M3PrimaryBrush" Color="#6750A4" />
-          <SolidColorBrush x:Key="M3OnPrimaryBrush" Color="#FFFFFF" />
-          <SolidColorBrush x:Key="M3PrimaryContainerBrush" Color="#EADDFF" />
-          <SolidColorBrush x:Key="M3OnPrimaryContainerBrush" Color="#21005D" />
-
-          <SolidColorBrush x:Key="M3SecondaryBrush" Color="#625B71" />
-          <SolidColorBrush x:Key="M3SecondaryContainerBrush" Color="#E8DEF8" />
-          <SolidColorBrush x:Key="M3OnSecondaryContainerBrush" Color="#1D192B" />
-
-          <SolidColorBrush x:Key="M3TertiaryBrush" Color="#7D5260" />
-          <SolidColorBrush x:Key="M3TertiaryContainerBrush" Color="#FFD8E4" />
-          <SolidColorBrush x:Key="M3OnTertiaryContainerBrush" Color="#31111D" />
-
-          <!-- M3 Content & Outline Roles -->
-          <SolidColorBrush x:Key="M3OnSurfaceBrush" Color="#1D1B20" />
-          <SolidColorBrush x:Key="M3OnSurfaceVariantBrush" Color="#49454F" />
-          <SolidColorBrush x:Key="M3OutlineBrush" Color="#79747E" />
-          <SolidColorBrush x:Key="M3OutlineVariantBrush" Color="#CAC4D0" />
-          <SolidColorBrush x:Key="M3ErrorBrush" Color="#B3261E" />
-
-          <!-- Mapped App Brushes for Compatibility -->
-          <SolidColorBrush x:Key="AppPrimaryBgBrush" Color="#FEF7FF" />
-          <SolidColorBrush x:Key="AppSecondaryBgBrush" Color="#F7F2FA" />
-          <SolidColorBrush x:Key="AppTertiaryBgBrush" Color="#ECE6F0" />
-          <SolidColorBrush x:Key="AppOverlayBgBrush" Color="#F2F3EDF7" />
-          <SolidColorBrush x:Key="AppBorderBrush" Color="#CAC4D0" />
-          <SolidColorBrush x:Key="AppPrimaryTextBrush" Color="#1D1B20" />
-          <SolidColorBrush x:Key="AppSecondaryTextBrush" Color="#49454F" />
-          <SolidColorBrush x:Key="AppMutedTextBrush" Color="#79747E" />
-          <SolidColorBrush x:Key="AppHoverBgBrush" Color="#E6E0E9" />
-          <SolidColorBrush x:Key="AppAccentBrush" Color="#6750A4" />
-          <SolidColorBrush x:Key="AppAccentDimBrush" Color="#EADDFF" />
-        </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>
     </ResourceDictionary>
   </Application.Resources>

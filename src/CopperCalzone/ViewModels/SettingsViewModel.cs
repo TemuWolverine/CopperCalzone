@@ -28,9 +28,6 @@ public sealed partial class SettingsViewModel : ObservableObject
     private string _defaultSidebarTab = "bom";
 
     [ObservableProperty]
-    private bool _isDarkTheme = true;
-
-    [ObservableProperty]
     private bool _isImmersiveMode;
 
     private bool _isLoading;
@@ -122,7 +119,6 @@ public sealed partial class SettingsViewModel : ObservableObject
             DefaultBomSortAscending = s.DefaultBomSortAscending;
             DefaultBomFilter = s.DefaultBomFilter;
 
-            IsDarkTheme = s.IsDarkTheme;
             IsImmersiveMode = s.IsImmersiveMode;
 
             // Initialize layer collections
@@ -259,7 +255,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         s.DefaultBomSortAscending = DefaultBomSortAscending;
         s.DefaultBomFilter = DefaultBomFilter;
 
-        s.IsDarkTheme = IsDarkTheme;
         s.IsImmersiveMode = IsImmersiveMode;
 
         var visible = new List<string>();
@@ -297,8 +292,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         OnPropertyChanged(nameof(IsFilterBottom));
         OnPropertyChanged(nameof(IsFilterUnplaced));
     }
-
-    partial void OnIsDarkThemeChanged(bool value) => AutoSave();
 
     partial void OnIsImmersiveModeChanged(bool value) => AutoSave();
 

@@ -1,107 +1,106 @@
-<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-  <Styles.Resources>
-    <FontFamily x:Key="AppMonoFontFamily">Consolas, Menlo, Monaco, 'Courier New', monospace</FontFamily>
-  </Styles.Resources>
+    <Styles.Resources>
+        <FontFamily x:Key="AppMonoFontFamily">Consolas, Menlo, Monaco, 'Courier New', monospace</FontFamily>
+    </Styles.Resources>
 
-  <!-- Global Control Typography Defaults -->
-  <Style Selector="CheckBox">
-    <Setter Property="FontSize" Value="14" />
-  </Style>
-  <Style Selector="RadioButton">
-    <Setter Property="FontSize" Value="14" />
-  </Style>
+    <!--  Global Control Typography Defaults  -->
+    <Style Selector="CheckBox">
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+    <Style Selector="RadioButton">
+        <Setter Property="FontSize" Value="14" />
+    </Style>
 
-  <!-- M3 Expressive Headlines & Titles -->
-  <Style Selector="TextBlock.m3-headline-medium">
-    <Setter Property="FontSize" Value="28" />
-    <Setter Property="FontWeight" Value="Medium" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
-  </Style>
-  <Style Selector="TextBlock.m3-title-large">
-    <Setter Property="FontSize" Value="22" />
-    <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
-  </Style>
-  <Style Selector="TextBlock.m3-title-medium">
-    <Setter Property="FontSize" Value="16" />
-    <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
-  </Style>
-  <Style Selector="TextBlock.m3-title-small">
-    <Setter Property="FontSize" Value="14" />
-    <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
-  </Style>
+    <!--  M3 Expressive Headlines & Titles  -->
+    <Style Selector="TextBlock.m3-headline-medium">
+        <Setter Property="FontSize" Value="28" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
+    </Style>
+    <Style Selector="TextBlock.m3-title-large">
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
+    </Style>
+    <Style Selector="TextBlock.m3-title-medium">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
+    </Style>
+    <Style Selector="TextBlock.m3-title-small">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
+    </Style>
 
-  <!-- M3 Section / Category Header (Label Small Emphasized) -->
-  <Style Selector="TextBlock.m3-section-title">
-    <Setter Property="FontSize" Value="11" />
-    <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="Foreground" Value="{DynamicResource M3PrimaryBrush}" />
-    <Setter Property="LetterSpacing" Value="0.5" />
-  </Style>
+    <!--  M3 Section / Category Header (Label Small Emphasized)  -->
+    <Style Selector="TextBlock.m3-section-title">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource M3PrimaryBrush}" />
+        <Setter Property="LetterSpacing" Value="0.5" />
+    </Style>
 
-  <!-- M3 Labels & Badges (Expressive Emphasized: Bold) -->
-  <Style Selector="TextBlock.m3-label-large">
-    <Setter Property="FontSize" Value="14" />
-    <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
-  </Style>
-  <Style Selector="TextBlock.m3-label-medium">
-    <Setter Property="FontSize" Value="12" />
-    <Setter Property="FontWeight" Value="Bold" />
-  </Style>
-  <Style Selector="TextBlock.m3-label-small">
-    <Setter Property="FontSize" Value="11" />
-    <Setter Property="FontWeight" Value="Bold" />
-  </Style>
+    <!--  M3 Labels & Badges (Expressive Emphasized: Bold)  -->
+    <Style Selector="TextBlock.m3-label-large">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
+    </Style>
+    <Style Selector="TextBlock.m3-label-medium">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="TextBlock.m3-label-small">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
 
-  <!-- M3 Body & Descriptions (Baseline: Regular, Emphasized: Medium) -->
-  <Style Selector="TextBlock.m3-body-large">
-    <Setter Property="FontSize" Value="16" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
-  </Style>
-  <Style Selector="TextBlock.m3-body-medium">
-    <Setter Property="FontSize" Value="14" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariantBrush}" />
-  </Style>
-  <Style Selector="TextBlock.m3-body-small">
-    <Setter Property="FontSize" Value="12" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariantBrush}" />
-  </Style>
+    <!--  M3 Body & Descriptions (Baseline: Regular, Emphasized: Medium)  -->
+    <Style Selector="TextBlock.m3-body-large">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
+    </Style>
+    <Style Selector="TextBlock.m3-body-medium">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariantBrush}" />
+    </Style>
+    <Style Selector="TextBlock.m3-body-small">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariantBrush}" />
+    </Style>
 
-  <!-- M3 Caption / Secondary / Metadata -->
-  <Style Selector="TextBlock.m3-caption">
-    <Setter Property="FontSize" Value="12" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariantBrush}" />
-  </Style>
+    <!--  M3 Caption / Secondary / Metadata  -->
+    <Style Selector="TextBlock.m3-caption">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariantBrush}" />
+    </Style>
 
-  <!-- Monospace Typography -->
-  <Style Selector="TextBlock.m3-mono">
-    <Setter Property="FontFamily" Value="{StaticResource AppMonoFontFamily}" />
-  </Style>
-  <Style Selector="TextBlock.m3-mono-title">
-    <Setter Property="FontFamily" Value="{StaticResource AppMonoFontFamily}" />
-    <Setter Property="FontSize" Value="16" />
-    <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
-  </Style>
-  <Style Selector="TextBlock.m3-mono-label">
-    <Setter Property="FontFamily" Value="{StaticResource AppMonoFontFamily}" />
-    <Setter Property="FontSize" Value="12" />
-    <Setter Property="FontWeight" Value="SemiBold" />
-  </Style>
-  <Style Selector="TextBlock.m3-mono-small">
-    <Setter Property="FontFamily" Value="{StaticResource AppMonoFontFamily}" />
-    <Setter Property="FontSize" Value="11" />
-  </Style>
-  <Style Selector="TextBlock.m3-mono-code">
-    <Setter Property="FontFamily" Value="{StaticResource AppMonoFontFamily}" />
-    <Setter Property="FontSize" Value="30" />
-    <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="LetterSpacing" Value="5" />
-  </Style>
+    <!--  Monospace Typography  -->
+    <Style Selector="TextBlock.m3-mono">
+        <Setter Property="FontFamily" Value="{StaticResource AppMonoFontFamily}" />
+    </Style>
+    <Style Selector="TextBlock.m3-mono-title">
+        <Setter Property="FontFamily" Value="{StaticResource AppMonoFontFamily}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceBrush}" />
+    </Style>
+    <Style Selector="TextBlock.m3-mono-label">
+        <Setter Property="FontFamily" Value="{StaticResource AppMonoFontFamily}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.m3-mono-small">
+        <Setter Property="FontFamily" Value="{StaticResource AppMonoFontFamily}" />
+        <Setter Property="FontSize" Value="11" />
+    </Style>
+    <Style Selector="TextBlock.m3-mono-code">
+        <Setter Property="FontFamily" Value="{StaticResource AppMonoFontFamily}" />
+        <Setter Property="FontSize" Value="30" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="LetterSpacing" Value="5" />
+    </Style>
 
 </Styles>

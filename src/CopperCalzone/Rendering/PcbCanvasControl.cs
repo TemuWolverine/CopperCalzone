@@ -38,7 +38,6 @@ public sealed class PcbCanvasControl : Control
 
     private PcbPad? _hoveredPad;
     private bool _isFlipped;
-    private bool _isLightTheme;
     private double _lastPinchAngle;
     private double _lastPinchDistance;
     private Point _lastPinchMidpoint;
@@ -396,12 +395,6 @@ public sealed class PcbCanvasControl : Control
         InvalidateVisual();
     }
 
-    public void SetTheme(bool isLightTheme)
-    {
-        _isLightTheme = isLightTheme;
-        InvalidateVisual();
-    }
-
     public void SetZoneMode(ZoneDisplayMode mode)
     {
         _zoneMode = mode;
@@ -657,7 +650,6 @@ public sealed class PcbCanvasControl : Control
             PanY = _panY,
             Rotation = _rotation,
             IsFlipped = _isFlipped,
-            IsLightTheme = _isLightTheme,
             ActiveNetId = _activeNetId,
             HoveredPad = _hoveredPad,
             SelectedPad = _selectedPad,
