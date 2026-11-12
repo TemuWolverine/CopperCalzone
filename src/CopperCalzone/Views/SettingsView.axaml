@@ -25,14 +25,13 @@
           <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
               <materialIcons:MaterialIcon Kind="TuneVariant" Width="26" Height="26" Foreground="{DynamicResource M3PrimaryBrush}" />
-              <TextBlock Text="Settings &amp; Preferences" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource M3OnSurfaceBrush}" VerticalAlignment="Center" />
+              <TextBlock Text="Settings &amp; Preferences" FontSize="{DynamicResource FontSizeXL}" FontWeight="Bold" Foreground="{DynamicResource M3OnSurfaceBrush}" VerticalAlignment="Center" />
             </StackPanel>
             <TextBlock Text="Configure default views, persistent layer selections, and startup behavior"
                        Classes="m3-caption"
-                       FontSize="13" />
+                       FontSize="{DynamicResource FontSizeMD}" />
             <TextBlock Text="{Binding StatusMessage}"
                        Classes="m3-mono-small"
-                       FontSize="11.5"
                        Foreground="{DynamicResource M3PrimaryBrush}"
                        Margin="0,4,0,0" />
           </StackPanel>
@@ -45,7 +44,7 @@
                     Padding="12,8">
               <StackPanel Orientation="Horizontal" Spacing="6">
                 <materialIcons:MaterialIcon Kind="Restore" Width="16" Height="16" Foreground="{DynamicResource M3ErrorBrush}" />
-                <TextBlock Text="Reset Defaults" Foreground="{DynamicResource M3ErrorBrush}" FontSize="12.5" />
+                <TextBlock Text="Reset Defaults" Foreground="{DynamicResource M3ErrorBrush}" FontSize="{DynamicResource FontSizeSM}" />
               </StackPanel>
             </Button>
 
@@ -56,7 +55,7 @@
                     CornerRadius="16">
               <StackPanel Orientation="Horizontal" Spacing="6">
                 <materialIcons:MaterialIcon Kind="ArrowLeft" Width="16" Height="16" />
-                <TextBlock Text="Done" FontWeight="SemiBold" FontSize="12.5" />
+                <TextBlock Text="Done" FontWeight="SemiBold" FontSize="{DynamicResource FontSizeSM}" />
               </StackPanel>
             </Button>
           </StackPanel>
@@ -87,7 +86,7 @@
                         Padding="14,6">
                   <StackPanel Orientation="Horizontal" Spacing="5">
                     <materialIcons:MaterialIcon Kind="LanConnect" Width="14" Height="14" />
-                    <TextBlock Text="Nets" FontSize="12" />
+                    <TextBlock Text="Nets" FontSize="{DynamicResource FontSizeSM}" />
                   </StackPanel>
                 </Button>
                 <Button Classes="tab-btn"
@@ -97,7 +96,7 @@
                         Padding="14,6">
                   <StackPanel Orientation="Horizontal" Spacing="5">
                     <materialIcons:MaterialIcon Kind="FormatListChecks" Width="14" Height="14" />
-                    <TextBlock Text="BOM" FontSize="12" />
+                    <TextBlock Text="BOM" FontSize="{DynamicResource FontSizeSM}" />
                   </StackPanel>
                 </Button>
                 <Button Classes="tab-btn"
@@ -107,7 +106,7 @@
                         Padding="14,6">
                   <StackPanel Orientation="Horizontal" Spacing="5">
                     <materialIcons:MaterialIcon Kind="LayersOutline" Width="14" Height="14" />
-                    <TextBlock Text="Layers" FontSize="12" />
+                    <TextBlock Text="Layers" FontSize="{DynamicResource FontSizeSM}" />
                   </StackPanel>
                 </Button>
               </StackPanel>
@@ -293,7 +292,7 @@
                     VerticalAlignment="Center">
               <StackPanel Orientation="Horizontal" Spacing="6">
                 <materialIcons:MaterialIcon Kind="TableColumnWidth" Width="15" Height="15" Foreground="{DynamicResource M3PrimaryBrush}" />
-                <TextBlock Text="Reset Column Widths" FontSize="12" Foreground="{DynamicResource M3PrimaryBrush}" />
+                <TextBlock Text="Reset Column Widths" FontSize="{DynamicResource FontSizeSM}" Foreground="{DynamicResource M3PrimaryBrush}" />
               </StackPanel>
             </Button>
           </Grid>
@@ -307,6 +306,37 @@
             <materialIcons:MaterialIcon Kind="PaletteOutline" Width="18" Height="18" Foreground="{DynamicResource M3PrimaryBrush}" />
             <TextBlock Classes="m3-section-title" Text="APPEARANCE &amp; CONFIGURATION STORAGE" />
           </StackPanel>
+
+          <!-- Interface Font Scale (80% - 150%) -->
+          <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center" Margin="0,0,16,0">
+              <TextBlock Classes="m3-label-large" Text="Interface Font Scale" />
+              <TextBlock Classes="m3-caption" Text="Scale all interface font sizes from 80% to 150% (default: 100%)" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+              <TextBlock Classes="m3-caption" Text="80%" VerticalAlignment="Center" />
+              <Slider Width="180"
+                      Minimum="80"
+                      Maximum="150"
+                      TickFrequency="5"
+                      IsSnapToTickEnabled="True"
+                      Value="{Binding FontScalePercent, Mode=TwoWay}"
+                      VerticalAlignment="Center" />
+              <TextBlock Classes="m3-caption" Text="150%" VerticalAlignment="Center" />
+              <Border Background="{DynamicResource M3SecondaryContainerBrush}"
+                      CornerRadius="12"
+                      Padding="10,4"
+                      MinWidth="54"
+                      VerticalAlignment="Center">
+                <TextBlock Classes="m3-mono-label"
+                           Text="{Binding FontScalePercent, StringFormat='{}{0:0}%'}"
+                           Foreground="{DynamicResource M3OnSecondaryContainerBrush}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+              </Border>
+            </StackPanel>
+          </Grid>
 
           <!-- Immersive Mode (Android Nav Bar / Desktop Fullscreen) -->
           <Grid ColumnDefinitions="*,Auto" Margin="0,4">
@@ -340,7 +370,7 @@
                     VerticalAlignment="Center">
               <StackPanel Orientation="Horizontal" Spacing="6">
                 <materialIcons:MaterialIcon Kind="FolderOpenOutline" Width="15" Height="15" Foreground="{DynamicResource M3PrimaryBrush}" />
-                <TextBlock Text="Open Folder" FontSize="12" Foreground="{DynamicResource M3PrimaryBrush}" />
+                <TextBlock Text="Open Folder" FontSize="{DynamicResource FontSizeSM}" Foreground="{DynamicResource M3PrimaryBrush}" />
               </StackPanel>
             </Button>
           </Grid>

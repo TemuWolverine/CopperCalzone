@@ -8,7 +8,7 @@
         <Setter Property="CornerRadius" Value="16" />
         <Setter Property="Padding" Value="16,10" />
         <Setter Property="Height" Value="56" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeMD}" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Cursor" Value="Hand" />
     </Style>
@@ -62,7 +62,7 @@
         <Setter Property="BorderThickness" Value="1,1,0.5,1" />
         <Setter Property="CornerRadius" Value="16,0,0,16" />
         <Setter Property="Padding" Value="14,9" />
-        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeSM}" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Cursor" Value="Hand" />
     </Style>
@@ -76,7 +76,7 @@
         <Setter Property="BorderThickness" Value="0.5,1,1,1" />
         <Setter Property="CornerRadius" Value="0,16,16,0" />
         <Setter Property="Padding" Value="14,9" />
-        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeSM}" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Cursor" Value="Hand" />
     </Style>
@@ -91,7 +91,7 @@
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="CornerRadius" Value="20" />
         <Setter Property="Padding" Value="18,9" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeMD}" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Cursor" Value="Hand" />
     </Style>
@@ -106,7 +106,7 @@
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="CornerRadius" Value="20" />
         <Setter Property="Padding" Value="16,9" />
-        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeSM}" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Cursor" Value="Hand" />
     </Style>
@@ -122,7 +122,7 @@
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="10,6" />
         <Setter Property="CornerRadius" Value="16" />
-        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeSM}" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="Cursor" Value="Hand" />
@@ -144,7 +144,7 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="Padding" Value="12,6" />
-        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeSM}" />
         <Setter Property="FontWeight" Value="Medium" />
         <Setter Property="Cursor" Value="Hand" />
     </Style>
@@ -167,7 +167,7 @@
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="CornerRadius" Value="14" />
         <Setter Property="Padding" Value="14,8" />
-        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontSize" Value="{DynamicResource FontSizeSM}" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />

@@ -101,7 +101,7 @@
                      Watermark="Search nets (GND, +3V3, SPI)..."
                      Background="Transparent"
                      BorderThickness="0"
-                     FontSize="13"
+                     FontSize="{DynamicResource FontSizeMD}"
                      VerticalAlignment="Center" />
             <Button Grid.Column="2"
                     Margin="4,0,0,0"
@@ -138,7 +138,7 @@
                                             Width="13" Height="13"
                                             Foreground="{DynamicResource M3PrimaryBrush}" />
                 <TextBlock Text="Clear"
-                           FontSize="11.5"
+                           FontSize="{DynamicResource FontSizeSM}"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource M3PrimaryBrush}" />
               </StackPanel>
@@ -215,7 +215,7 @@
                                             Foreground="{DynamicResource M3PrimaryBrush}"
                                             VerticalAlignment="Center" />
                 <TextBlock Text="{Binding AssemblyProgressText}"
-                           FontSize="12"
+                           FontSize="{DynamicResource FontSizeSM}"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource M3OnSurfaceBrush}"
                            VerticalAlignment="Center" />
@@ -229,7 +229,7 @@
                       ToolTip.Tip="Mark all BOM items as placed">
                 <StackPanel Orientation="Horizontal" Spacing="4">
                   <materialIcons:MaterialIcon Kind="CheckAll" Width="13" Height="13" Foreground="{DynamicResource M3PrimaryBrush}" />
-                  <TextBlock Text="All" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource M3PrimaryBrush}" />
+                  <TextBlock Text="All" FontSize="{DynamicResource FontSizeXS}" FontWeight="SemiBold" Foreground="{DynamicResource M3PrimaryBrush}" />
                 </StackPanel>
               </Button>
 
@@ -242,7 +242,7 @@
                       ToolTip.Tip="Reset placed status for all components">
                 <StackPanel Orientation="Horizontal" Spacing="4">
                   <materialIcons:MaterialIcon Kind="Restart" Width="13" Height="13" Foreground="{DynamicResource M3OnSurfaceVariantBrush}" />
-                  <TextBlock Text="Reset" FontSize="11" Foreground="{DynamicResource M3OnSurfaceVariantBrush}" />
+                  <TextBlock Text="Reset" FontSize="{DynamicResource FontSizeXS}" Foreground="{DynamicResource M3OnSurfaceVariantBrush}" />
                 </StackPanel>
               </Button>
             </Grid>
@@ -273,7 +273,7 @@
                      Watermark="Search ref, value, or footprint (R1, 100nF, 0402)..."
                      Background="Transparent"
                      BorderThickness="0"
-                     FontSize="13"
+                     FontSize="{DynamicResource FontSizeMD}"
                      VerticalAlignment="Center" />
             <Button Grid.Column="2"
                     Margin="4,0,0,0"
@@ -355,7 +355,7 @@
                                             Width="13" Height="13"
                                             Foreground="{DynamicResource M3PrimaryBrush}" />
                 <TextBlock Text="Clear"
-                           FontSize="11.5"
+                           FontSize="{DynamicResource FontSizeSM}"
                            FontWeight="SemiBold"
                            Foreground="{DynamicResource M3PrimaryBrush}" />
               </StackPanel>
@@ -536,7 +536,7 @@
                                 BorderThickness="1"
                                 VerticalAlignment="Center">
                           <TextBlock Text="{Binding SideText}"
-                                     FontSize="9"
+                                     FontSize="{DynamicResource FontSizeMicro}"
                                      FontWeight="Bold"
                                      Foreground="{Binding SideBrush}" />
                         </Border>
@@ -647,7 +647,7 @@
                   <DataTemplate x:DataType="x:String">
                     <Button Classes="chip-btn"
                             Padding="8,3"
-                            FontSize="11"
+                            FontSize="{DynamicResource FontSizeXS}"
                             Command="{Binding $parent[UserControl].((vm:MainViewModel)DataContext).SelectBomComponentCommand}"
                             CommandParameter="{Binding}"
                             Content="{Binding}" />

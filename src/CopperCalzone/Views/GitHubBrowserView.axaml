@@ -223,7 +223,7 @@
                          Watermark="Search repositories by name, owner, or description..."
                          Background="Transparent"
                          BorderThickness="0"
-                         FontSize="13.5"
+                         FontSize="{DynamicResource FontSizeMD}"
                          VerticalAlignment="Center" />
               </Grid>
             </Border>

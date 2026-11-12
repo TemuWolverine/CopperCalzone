@@ -402,6 +402,8 @@ public sealed partial class MainViewModel : ObservableObject
             IsImmersiveMode = s.IsImmersiveMode;
             ImmersiveModeChanged?.Invoke(IsImmersiveMode);
         }
+
+        App.ApplyFontScale(s.FontScalePercent);
     }
 
     public void AttachCanvas(PcbCanvasControl canvas)

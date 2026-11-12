@@ -30,6 +30,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool _isImmersiveMode;
 
+    [ObservableProperty]
+    private double _fontScalePercent = 100.0;
+
     private bool _isLoading;
 
     [ObservableProperty]
@@ -120,6 +123,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             DefaultBomFilter = s.DefaultBomFilter;
 
             IsImmersiveMode = s.IsImmersiveMode;
+            FontScalePercent = Math.Clamp(s.FontScalePercent, 80.0, 150.0);
 
             // Initialize layer collections
             var activeSet = new HashSet<string>(s.VisibleLayers, StringComparer.OrdinalIgnoreCase);
@@ -256,6 +260,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         s.DefaultBomFilter = DefaultBomFilter;
 
         s.IsImmersiveMode = IsImmersiveMode;
+        s.FontScalePercent = Math.Clamp(FontScalePercent, 80.0, 150.0);
 
         var visible = new List<string>();
         foreach (var l in DefaultCopperLayers)
@@ -292,6 +297,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         OnPropertyChanged(nameof(IsFilterBottom));
         OnPropertyChanged(nameof(IsFilterUnplaced));
     }
+
+    partial void OnFontScalePercentChanged(double value) => AutoSave();
 
     partial void OnIsImmersiveModeChanged(bool value) => AutoSave();
 

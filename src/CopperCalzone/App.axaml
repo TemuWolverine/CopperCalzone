@@ -9,6 +9,16 @@
     <ResourceDictionary>
       <FontFamily x:Key="AppMonoFontFamily">Consolas, Menlo, Monaco, 'Courier New', monospace</FontFamily>
 
+      <!-- Scaled Typography Tokens (Base = 16 at 100%) -->
+      <x:Double x:Key="FontSizeMicro">11</x:Double>
+      <x:Double x:Key="FontSizeXS">13</x:Double>
+      <x:Double x:Key="FontSizeSM">14</x:Double>
+      <x:Double x:Key="FontSizeMD">16</x:Double>
+      <x:Double x:Key="FontSizeLG">18</x:Double>
+      <x:Double x:Key="FontSizeXL">24</x:Double>
+      <x:Double x:Key="FontSizeXXL">32</x:Double>
+      <x:Double x:Key="FontSizeCode">34</x:Double>
+
       <ResourceDictionary.ThemeDictionaries>
         <!-- Google Material 3 Expressive Dark Palette -->
         <ResourceDictionary x:Key="Dark">

@@ -57,7 +57,7 @@
                      VerticalAlignment="Center" />
         </StackPanel>
         <TextBlock Text="•"
-                   FontSize="12"
+                   FontSize="{DynamicResource FontSizeSM}"
                    Foreground="{DynamicResource M3OutlineBrush}"
                    VerticalAlignment="Center" />
         <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">

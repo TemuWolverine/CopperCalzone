@@ -69,6 +69,9 @@ public sealed class AppSettings
     [JsonPropertyName("isImmersiveMode")]
     public bool IsImmersiveMode { get; set; } = false;
 
+    [JsonPropertyName("fontScalePercent")]
+    public double FontScalePercent { get; set; } = 100.0;
+
     public AppSettings Clone()
     {
         return new AppSettings
@@ -91,7 +94,8 @@ public sealed class AppSettings
             BomColValWidth = BomColValWidth,
             BomColFpWidth = BomColFpWidth,
             BomColQtyWidth = BomColQtyWidth,
-            IsImmersiveMode = IsImmersiveMode
+            IsImmersiveMode = IsImmersiveMode,
+            FontScalePercent = FontScalePercent
         };
     }
 }
