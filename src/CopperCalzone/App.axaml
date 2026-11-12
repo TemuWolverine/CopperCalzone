@@ -20,56 +20,56 @@
       <x:Double x:Key="FontSizeCode">34</x:Double>
 
       <ResourceDictionary.ThemeDictionaries>
-        <!-- Google Material 3 Expressive Dark Palette -->
+        <!-- Google Material 3 Expressive Dark Palette (Forest Green & Copper) -->
         <ResourceDictionary x:Key="Dark">
           <!-- M3 Surface Hierarchy -->
-          <SolidColorBrush x:Key="M3SurfaceBrush" Color="#141218" />
-          <SolidColorBrush x:Key="M3SurfaceContainerLowBrush" Color="#1D1B20" />
-          <SolidColorBrush x:Key="M3SurfaceContainerBrush" Color="#211F26" />
-          <SolidColorBrush x:Key="M3SurfaceContainerHighBrush" Color="#2B2930" />
-          <SolidColorBrush x:Key="M3SurfaceContainerHighestBrush" Color="#36343B" />
-          <SolidColorBrush x:Key="M3SurfaceOverlayBrush" Color="#EB2B2930" />
+          <SolidColorBrush x:Key="M3SurfaceBrush" Color="#111412" />
+          <SolidColorBrush x:Key="M3SurfaceContainerLowBrush" Color="#181B19" />
+          <SolidColorBrush x:Key="M3SurfaceContainerBrush" Color="#1D211E" />
+          <SolidColorBrush x:Key="M3SurfaceContainerHighBrush" Color="#272B28" />
+          <SolidColorBrush x:Key="M3SurfaceContainerHighestBrush" Color="#323633" />
+          <SolidColorBrush x:Key="M3SurfaceOverlayBrush" Color="#EB272B28" />
 
-          <!-- M3 Expressive Primary, Secondary & Tertiary Roles -->
-          <SolidColorBrush x:Key="M3PrimaryBrush" Color="#D0BCFF" />
-          <SolidColorBrush x:Key="M3OnPrimaryBrush" Color="#381E72" />
-          <SolidColorBrush x:Key="M3PrimaryContainerBrush" Color="#4F378B" />
-          <SolidColorBrush x:Key="M3OnPrimaryContainerBrush" Color="#EADDFF" />
+          <!-- M3 Expressive Primary (#194C2B), Secondary (#CC916B) & Tertiary Roles -->
+          <SolidColorBrush x:Key="M3PrimaryBrush" Color="#8FD8A5" />
+          <SolidColorBrush x:Key="M3OnPrimaryBrush" Color="#0A391B" />
+          <SolidColorBrush x:Key="M3PrimaryContainerBrush" Color="#194C2B" />
+          <SolidColorBrush x:Key="M3OnPrimaryContainerBrush" Color="#B8F2C8" />
 
-          <SolidColorBrush x:Key="M3SecondaryBrush" Color="#CCC2DC" />
-          <SolidColorBrush x:Key="M3SecondaryContainerBrush" Color="#4A4458" />
-          <SolidColorBrush x:Key="M3OnSecondaryContainerBrush" Color="#E8DEF8" />
+          <SolidColorBrush x:Key="M3SecondaryBrush" Color="#CC916B" />
+          <SolidColorBrush x:Key="M3SecondaryContainerBrush" Color="#5C3B27" />
+          <SolidColorBrush x:Key="M3OnSecondaryContainerBrush" Color="#FCE1CF" />
 
-          <SolidColorBrush x:Key="M3TertiaryBrush" Color="#EFB8C8" />
-          <SolidColorBrush x:Key="M3TertiaryContainerBrush" Color="#633B48" />
-          <SolidColorBrush x:Key="M3OnTertiaryContainerBrush" Color="#FFD8E4" />
+          <SolidColorBrush x:Key="M3TertiaryBrush" Color="#E2C28B" />
+          <SolidColorBrush x:Key="M3TertiaryContainerBrush" Color="#52421E" />
+          <SolidColorBrush x:Key="M3OnTertiaryContainerBrush" Color="#FFE8BA" />
 
           <!-- M3 Content & Outline Roles -->
-          <SolidColorBrush x:Key="M3OnSurfaceBrush" Color="#E6E0E9" />
-          <SolidColorBrush x:Key="M3OnSurfaceVariantBrush" Color="#CAC4D0" />
-          <SolidColorBrush x:Key="M3OutlineBrush" Color="#938F99" />
-          <SolidColorBrush x:Key="M3OutlineVariantBrush" Color="#49454F" />
+          <SolidColorBrush x:Key="M3OnSurfaceBrush" Color="#E3E6E3" />
+          <SolidColorBrush x:Key="M3OnSurfaceVariantBrush" Color="#C4C9C4" />
+          <SolidColorBrush x:Key="M3OutlineBrush" Color="#8E948F" />
+          <SolidColorBrush x:Key="M3OutlineVariantBrush" Color="#444A45" />
           <SolidColorBrush x:Key="M3ErrorBrush" Color="#F2B8B5" />
 
           <!-- Mapped App Brushes for Compatibility -->
-          <SolidColorBrush x:Key="AppPrimaryBgBrush" Color="#141218" />
-          <SolidColorBrush x:Key="AppSecondaryBgBrush" Color="#1D1B20" />
-          <SolidColorBrush x:Key="AppTertiaryBgBrush" Color="#2B2930" />
-          <SolidColorBrush x:Key="AppOverlayBgBrush" Color="#F0211F26" />
-          <SolidColorBrush x:Key="AppBorderBrush" Color="#49454F" />
-          <SolidColorBrush x:Key="AppPrimaryTextBrush" Color="#E6E0E9" />
-          <SolidColorBrush x:Key="AppSecondaryTextBrush" Color="#CAC4D0" />
-          <SolidColorBrush x:Key="AppMutedTextBrush" Color="#938F99" />
-          <SolidColorBrush x:Key="AppHoverBgBrush" Color="#36343B" />
-          <SolidColorBrush x:Key="AppAccentBrush" Color="#D0BCFF" />
-          <SolidColorBrush x:Key="AppAccentDimBrush" Color="#4F378B" />
+          <SolidColorBrush x:Key="AppPrimaryBgBrush" Color="#111412" />
+          <SolidColorBrush x:Key="AppSecondaryBgBrush" Color="#181B19" />
+          <SolidColorBrush x:Key="AppTertiaryBgBrush" Color="#272B28" />
+          <SolidColorBrush x:Key="AppOverlayBgBrush" Color="#F01D211E" />
+          <SolidColorBrush x:Key="AppBorderBrush" Color="#444A45" />
+          <SolidColorBrush x:Key="AppPrimaryTextBrush" Color="#E3E6E3" />
+          <SolidColorBrush x:Key="AppSecondaryTextBrush" Color="#C4C9C4" />
+          <SolidColorBrush x:Key="AppMutedTextBrush" Color="#8E948F" />
+          <SolidColorBrush x:Key="AppHoverBgBrush" Color="#323633" />
+          <SolidColorBrush x:Key="AppAccentBrush" Color="#8FD8A5" />
+          <SolidColorBrush x:Key="AppAccentDimBrush" Color="#194C2B" />
         </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>
     </ResourceDictionary>
   </Application.Resources>
 
   <Application.Styles>
-    <themes:MaterialTheme BaseTheme="Dark" PrimaryColor="DeepPurple" SecondaryColor="Pink" />
+    <themes:MaterialTheme BaseTheme="Dark" PrimaryColor="Green" SecondaryColor="Amber" />
     <materialIcons:MaterialIconStyles />
 
     <StyleInclude Source="avares://CopperCalzone/Styles/Typography.axaml" />

@@ -6,7 +6,7 @@ namespace CopperCalzone.ViewModels;
 public sealed class NetItemViewModel(PcbNet net)
 {
     private static readonly IBrush PowerBrush = new SolidColorBrush(Color.Parse("#EFB8C8"));
-    private static readonly IBrush SignalBrush = new SolidColorBrush(Color.Parse("#D0BCFF"));
+    private static readonly IBrush SignalBrush = new SolidColorBrush(Color.Parse("#8FD8A5"));
 
     public string DisplayName => string.IsNullOrEmpty(Net.Name) ? "(unnamed)" : Net.Name;
     public IBrush DotBrush => Net.IsPower ? PowerBrush : SignalBrush;
