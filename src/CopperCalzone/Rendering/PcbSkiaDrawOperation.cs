@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Rendering.SceneGraph;
@@ -10,17 +10,6 @@ namespace CopperCalzone.Rendering;
 
 public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
 {
-    private readonly Rect _bounds;
-    private readonly PcbRenderState _state;
-
-    private static readonly SKTypeface MonoBoldTypeface =
-        SKTypeface.FromFamilyName("Consolas", SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright)
-        ?? SKTypeface.Default;
-
-    private static readonly SKTypeface SansSemiBoldTypeface =
-        SKTypeface.FromFamilyName("Segoe UI", SKFontStyleWeight.SemiBold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright)
-        ?? SKTypeface.Default;
-
     public static readonly Dictionary<string, SKColor> LayerColors = new(StringComparer.Ordinal)
     {
         ["F.Cu"] = new SKColor(0xC8, 0x34, 0x34),
@@ -38,13 +27,34 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
         ["B.Fab"] = new SKColor(0x78, 0x90, 0x9C)
     };
 
+    private static readonly SKColor BomActiveGlow = new(0x00, 0xE5, 0xFF);
+    private static readonly SKColor BomPlacedActiveGlow = new(0x4A, 0xDE, 0x80);
+
+    // Neon Cyan for active component
+    private static readonly SKColor BomPlacedGlow = new(0x22, 0xC5, 0x5E);
+
+    private static readonly SKColor BomPrimaryGlow = new(0xFF, 0xB1, 0x42);
     private static readonly SKColor HighlightColor = new(0x00, 0xF0, 0xFF);
-    private static readonly SKColor BomPrimaryGlow = new(0xFF, 0xB1, 0x42); // Vibrant Golden Amber
-    private static readonly SKColor BomActiveGlow = new(0x00, 0xE5, 0xFF);  // Neon Cyan for active component
-    private static readonly SKColor BomPlacedGlow = new(0x22, 0xC5, 0x5E);  // Vibrant Emerald Green for placed components
-    private static readonly SKColor BomPlacedActiveGlow = new(0x4A, 0xDE, 0x80); // Electric Mint Green for active placed component
-    private static readonly SKColor Pin1Color = new(0xFF, 0x38, 0x38);      // Vibrant Coral Red for Pin 1 indicator
+
+    private static readonly SKTypeface MonoBoldTypeface =
+        SKTypeface.FromFamilyName("Consolas", SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright)
+        ?? SKTypeface.Default;
+
+    // Vibrant Golden Amber
+    // Vibrant Emerald Green for placed components
+    // Electric Mint Green for active placed component
+    private static readonly SKColor Pin1Color = new(0xFF, 0x38, 0x38);
+
+    private static readonly SKTypeface SansSemiBoldTypeface =
+        SKTypeface.FromFamilyName("Segoe UI", SKFontStyleWeight.SemiBold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright)
+        ?? SKTypeface.Default;
+
+    // Vibrant Coral Red for Pin 1 indicator
     private static readonly SKColor ViaCopperColor = new(0xB8, 0x86, 0x0B);
+
+    private readonly Rect _bounds;
+    private readonly PcbRenderState _state;
+    public Rect Bounds => _bounds;
 
     public PcbSkiaDrawOperation(Rect bounds, PcbRenderState state)
     {
@@ -52,13 +62,13 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
         _state = state;
     }
 
-    public Rect Bounds => _bounds;
-
-    public void Dispose() { }
-
-    public bool HitTest(Point p) => _bounds.Contains(p);
+    public void Dispose()
+    {
+    }
 
     public bool Equals(ICustomDrawOperation? other) => false;
+
+    public bool HitTest(Point p) => _bounds.Contains(p);
 
     public void Render(ImmediateDrawingContext context)
     {
@@ -120,6 +130,380 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
         canvas.Restore();
     }
 
+    private static SKPath BuildPolygonPath(List<double[]> poly)
+    {
+        var path = new SKPath();
+        path.MoveTo((float)poly[0][0], (float)poly[0][1]);
+        for (int i = 1; i < poly.Count; i++)
+        {
+            path.LineTo((float)poly[i][0], (float)poly[i][1]);
+        }
+        path.Close();
+        return path;
+    }
+
+    private static string CleanDisplayNetName(string netName)
+    {
+        if (string.IsNullOrEmpty(netName)) return "";
+        if (netName.StartsWith("Net-(", StringComparison.Ordinal) && netName.EndsWith(')'))
+            return netName[5..^1];
+        if (netName.StartsWith("unconnected-(", StringComparison.Ordinal))
+            return "NC";
+        return netName;
+    }
+
+    private static void DrawGraphicItem(SKCanvas canvas, PcbGraphic dwg, SKPaint strokePaint, SKPaint fillPaint)
+    {
+        if (dwg.Type == "gr_text") return;
+
+        if (dwg.Type == "gr_line" && dwg.Start is { Length: >= 2 } && dwg.End is { Length: >= 2 })
+        {
+            canvas.DrawLine((float)dwg.Start[0], (float)dwg.Start[1], (float)dwg.End[0], (float)dwg.End[1], strokePaint);
+        }
+        else if (dwg.Type == "gr_arc" && dwg.Start is { Length: >= 2 } && dwg.Mid is { Length: >= 2 } && dwg.End is { Length: >= 2 })
+        {
+            using var path = new SKPath();
+            path.MoveTo((float)dwg.Start[0], (float)dwg.Start[1]);
+            float cpx = (float)(2.0 * dwg.Mid[0] - 0.5 * (dwg.Start[0] + dwg.End[0]));
+            float cpy = (float)(2.0 * dwg.Mid[1] - 0.5 * (dwg.Start[1] + dwg.End[1]));
+            path.QuadTo(cpx, cpy, (float)dwg.End[0], (float)dwg.End[1]);
+            canvas.DrawPath(path, strokePaint);
+        }
+        else if (dwg.Type == "gr_circle" && dwg.Center is { Length: >= 2 } && dwg.End is { Length: >= 2 })
+        {
+            double dx = dwg.End[0] - dwg.Center[0];
+            double dy = dwg.End[1] - dwg.Center[1];
+            float r = (float)Math.Sqrt(dx * dx + dy * dy);
+            bool isFilled = !string.IsNullOrEmpty(dwg.Fill) && dwg.Fill is not ("no" or "none");
+            if (isFilled)
+            {
+                canvas.DrawCircle((float)dwg.Center[0], (float)dwg.Center[1], r, fillPaint);
+            }
+            canvas.DrawCircle((float)dwg.Center[0], (float)dwg.Center[1], r, strokePaint);
+        }
+        else if (dwg.Type == "gr_rect" && dwg.Start is { Length: >= 2 } && dwg.End is { Length: >= 2 })
+        {
+            float rx = (float)Math.Min(dwg.Start[0], dwg.End[0]);
+            float ry = (float)Math.Min(dwg.Start[1], dwg.End[1]);
+            float rw = (float)Math.Abs(dwg.End[0] - dwg.Start[0]);
+            float rh = (float)Math.Abs(dwg.End[1] - dwg.Start[1]);
+            bool isFilled = !string.IsNullOrEmpty(dwg.Fill) && dwg.Fill is not ("no" or "none");
+            if (isFilled)
+            {
+                canvas.DrawRect(rx, ry, rw, rh, fillPaint);
+            }
+            canvas.DrawRect(rx, ry, rw, rh, strokePaint);
+        }
+        else if (dwg.Type == "gr_poly" && dwg.Pts is { Count: > 2 })
+        {
+            using var path = BuildPolygonPath(dwg.Pts);
+            bool isFilled = !string.IsNullOrEmpty(dwg.Fill) && dwg.Fill is not ("no" or "none");
+            if (isFilled)
+            {
+                canvas.DrawPath(path, fillPaint);
+            }
+            if (dwg.Width > 0)
+            {
+                canvas.DrawPath(path, strokePaint);
+            }
+            else if (!isFilled)
+            {
+                float oldW = strokePaint.StrokeWidth;
+                strokePaint.StrokeWidth = 0.05f;
+                canvas.DrawPath(path, strokePaint);
+                strokePaint.StrokeWidth = oldW;
+            }
+        }
+    }
+
+    private static void DrawHatchedPath(SKCanvas canvas, SKPath polyPath, SKColor color)
+    {
+        canvas.Save();
+        canvas.ClipPath(polyPath, SKClipOperation.Intersect, true);
+
+        SKRect bounds = polyPath.Bounds;
+        float step = 0.8f; // 0.8mm hatch spacing
+        using var hatchPaint = new SKPaint
+        {
+            IsAntialias = true,
+            Style = SKPaintStyle.Stroke,
+            Color = color,
+            StrokeWidth = 0.12f
+        };
+
+        float minX = bounds.Left - bounds.Height;
+        float maxX = bounds.Right + bounds.Height;
+        for (float x = minX; x <= maxX; x += step)
+        {
+            canvas.DrawLine(x, bounds.Top, x + bounds.Height, bounds.Bottom, hatchPaint);
+        }
+
+        canvas.Restore();
+    }
+
+    private static void DrawOutlinedText(
+        SKCanvas canvas,
+        string text,
+        float x,
+        float y,
+        float fontSize,
+        SKTypeface typeface,
+        SKColor fillColor,
+        SKColor strokeColor,
+        float strokeWidth)
+    {
+        using var paint = new SKPaint
+        {
+            IsAntialias = true,
+            Typeface = typeface,
+            TextSize = fontSize,
+            TextAlign = SKTextAlign.Center,
+            StrokeJoin = SKStrokeJoin.Round
+        };
+
+        // Vertically center baseline
+        var metrics = paint.FontMetrics;
+        float baselineOffset = -(metrics.Ascent + metrics.Descent) / 2f;
+        float drawY = y + baselineOffset;
+
+        paint.Style = SKPaintStyle.Stroke;
+        paint.StrokeWidth = strokeWidth;
+        paint.Color = strokeColor;
+        canvas.DrawText(text, x, drawY, paint);
+
+        paint.Style = SKPaintStyle.Fill;
+        paint.Color = fillColor;
+        canvas.DrawText(text, x, drawY, paint);
+    }
+
+    private static void DrawPadDrill(SKCanvas canvas, PcbPad pad, SKPaint fillPaint)
+    {
+        if (pad.DrillW > 0 && pad.DrillH > 0 && Math.Abs(pad.DrillW - pad.DrillH) > 0.0001)
+        {
+            canvas.Save();
+            canvas.Translate((float)pad.X, (float)pad.Y);
+            if (Math.Abs(pad.Rot) > 0.001)
+            {
+                canvas.RotateDegrees((float)(-pad.Rot));
+            }
+            float dw = (float)pad.DrillW;
+            float dh = (float)pad.DrillH;
+            float r = Math.Min(dw, dh) / 2f;
+            canvas.DrawRoundRect(-dw / 2f, -dh / 2f, dw, dh, r, r, fillPaint);
+            canvas.Restore();
+        }
+        else
+        {
+            canvas.DrawCircle((float)pad.X, (float)pad.Y, (float)(pad.Drill / 2.0), fillPaint);
+        }
+    }
+
+    private static void DrawPadShape(SKCanvas canvas, PcbPad pad, SKPaint fillPaint, float scaleMultiplier)
+    {
+        canvas.Save();
+        canvas.Translate((float)pad.X, (float)pad.Y);
+        if (Math.Abs(pad.Rot) > 0.001)
+        {
+            canvas.RotateDegrees((float)(-pad.Rot));
+        }
+
+        float w = (float)pad.W * scaleMultiplier;
+        float h = (float)pad.H * scaleMultiplier;
+
+        if (pad.Shape == "circle")
+        {
+            canvas.DrawCircle(0, 0, w / 2f, fillPaint);
+        }
+        else if (pad.Shape == "oval")
+        {
+            float r = Math.Min(w, h) / 2f;
+            canvas.DrawRoundRect(-w / 2f, -h / 2f, w, h, r, r, fillPaint);
+        }
+        else if (pad.Shape == "roundrect")
+        {
+            float rratio = (float)(pad.Rratio > 0 ? pad.Rratio : 0.25);
+            float r = Math.Min(w, h) * rratio;
+            canvas.DrawRoundRect(-w / 2f, -h / 2f, w, h, r, r, fillPaint);
+        }
+        else
+        {
+            canvas.DrawRect(-w / 2f, -h / 2f, w, h, fillPaint);
+        }
+
+        canvas.Restore();
+    }
+
+    private static void DrawTrack(SKCanvas canvas, PcbTrack track, SKPaint strokePaint)
+    {
+        if (track.Type == "segment")
+        {
+            canvas.DrawLine(
+                (float)track.Start[0],
+                (float)track.Start[1],
+                (float)track.End[0],
+                (float)track.End[1],
+                strokePaint);
+        }
+        else if (track.Type == "arc" && track.Mid is { Length: >= 2 })
+        {
+            using var path = new SKPath();
+            path.MoveTo((float)track.Start[0], (float)track.Start[1]);
+            float cpx = (float)(2.0 * track.Mid[0] - 0.5 * (track.Start[0] + track.End[0]));
+            float cpy = (float)(2.0 * track.Mid[1] - 0.5 * (track.Start[1] + track.End[1]));
+            path.QuadTo(cpx, cpy, (float)track.End[0], (float)track.End[1]);
+            canvas.DrawPath(path, strokePaint);
+        }
+    }
+
+    private void DrawPadText(SKCanvas canvas, SKMatrix screenMatrix, PcbPad pad, bool isHighlight)
+    {
+        string netName = pad.NetName ?? "";
+        string pinNum = pad.Num ?? "";
+        if (string.IsNullOrEmpty(netName) && string.IsNullOrEmpty(pinNum))
+            return;
+
+        string displayNet = CleanDisplayNetName(netName);
+
+        var (sx, sy) = WorldToScreen(pad.X, pad.Y);
+
+        float padMaxPx = (float)(Math.Max(pad.W, pad.H) * _state.Scale + 30);
+        if (sx < -padMaxPx || sx > _bounds.Width + padMaxPx || sy < -padMaxPx || sy > _bounds.Height + padMaxPx)
+            return;
+
+        double angle = pad.Rot;
+        bool isVertical = pad.H > pad.W * 1.25;
+        if (isVertical) angle += 90.0;
+        angle -= _state.Rotation;
+
+        double normAngle = ((angle % 360.0) + 360.0) % 360.0;
+        if (_state.IsFlipped)
+            normAngle = (360.0 - normAngle) % 360.0;
+        if (normAngle > 90.0 && normAngle < 270.0)
+            angle += 180.0;
+
+        canvas.Save();
+        canvas.SetMatrix(screenMatrix);
+        canvas.Translate(sx, sy);
+        canvas.RotateDegrees((float)(-angle));
+        if (_state.IsFlipped)
+            canvas.Scale(-1f, 1f);
+
+        double lengthAxis = isVertical ? pad.H : pad.W;
+        double widthAxis = isVertical ? pad.W : pad.H;
+        double availW = lengthAxis * _state.Scale * 0.92;
+        double availH = widthAxis * _state.Scale * 0.92;
+        bool isThroughHole = pad.Drill > 0 || pad.Layers.Contains("*.Cu");
+
+        bool showTwoLines = !string.IsNullOrEmpty(pinNum) && !string.IsNullOrEmpty(displayNet) && availH > 22 && availW > 16;
+
+        if (showTwoLines)
+        {
+            float fSizeNum = (float)Math.Max(7.0, Math.Min(availH * 0.32, 20.0));
+            float fSizeNet = (float)Math.Max(8.0, Math.Min(Math.Min(availH * 0.40, availW / (Math.Max(displayNet.Length, 1) * 0.62)), 26.0));
+
+            SKColor strokeColor = isHighlight ? HighlightColor : new SKColor(0x0B, 0x0E, 0x14, 242);
+            SKColor fillNum = isHighlight ? new SKColor(0x05, 0x08, 0x10) : new SKColor(0xFF, 0xFF, 0xFF, 216);
+            SKColor fillNet = isHighlight ? new SKColor(0x05, 0x08, 0x10) : SKColors.White;
+
+            DrawOutlinedText(canvas, pinNum, 0, (float)(-availH * 0.22), fSizeNum, MonoBoldTypeface, fillNum, strokeColor, Math.Max(2f, fSizeNum * 0.22f));
+            DrawOutlinedText(canvas, displayNet, 0, (float)(availH * 0.24), fSizeNet, MonoBoldTypeface, fillNet, strokeColor, Math.Max(2f, fSizeNet * 0.22f));
+        }
+        else
+        {
+            string text = !string.IsNullOrEmpty(displayNet) ? displayNet : pinNum;
+            double fSize = isThroughHole
+                ? Math.Max(availH * 0.70, pad.Drill * _state.Scale * 0.65)
+                : availH * 0.70;
+            fSize = Math.Min(fSize, availW / (Math.Max(text.Length, 1) * 0.58));
+            float clampedSize = (float)Math.Max(7.0, Math.Min(fSize, 52.0));
+
+            SKColor strokeColor = isHighlight ? HighlightColor : new SKColor(0x0B, 0x0E, 0x14, 242);
+            SKColor fillColor = isHighlight ? new SKColor(0x05, 0x08, 0x10) : SKColors.White;
+
+            DrawOutlinedText(canvas, text, 0, 0, clampedSize, MonoBoldTypeface, fillColor, strokeColor, Math.Max(2f, clampedSize * 0.22f));
+        }
+
+        canvas.Restore();
+    }
+
+    private void DrawSilkscreenText(
+        SKCanvas canvas,
+        SKMatrix screenMatrix,
+        string text,
+        string layer,
+        double worldX,
+        double worldY,
+        double rot,
+        double sizeMm,
+        byte alpha)
+    {
+        double pxSize = (sizeMm > 0 ? sizeMm : 1.0) * _state.Scale;
+        if (pxSize < 4.0) return;
+
+        var (sx, sy) = WorldToScreen(worldX, worldY);
+
+        float maxPx = (float)(pxSize * Math.Max(text.Length, 2) + 20);
+        if (sx < -maxPx || sx > _bounds.Width + maxPx || sy < -maxPx || sy > _bounds.Height + maxPx)
+            return;
+
+        double angle = _state.IsFlipped ? -rot : rot;
+        angle -= _state.Rotation;
+
+        canvas.Save();
+        canvas.SetMatrix(screenMatrix);
+        canvas.Translate(sx, sy);
+        if (Math.Abs(angle) > 0.01)
+            canvas.RotateDegrees((float)(-angle));
+
+        bool isMirrored = (layer.StartsWith("B.", StringComparison.Ordinal) && !_state.IsFlipped)
+                       || (layer.StartsWith("F.", StringComparison.Ordinal) && _state.IsFlipped);
+        if (isMirrored)
+            canvas.Scale(-1f, 1f);
+
+        float fSize = (float)Math.Max(7.0, Math.Round(pxSize));
+        DrawOutlinedText(
+            canvas,
+            text,
+            0,
+            0,
+            fSize,
+            SansSemiBoldTypeface,
+            GetLayerColor(layer, alpha),
+            new SKColor(0x0B, 0x0E, 0x14, (byte)(alpha * 0.75)),
+            Math.Max(1.5f, fSize * 0.16f));
+
+        canvas.Restore();
+    }
+
+    private void DrawViaText(SKCanvas canvas, SKMatrix screenMatrix, PcbVia via, string netName, bool isHighlight)
+    {
+        if (netName.StartsWith("unconnected-(", StringComparison.Ordinal))
+            return;
+
+        string text = CleanDisplayNetName(netName);
+        if (string.IsNullOrEmpty(text))
+            return;
+
+        var (sx, sy) = WorldToScreen(via.X, via.Y);
+
+        double viaPx = via.Size * _state.Scale;
+        if (sx < -viaPx || sx > _bounds.Width + viaPx || sy < -viaPx || sy > _bounds.Height + viaPx)
+            return;
+
+        canvas.Save();
+        canvas.SetMatrix(screenMatrix);
+        canvas.Translate(sx, sy);
+        if (_state.IsFlipped)
+            canvas.Scale(-1f, 1f);
+
+        float fSize = (float)Math.Max(7.0, Math.Min(viaPx * 0.75, 28.0));
+        SKColor strokeColor = isHighlight ? HighlightColor : new SKColor(0x0B, 0x0E, 0x14, 242);
+        SKColor fillColor = isHighlight ? new SKColor(0x05, 0x08, 0x10) : SKColors.White;
+
+        DrawOutlinedText(canvas, text, 0, 0, fSize, MonoBoldTypeface, fillColor, strokeColor, Math.Max(2f, fSize * 0.22f));
+        canvas.Restore();
+    }
+
     private SKColor GetLayerColor(string layerName, byte alpha = 255)
     {
         if (LayerColors.TryGetValue(layerName, out var c))
@@ -128,8 +512,17 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
         return new SKColor(0x88, 0x88, 0x88, alpha);
     }
 
+    private bool IsViaVisible(PcbVia via)
+    {
+        foreach (string l in via.Layers)
+        {
+            if (_state.VisibleLayers.Contains(l)) return true;
+        }
+        return false;
+    }
+
     private void RenderBackgroundLayer(
-        SKCanvas canvas,
+            SKCanvas canvas,
         PcbBoard board,
         SKColor drillBgColor,
         SKMatrix screenMatrix,
@@ -377,119 +770,6 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
         canvas.SetMatrix(worldMatrix);
     }
 
-    private void RenderHighlightLayer(
-        SKCanvas canvas,
-        PcbBoard board,
-        SKColor drillBgColor,
-        SKMatrix screenMatrix,
-        SKMatrix worldMatrix)
-    {
-        int activeNet = _state.ActiveNetId!.Value;
-
-        using var strokePaint = new SKPaint
-        {
-            IsAntialias = true,
-            Style = SKPaintStyle.Stroke,
-            StrokeCap = SKStrokeCap.Round,
-            StrokeJoin = SKStrokeJoin.Round,
-            Color = HighlightColor
-        };
-
-        using var fillPaint = new SKPaint
-        {
-            IsAntialias = true,
-            Style = SKPaintStyle.Fill,
-            Color = HighlightColor
-        };
-
-        // 1. Highlight Active Zones
-        if (_state.ZoneMode != ZoneDisplayMode.Hide)
-        {
-            fillPaint.Color = HighlightColor.WithAlpha(115); // 0.45 alpha
-            strokePaint.Color = HighlightColor;
-            strokePaint.StrokeWidth = 0.12f;
-
-            foreach (var zone in board.Zones)
-            {
-                if (zone.Net != activeNet) continue;
-                if (!_state.VisibleLayers.Contains(zone.Layer)) continue;
-
-                foreach (var poly in zone.Polygons)
-                {
-                    if (poly.Count < 3) continue;
-                    using var path = BuildPolygonPath(poly);
-                    if (_state.ZoneMode != ZoneDisplayMode.Outline)
-                        canvas.DrawPath(path, fillPaint);
-                    canvas.DrawPath(path, strokePaint);
-                }
-            }
-        }
-
-        // 2. Highlight Active Tracks
-        strokePaint.Color = HighlightColor;
-        foreach (var track in board.Tracks)
-        {
-            if (track.Net != activeNet) continue;
-            if (!_state.VisibleLayers.Contains(track.Layer)) continue;
-
-            strokePaint.StrokeWidth = (float)Math.Max(track.Width * 1.15, 0.2);
-            DrawTrack(canvas, track, strokePaint);
-        }
-
-        // 3. Highlight Active Vias
-        foreach (var via in board.Vias)
-        {
-            if (via.Net != activeNet) continue;
-            if (!IsViaVisible(via)) continue;
-
-            fillPaint.Color = HighlightColor;
-            canvas.DrawCircle((float)via.X, (float)via.Y, (float)(via.Size / 2.0 * 1.2), fillPaint);
-
-            fillPaint.Color = drillBgColor;
-            canvas.DrawCircle((float)via.X, (float)via.Y, (float)(via.Drill / 2.0), fillPaint);
-        }
-
-        // 4. Highlight Active Pads
-        foreach (var pad in board.Pads)
-        {
-            if (pad.Net != activeNet) continue;
-            if (!_state.IsPadVisible(pad)) continue;
-
-            fillPaint.Color = HighlightColor;
-            DrawPadShape(canvas, pad, fillPaint, 1.15f);
-
-            if (pad.Drill > 0)
-            {
-                fillPaint.Color = drillBgColor;
-                DrawPadDrill(canvas, pad, fillPaint);
-            }
-        }
-
-        // 5. Highlight Labels on Active Pads & Vias (in Screen Space)
-        if (_state.ShowPadNetNames)
-        {
-            string activeNetName = board.Nets.FirstOrDefault(n => n.Id == activeNet)?.Name ?? "";
-            foreach (var pad in board.Pads)
-            {
-                if (pad.Net != activeNet) continue;
-                if (!_state.IsPadVisible(pad)) continue;
-                DrawPadText(canvas, screenMatrix, pad, true);
-            }
-
-            if (!string.IsNullOrEmpty(activeNetName))
-            {
-                foreach (var via in board.Vias)
-                {
-                    if (via.Net != activeNet) continue;
-                    if (!IsViaVisible(via)) continue;
-                    DrawViaText(canvas, screenMatrix, via, activeNetName, true);
-                }
-            }
-        }
-
-        canvas.SetMatrix(worldMatrix);
-    }
-
     private void RenderBomHighlightLayer(
         SKCanvas canvas,
         PcbBoard board,
@@ -699,6 +979,119 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
         canvas.SetMatrix(worldMatrix);
     }
 
+    private void RenderHighlightLayer(
+            SKCanvas canvas,
+        PcbBoard board,
+        SKColor drillBgColor,
+        SKMatrix screenMatrix,
+        SKMatrix worldMatrix)
+    {
+        int activeNet = _state.ActiveNetId!.Value;
+
+        using var strokePaint = new SKPaint
+        {
+            IsAntialias = true,
+            Style = SKPaintStyle.Stroke,
+            StrokeCap = SKStrokeCap.Round,
+            StrokeJoin = SKStrokeJoin.Round,
+            Color = HighlightColor
+        };
+
+        using var fillPaint = new SKPaint
+        {
+            IsAntialias = true,
+            Style = SKPaintStyle.Fill,
+            Color = HighlightColor
+        };
+
+        // 1. Highlight Active Zones
+        if (_state.ZoneMode != ZoneDisplayMode.Hide)
+        {
+            fillPaint.Color = HighlightColor.WithAlpha(115); // 0.45 alpha
+            strokePaint.Color = HighlightColor;
+            strokePaint.StrokeWidth = 0.12f;
+
+            foreach (var zone in board.Zones)
+            {
+                if (zone.Net != activeNet) continue;
+                if (!_state.VisibleLayers.Contains(zone.Layer)) continue;
+
+                foreach (var poly in zone.Polygons)
+                {
+                    if (poly.Count < 3) continue;
+                    using var path = BuildPolygonPath(poly);
+                    if (_state.ZoneMode != ZoneDisplayMode.Outline)
+                        canvas.DrawPath(path, fillPaint);
+                    canvas.DrawPath(path, strokePaint);
+                }
+            }
+        }
+
+        // 2. Highlight Active Tracks
+        strokePaint.Color = HighlightColor;
+        foreach (var track in board.Tracks)
+        {
+            if (track.Net != activeNet) continue;
+            if (!_state.VisibleLayers.Contains(track.Layer)) continue;
+
+            strokePaint.StrokeWidth = (float)Math.Max(track.Width * 1.15, 0.2);
+            DrawTrack(canvas, track, strokePaint);
+        }
+
+        // 3. Highlight Active Vias
+        foreach (var via in board.Vias)
+        {
+            if (via.Net != activeNet) continue;
+            if (!IsViaVisible(via)) continue;
+
+            fillPaint.Color = HighlightColor;
+            canvas.DrawCircle((float)via.X, (float)via.Y, (float)(via.Size / 2.0 * 1.2), fillPaint);
+
+            fillPaint.Color = drillBgColor;
+            canvas.DrawCircle((float)via.X, (float)via.Y, (float)(via.Drill / 2.0), fillPaint);
+        }
+
+        // 4. Highlight Active Pads
+        foreach (var pad in board.Pads)
+        {
+            if (pad.Net != activeNet) continue;
+            if (!_state.IsPadVisible(pad)) continue;
+
+            fillPaint.Color = HighlightColor;
+            DrawPadShape(canvas, pad, fillPaint, 1.15f);
+
+            if (pad.Drill > 0)
+            {
+                fillPaint.Color = drillBgColor;
+                DrawPadDrill(canvas, pad, fillPaint);
+            }
+        }
+
+        // 5. Highlight Labels on Active Pads & Vias (in Screen Space)
+        if (_state.ShowPadNetNames)
+        {
+            string activeNetName = board.Nets.FirstOrDefault(n => n.Id == activeNet)?.Name ?? "";
+            foreach (var pad in board.Pads)
+            {
+                if (pad.Net != activeNet) continue;
+                if (!_state.IsPadVisible(pad)) continue;
+                DrawPadText(canvas, screenMatrix, pad, true);
+            }
+
+            if (!string.IsNullOrEmpty(activeNetName))
+            {
+                foreach (var via in board.Vias)
+                {
+                    if (via.Net != activeNet) continue;
+                    if (!IsViaVisible(via)) continue;
+                    DrawViaText(canvas, screenMatrix, via, activeNetName, true);
+                }
+            }
+        }
+
+        canvas.SetMatrix(worldMatrix);
+    }
+
     private void RenderOverlayLayer(SKCanvas canvas, SKMatrix screenMatrix)
     {
         // 1. Hovered Pad Indicator
@@ -746,195 +1139,6 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
         }
     }
 
-    private bool IsViaVisible(PcbVia via)
-    {
-        foreach (string l in via.Layers)
-        {
-            if (_state.VisibleLayers.Contains(l)) return true;
-        }
-        return false;
-    }
-
-    private static SKPath BuildPolygonPath(List<double[]> poly)
-    {
-        var path = new SKPath();
-        path.MoveTo((float)poly[0][0], (float)poly[0][1]);
-        for (int i = 1; i < poly.Count; i++)
-        {
-            path.LineTo((float)poly[i][0], (float)poly[i][1]);
-        }
-        path.Close();
-        return path;
-    }
-
-    private static void DrawHatchedPath(SKCanvas canvas, SKPath polyPath, SKColor color)
-    {
-        canvas.Save();
-        canvas.ClipPath(polyPath, SKClipOperation.Intersect, true);
-
-        SKRect bounds = polyPath.Bounds;
-        float step = 0.8f; // 0.8mm hatch spacing
-        using var hatchPaint = new SKPaint
-        {
-            IsAntialias = true,
-            Style = SKPaintStyle.Stroke,
-            Color = color,
-            StrokeWidth = 0.12f
-        };
-
-        float minX = bounds.Left - bounds.Height;
-        float maxX = bounds.Right + bounds.Height;
-        for (float x = minX; x <= maxX; x += step)
-        {
-            canvas.DrawLine(x, bounds.Top, x + bounds.Height, bounds.Bottom, hatchPaint);
-        }
-
-        canvas.Restore();
-    }
-
-    private static void DrawTrack(SKCanvas canvas, PcbTrack track, SKPaint strokePaint)
-    {
-        if (track.Type == "segment")
-        {
-            canvas.DrawLine(
-                (float)track.Start[0],
-                (float)track.Start[1],
-                (float)track.End[0],
-                (float)track.End[1],
-                strokePaint);
-        }
-        else if (track.Type == "arc" && track.Mid is { Length: >= 2 })
-        {
-            using var path = new SKPath();
-            path.MoveTo((float)track.Start[0], (float)track.Start[1]);
-            float cpx = (float)(2.0 * track.Mid[0] - 0.5 * (track.Start[0] + track.End[0]));
-            float cpy = (float)(2.0 * track.Mid[1] - 0.5 * (track.Start[1] + track.End[1]));
-            path.QuadTo(cpx, cpy, (float)track.End[0], (float)track.End[1]);
-            canvas.DrawPath(path, strokePaint);
-        }
-    }
-
-    private static void DrawPadShape(SKCanvas canvas, PcbPad pad, SKPaint fillPaint, float scaleMultiplier)
-    {
-        canvas.Save();
-        canvas.Translate((float)pad.X, (float)pad.Y);
-        if (Math.Abs(pad.Rot) > 0.001)
-        {
-            canvas.RotateDegrees((float)(-pad.Rot));
-        }
-
-        float w = (float)pad.W * scaleMultiplier;
-        float h = (float)pad.H * scaleMultiplier;
-
-        if (pad.Shape == "circle")
-        {
-            canvas.DrawCircle(0, 0, w / 2f, fillPaint);
-        }
-        else if (pad.Shape == "oval")
-        {
-            float r = Math.Min(w, h) / 2f;
-            canvas.DrawRoundRect(-w / 2f, -h / 2f, w, h, r, r, fillPaint);
-        }
-        else if (pad.Shape == "roundrect")
-        {
-            float rratio = (float)(pad.Rratio > 0 ? pad.Rratio : 0.25);
-            float r = Math.Min(w, h) * rratio;
-            canvas.DrawRoundRect(-w / 2f, -h / 2f, w, h, r, r, fillPaint);
-        }
-        else
-        {
-            canvas.DrawRect(-w / 2f, -h / 2f, w, h, fillPaint);
-        }
-
-        canvas.Restore();
-    }
-
-    private static void DrawPadDrill(SKCanvas canvas, PcbPad pad, SKPaint fillPaint)
-    {
-        if (pad.DrillW > 0 && pad.DrillH > 0 && Math.Abs(pad.DrillW - pad.DrillH) > 0.0001)
-        {
-            canvas.Save();
-            canvas.Translate((float)pad.X, (float)pad.Y);
-            if (Math.Abs(pad.Rot) > 0.001)
-            {
-                canvas.RotateDegrees((float)(-pad.Rot));
-            }
-            float dw = (float)pad.DrillW;
-            float dh = (float)pad.DrillH;
-            float r = Math.Min(dw, dh) / 2f;
-            canvas.DrawRoundRect(-dw / 2f, -dh / 2f, dw, dh, r, r, fillPaint);
-            canvas.Restore();
-        }
-        else
-        {
-            canvas.DrawCircle((float)pad.X, (float)pad.Y, (float)(pad.Drill / 2.0), fillPaint);
-        }
-    }
-
-    private static void DrawGraphicItem(SKCanvas canvas, PcbGraphic dwg, SKPaint strokePaint, SKPaint fillPaint)
-    {
-        if (dwg.Type == "gr_text") return;
-
-        if (dwg.Type == "gr_line" && dwg.Start is { Length: >= 2 } && dwg.End is { Length: >= 2 })
-        {
-            canvas.DrawLine((float)dwg.Start[0], (float)dwg.Start[1], (float)dwg.End[0], (float)dwg.End[1], strokePaint);
-        }
-        else if (dwg.Type == "gr_arc" && dwg.Start is { Length: >= 2 } && dwg.Mid is { Length: >= 2 } && dwg.End is { Length: >= 2 })
-        {
-            using var path = new SKPath();
-            path.MoveTo((float)dwg.Start[0], (float)dwg.Start[1]);
-            float cpx = (float)(2.0 * dwg.Mid[0] - 0.5 * (dwg.Start[0] + dwg.End[0]));
-            float cpy = (float)(2.0 * dwg.Mid[1] - 0.5 * (dwg.Start[1] + dwg.End[1]));
-            path.QuadTo(cpx, cpy, (float)dwg.End[0], (float)dwg.End[1]);
-            canvas.DrawPath(path, strokePaint);
-        }
-        else if (dwg.Type == "gr_circle" && dwg.Center is { Length: >= 2 } && dwg.End is { Length: >= 2 })
-        {
-            double dx = dwg.End[0] - dwg.Center[0];
-            double dy = dwg.End[1] - dwg.Center[1];
-            float r = (float)Math.Sqrt(dx * dx + dy * dy);
-            bool isFilled = !string.IsNullOrEmpty(dwg.Fill) && dwg.Fill is not ("no" or "none");
-            if (isFilled)
-            {
-                canvas.DrawCircle((float)dwg.Center[0], (float)dwg.Center[1], r, fillPaint);
-            }
-            canvas.DrawCircle((float)dwg.Center[0], (float)dwg.Center[1], r, strokePaint);
-        }
-        else if (dwg.Type == "gr_rect" && dwg.Start is { Length: >= 2 } && dwg.End is { Length: >= 2 })
-        {
-            float rx = (float)Math.Min(dwg.Start[0], dwg.End[0]);
-            float ry = (float)Math.Min(dwg.Start[1], dwg.End[1]);
-            float rw = (float)Math.Abs(dwg.End[0] - dwg.Start[0]);
-            float rh = (float)Math.Abs(dwg.End[1] - dwg.Start[1]);
-            bool isFilled = !string.IsNullOrEmpty(dwg.Fill) && dwg.Fill is not ("no" or "none");
-            if (isFilled)
-            {
-                canvas.DrawRect(rx, ry, rw, rh, fillPaint);
-            }
-            canvas.DrawRect(rx, ry, rw, rh, strokePaint);
-        }
-        else if (dwg.Type == "gr_poly" && dwg.Pts is { Count: > 2 })
-        {
-            using var path = BuildPolygonPath(dwg.Pts);
-            bool isFilled = !string.IsNullOrEmpty(dwg.Fill) && dwg.Fill is not ("no" or "none");
-            if (isFilled)
-            {
-                canvas.DrawPath(path, fillPaint);
-            }
-            if (dwg.Width > 0)
-            {
-                canvas.DrawPath(path, strokePaint);
-            }
-            else if (!isFilled)
-            {
-                float oldW = strokePaint.StrokeWidth;
-                strokePaint.StrokeWidth = 0.05f;
-                canvas.DrawPath(path, strokePaint);
-                strokePaint.StrokeWidth = oldW;
-            }
-        }
-    }
-
     private (float X, float Y) WorldToScreen(double worldX, double worldY)
     {
         double effX = _state.IsFlipped ? -worldX : worldX;
@@ -952,199 +1156,5 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
         }
 
         return ((float)(_state.PanX + x2), (float)(_state.PanY + y2));
-    }
-
-    private void DrawSilkscreenText(
-        SKCanvas canvas,
-        SKMatrix screenMatrix,
-        string text,
-        string layer,
-        double worldX,
-        double worldY,
-        double rot,
-        double sizeMm,
-        byte alpha)
-    {
-        double pxSize = (sizeMm > 0 ? sizeMm : 1.0) * _state.Scale;
-        if (pxSize < 4.0) return;
-
-        var (sx, sy) = WorldToScreen(worldX, worldY);
-
-        float maxPx = (float)(pxSize * Math.Max(text.Length, 2) + 20);
-        if (sx < -maxPx || sx > _bounds.Width + maxPx || sy < -maxPx || sy > _bounds.Height + maxPx)
-            return;
-
-        double angle = _state.IsFlipped ? -rot : rot;
-        angle -= _state.Rotation;
-
-        canvas.Save();
-        canvas.SetMatrix(screenMatrix);
-        canvas.Translate(sx, sy);
-        if (Math.Abs(angle) > 0.01)
-            canvas.RotateDegrees((float)(-angle));
-
-        bool isMirrored = (layer.StartsWith("B.", StringComparison.Ordinal) && !_state.IsFlipped)
-                       || (layer.StartsWith("F.", StringComparison.Ordinal) && _state.IsFlipped);
-        if (isMirrored)
-            canvas.Scale(-1f, 1f);
-
-        float fSize = (float)Math.Max(7.0, Math.Round(pxSize));
-        DrawOutlinedText(
-            canvas,
-            text,
-            0,
-            0,
-            fSize,
-            SansSemiBoldTypeface,
-            GetLayerColor(layer, alpha),
-            new SKColor(0x0B, 0x0E, 0x14, (byte)(alpha * 0.75)),
-            Math.Max(1.5f, fSize * 0.16f));
-
-        canvas.Restore();
-    }
-
-    private void DrawPadText(SKCanvas canvas, SKMatrix screenMatrix, PcbPad pad, bool isHighlight)
-    {
-        string netName = pad.NetName ?? "";
-        string pinNum = pad.Num ?? "";
-        if (string.IsNullOrEmpty(netName) && string.IsNullOrEmpty(pinNum))
-            return;
-
-        string displayNet = CleanDisplayNetName(netName);
-
-        var (sx, sy) = WorldToScreen(pad.X, pad.Y);
-
-        float padMaxPx = (float)(Math.Max(pad.W, pad.H) * _state.Scale + 30);
-        if (sx < -padMaxPx || sx > _bounds.Width + padMaxPx || sy < -padMaxPx || sy > _bounds.Height + padMaxPx)
-            return;
-
-        double angle = pad.Rot;
-        bool isVertical = pad.H > pad.W * 1.25;
-        if (isVertical) angle += 90.0;
-        angle -= _state.Rotation;
-
-        double normAngle = ((angle % 360.0) + 360.0) % 360.0;
-        if (_state.IsFlipped)
-            normAngle = (360.0 - normAngle) % 360.0;
-        if (normAngle > 90.0 && normAngle < 270.0)
-            angle += 180.0;
-
-        canvas.Save();
-        canvas.SetMatrix(screenMatrix);
-        canvas.Translate(sx, sy);
-        canvas.RotateDegrees((float)(-angle));
-        if (_state.IsFlipped)
-            canvas.Scale(-1f, 1f);
-
-        double lengthAxis = isVertical ? pad.H : pad.W;
-        double widthAxis = isVertical ? pad.W : pad.H;
-        double availW = lengthAxis * _state.Scale * 0.92;
-        double availH = widthAxis * _state.Scale * 0.92;
-        bool isThroughHole = pad.Drill > 0 || pad.Layers.Contains("*.Cu");
-
-        bool showTwoLines = !string.IsNullOrEmpty(pinNum) && !string.IsNullOrEmpty(displayNet) && availH > 22 && availW > 16;
-
-        if (showTwoLines)
-        {
-            float fSizeNum = (float)Math.Max(7.0, Math.Min(availH * 0.32, 20.0));
-            float fSizeNet = (float)Math.Max(8.0, Math.Min(Math.Min(availH * 0.40, availW / (Math.Max(displayNet.Length, 1) * 0.62)), 26.0));
-
-            SKColor strokeColor = isHighlight ? HighlightColor : new SKColor(0x0B, 0x0E, 0x14, 242);
-            SKColor fillNum = isHighlight ? new SKColor(0x05, 0x08, 0x10) : new SKColor(0xFF, 0xFF, 0xFF, 216);
-            SKColor fillNet = isHighlight ? new SKColor(0x05, 0x08, 0x10) : SKColors.White;
-
-            DrawOutlinedText(canvas, pinNum, 0, (float)(-availH * 0.22), fSizeNum, MonoBoldTypeface, fillNum, strokeColor, Math.Max(2f, fSizeNum * 0.22f));
-            DrawOutlinedText(canvas, displayNet, 0, (float)(availH * 0.24), fSizeNet, MonoBoldTypeface, fillNet, strokeColor, Math.Max(2f, fSizeNet * 0.22f));
-        }
-        else
-        {
-            string text = !string.IsNullOrEmpty(displayNet) ? displayNet : pinNum;
-            double fSize = isThroughHole
-                ? Math.Max(availH * 0.70, pad.Drill * _state.Scale * 0.65)
-                : availH * 0.70;
-            fSize = Math.Min(fSize, availW / (Math.Max(text.Length, 1) * 0.58));
-            float clampedSize = (float)Math.Max(7.0, Math.Min(fSize, 52.0));
-
-            SKColor strokeColor = isHighlight ? HighlightColor : new SKColor(0x0B, 0x0E, 0x14, 242);
-            SKColor fillColor = isHighlight ? new SKColor(0x05, 0x08, 0x10) : SKColors.White;
-
-            DrawOutlinedText(canvas, text, 0, 0, clampedSize, MonoBoldTypeface, fillColor, strokeColor, Math.Max(2f, clampedSize * 0.22f));
-        }
-
-        canvas.Restore();
-    }
-
-    private void DrawViaText(SKCanvas canvas, SKMatrix screenMatrix, PcbVia via, string netName, bool isHighlight)
-    {
-        if (netName.StartsWith("unconnected-(", StringComparison.Ordinal))
-            return;
-
-        string text = CleanDisplayNetName(netName);
-        if (string.IsNullOrEmpty(text))
-            return;
-
-        var (sx, sy) = WorldToScreen(via.X, via.Y);
-
-        double viaPx = via.Size * _state.Scale;
-        if (sx < -viaPx || sx > _bounds.Width + viaPx || sy < -viaPx || sy > _bounds.Height + viaPx)
-            return;
-
-        canvas.Save();
-        canvas.SetMatrix(screenMatrix);
-        canvas.Translate(sx, sy);
-        if (_state.IsFlipped)
-            canvas.Scale(-1f, 1f);
-
-        float fSize = (float)Math.Max(7.0, Math.Min(viaPx * 0.75, 28.0));
-        SKColor strokeColor = isHighlight ? HighlightColor : new SKColor(0x0B, 0x0E, 0x14, 242);
-        SKColor fillColor = isHighlight ? new SKColor(0x05, 0x08, 0x10) : SKColors.White;
-
-        DrawOutlinedText(canvas, text, 0, 0, fSize, MonoBoldTypeface, fillColor, strokeColor, Math.Max(2f, fSize * 0.22f));
-        canvas.Restore();
-    }
-
-    private static string CleanDisplayNetName(string netName)
-    {
-        if (string.IsNullOrEmpty(netName)) return "";
-        if (netName.StartsWith("Net-(", StringComparison.Ordinal) && netName.EndsWith(')'))
-            return netName[5..^1];
-        if (netName.StartsWith("unconnected-(", StringComparison.Ordinal))
-            return "NC";
-        return netName;
-    }
-
-    private static void DrawOutlinedText(
-        SKCanvas canvas,
-        string text,
-        float x,
-        float y,
-        float fontSize,
-        SKTypeface typeface,
-        SKColor fillColor,
-        SKColor strokeColor,
-        float strokeWidth)
-    {
-        using var paint = new SKPaint
-        {
-            IsAntialias = true,
-            Typeface = typeface,
-            TextSize = fontSize,
-            TextAlign = SKTextAlign.Center,
-            StrokeJoin = SKStrokeJoin.Round
-        };
-
-        // Vertically center baseline
-        var metrics = paint.FontMetrics;
-        float baselineOffset = -(metrics.Ascent + metrics.Descent) / 2f;
-        float drawY = y + baselineOffset;
-
-        paint.Style = SKPaintStyle.Stroke;
-        paint.StrokeWidth = strokeWidth;
-        paint.Color = strokeColor;
-        canvas.DrawText(text, x, drawY, paint);
-
-        paint.Style = SKPaintStyle.Fill;
-        paint.Color = fillColor;
-        canvas.DrawText(text, x, drawY, paint);
     }
 }

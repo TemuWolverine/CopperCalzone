@@ -1,7 +1,7 @@
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CopperCalzone.Models;
+using System.Collections.ObjectModel;
 
 namespace CopperCalzone.ViewModels;
 

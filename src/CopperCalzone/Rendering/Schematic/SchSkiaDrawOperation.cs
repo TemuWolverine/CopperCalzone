@@ -10,30 +10,53 @@ namespace CopperCalzone.Rendering.Schematic;
 
 public sealed class SchSkiaDrawOperation : ICustomDrawOperation
 {
+    private static readonly SKColor ActiveGlow = new(0x00, 0xE5, 0xFF);
+
+    private static readonly SKColor BusColor = new(0x38, 0xBD, 0xF8);
+
+    private static readonly SKColor LabelColor = new(0xF4, 0x72, 0xB6);
+
     private static readonly SKTypeface MonoBoldTypeface =
-        SKTypeface.FromFamilyName("Consolas", SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright)
+                    SKTypeface.FromFamilyName("Consolas", SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright)
         ?? SKTypeface.Default;
 
+    private static readonly SKColor PinNameColor = new(0xC0, 0x84, 0xFC);
+
+    // Lavender
+    private static readonly SKColor PinNumColor = new(0xFB, 0x92, 0x3C);
+
+    private static readonly SKColor PlacedGlow = new(0x22, 0xC5, 0x5E);
+
+    // Neon Cyan
+    private static readonly SKColor PrimaryGlow = new(0xFF, 0xB1, 0x42);
+
     private static readonly SKTypeface SansSemiBoldTypeface =
-        SKTypeface.FromFamilyName("Segoe UI", SKFontStyleWeight.SemiBold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright)
+                        SKTypeface.FromFamilyName("Segoe UI", SKFontStyleWeight.SemiBold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright)
         ?? SKTypeface.Default;
+
+    // Sky Blue
+    private static readonly SKColor SymbolColor = new(0xFB, 0xBF, 0x24);
+
+    // Warm Amber/Yellow for symbol lines
+    private static readonly SKColor TextRefColor = new(0x67, 0xE8, 0xF9);
+
+    // Cyan
+    private static readonly SKColor TextValColor = new(0xF1, 0xF5, 0xF9);
 
     // Palette
     private static readonly SKColor WireColor = new(0x4A, 0xDE, 0x80); // Bright Green
-    private static readonly SKColor BusColor = new(0x38, 0xBD, 0xF8); // Sky Blue
-    private static readonly SKColor SymbolColor = new(0xFB, 0xBF, 0x24); // Warm Amber/Yellow for symbol lines
-    private static readonly SKColor TextRefColor = new(0x67, 0xE8, 0xF9); // Cyan
-    private static readonly SKColor TextValColor = new(0xF1, 0xF5, 0xF9); // Soft White
-    private static readonly SKColor PinNameColor = new(0xC0, 0x84, 0xFC); // Lavender
-    private static readonly SKColor PinNumColor = new(0xFB, 0x92, 0x3C); // Orange
-    private static readonly SKColor LabelColor = new(0xF4, 0x72, 0xB6); // Pink / Rose
 
-    private static readonly SKColor ActiveGlow = new(0x00, 0xE5, 0xFF); // Neon Cyan
-    private static readonly SKColor PrimaryGlow = new(0xFF, 0xB1, 0x42); // Golden Amber
-    private static readonly SKColor PlacedGlow = new(0x22, 0xC5, 0x5E); // Green
+    // Soft White
+    // Orange
+    // Pink / Rose
+
+    // Golden Amber
+    // Green
 
     private readonly Rect _bounds;
     private readonly SchRenderState _state;
+
+    public Rect Bounds => _bounds;
 
     public SchSkiaDrawOperation(Rect bounds, SchRenderState state)
     {
@@ -41,10 +64,13 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
         _state = state;
     }
 
-    public Rect Bounds => _bounds;
-    public void Dispose() { }
-    public bool HitTest(Point p) => _bounds.Contains(p);
+    public void Dispose()
+    {
+    }
+
     public bool Equals(ICustomDrawOperation? other) => false;
+
+    public bool HitTest(Point p) => _bounds.Contains(p);
 
     public void Render(ImmediateDrawingContext context)
     {
@@ -55,56 +81,50 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
         RenderToCanvas(lease.SkCanvas);
     }
 
-    private void RenderToCanvas(SKCanvas canvas)
+    private static void DrawPropertyText(SKCanvas canvas, string text, float x, float y, double rotDeg, SKPaint paint)
     {
-        SKMatrix screenMatrix = canvas.TotalMatrix;
+        int rot = ((int)Math.Round(rotDeg) % 360 + 360) % 360;
+        bool isVertical = rot is 90 or 270;
 
-        canvas.Save();
-        canvas.ClipRect(new SKRect(0, 0, (float)_bounds.Width, (float)_bounds.Height));
-
-        SKColor bgColor = new SKColor(0x0F, 0x13, 0x1D);
-        canvas.DrawColor(bgColor);
-
-        var sch = _state.Schematic;
-        if (sch is null)
+        if (!isVertical)
         {
-            canvas.Restore();
-            return;
+            canvas.DrawText(text, x, y, paint);
         }
+        else
+        {
+            canvas.Save();
+            canvas.Translate(x, y);
+            canvas.RotateDegrees(-90); // Read bottom-to-top
+            canvas.DrawText(text, 0, 0, paint);
+            canvas.Restore();
+        }
+    }
 
-        // Apply World Transform
-        canvas.Translate((float)_state.PanX, (float)_state.PanY);
-        canvas.Scale((float)_state.Scale, (float)_state.Scale);
-        SKMatrix worldMatrix = canvas.TotalMatrix;
+    private void DrawBuses(SKCanvas canvas, KiCadSchematic sch)
+    {
+        if (sch.Buses.Count == 0) return;
 
-        // 1. Draw Grid
-        DrawGrid(canvas);
+        using var paint = new SKPaint
+        {
+            IsAntialias = true,
+            Style = SKPaintStyle.Stroke,
+            Color = BusColor,
+            StrokeCap = SKStrokeCap.Round,
+            StrokeJoin = SKStrokeJoin.Round,
+            StrokeWidth = (float)Math.Max(0.45, 2.8 / _state.Scale)
+        };
 
-        // 2. Draw Sheets
-        DrawSheets(canvas, sch);
-
-        // 3. Draw Buses
-        DrawBuses(canvas, sch);
-
-        // 4. Draw Wires
-        DrawWires(canvas, sch);
-
-        // 5. Draw Junctions
-        DrawJunctions(canvas, sch);
-
-        // 6. Draw No-Connects
-        DrawNoConnects(canvas, sch);
-
-        // 7. Draw Labels
-        DrawLabels(canvas, sch);
-
-        // 8. Draw Symbols
-        DrawSymbols(canvas, sch);
-
-        // 9. Draw Highlights & Reticles
-        DrawHighlights(canvas, sch, screenMatrix, worldMatrix);
-
-        canvas.Restore();
+        using var path = new SKPath();
+        foreach (var b in sch.Buses)
+        {
+            if (b.Points.Count < 2) continue;
+            path.MoveTo((float)b.Points[0].X, (float)b.Points[0].Y);
+            for (int i = 1; i < b.Points.Count; i++)
+            {
+                path.LineTo((float)b.Points[i].X, (float)b.Points[i].Y);
+            }
+        }
+        canvas.DrawPath(path, paint);
     }
 
     private void DrawGrid(SKCanvas canvas)
@@ -142,101 +162,111 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
         }
     }
 
-    private void DrawSheets(SKCanvas canvas, KiCadSchematic sch)
+    private void DrawHighlights(SKCanvas canvas, KiCadSchematic sch, SKMatrix screenMatrix, SKMatrix worldMatrix)
     {
-        if (sch.Sheets.Count == 0) return;
+        var highlighted = _state.HighlightedSymbolRefs;
+        var placed = _state.PlacedSymbolRefs;
+        if (highlighted.Count == 0 && placed.Count == 0) return;
 
-        using var strokePaint = new SKPaint
+        using var reticlePaint = new SKPaint
         {
             IsAntialias = true,
             Style = SKPaintStyle.Stroke,
-            Color = new SKColor(0xFB, 0x92, 0x3C),
-            StrokeWidth = (float)Math.Max(0.2, 1.5 / _state.Scale)
-        };
-
-        using var fillPaint = new SKPaint
-        {
-            IsAntialias = true,
-            Style = SKPaintStyle.Fill,
-            Color = new SKColor(0x45, 0x1A, 0x03, 70)
-        };
-
-        using var textPaint = new SKPaint
-        {
-            IsAntialias = true,
-            Typeface = SansSemiBoldTypeface,
-            TextSize = 2.0f,
-            Color = strokePaint.Color
-        };
-
-        foreach (var s in sch.Sheets)
-        {
-            var rect = new SKRect((float)s.X, (float)s.Y, (float)(s.X + s.Width), (float)(s.Y + s.Height));
-            canvas.DrawRoundRect(rect, 1.0f, 1.0f, fillPaint);
-            canvas.DrawRoundRect(rect, 1.0f, 1.0f, strokePaint);
-
-            canvas.DrawText($"Sheet: {s.Name}", (float)s.X + 1.5f, (float)s.Y + 3.0f, textPaint);
-            if (!string.IsNullOrWhiteSpace(s.FilePath))
-            {
-                textPaint.TextSize = 1.4f;
-                canvas.DrawText(s.FilePath, (float)s.X + 1.5f, (float)s.Y + 5.5f, textPaint);
-                textPaint.TextSize = 2.0f;
-            }
-        }
-    }
-
-    private void DrawWires(SKCanvas canvas, KiCadSchematic sch)
-    {
-        if (sch.Wires.Count == 0) return;
-
-        using var paint = new SKPaint
-        {
-            IsAntialias = true,
-            Style = SKPaintStyle.Stroke,
-            Color = WireColor,
             StrokeCap = SKStrokeCap.Round,
-            StrokeJoin = SKStrokeJoin.Round,
-            StrokeWidth = (float)Math.Max(0.18, 1.4 / _state.Scale)
+            StrokeJoin = SKStrokeJoin.Round
         };
 
-        using var path = new SKPath();
-        foreach (var w in sch.Wires)
-        {
-            if (w.Points.Count < 2) continue;
-            path.MoveTo((float)w.Points[0].X, (float)w.Points[0].Y);
-            for (int i = 1; i < w.Points.Count; i++)
-            {
-                path.LineTo((float)w.Points[i].X, (float)w.Points[i].Y);
-            }
-        }
-        canvas.DrawPath(path, paint);
-    }
-
-    private void DrawBuses(SKCanvas canvas, KiCadSchematic sch)
-    {
-        if (sch.Buses.Count == 0) return;
-
-        using var paint = new SKPaint
+        using var fillGlowPaint = new SKPaint
         {
             IsAntialias = true,
-            Style = SKPaintStyle.Stroke,
-            Color = BusColor,
-            StrokeCap = SKStrokeCap.Round,
-            StrokeJoin = SKStrokeJoin.Round,
-            StrokeWidth = (float)Math.Max(0.45, 2.8 / _state.Scale)
+            Style = SKPaintStyle.Fill
         };
 
-        using var path = new SKPath();
-        foreach (var b in sch.Buses)
+        // Render in World Space
+        foreach (var sym in sch.Symbols)
         {
-            if (b.Points.Count < 2) continue;
-            path.MoveTo((float)b.Points[0].X, (float)b.Points[0].Y);
-            for (int i = 1; i < b.Points.Count; i++)
-            {
-                path.LineTo((float)b.Points[i].X, (float)b.Points[i].Y);
-            }
+            bool isHigh = highlighted.Contains(sym.Reference);
+            bool isPlac = placed.Contains(sym.Reference);
+            if (!isHigh && !isPlac) continue;
+
+            bool isActive = isHigh && string.Equals(sym.Reference, _state.ActiveSymbolRef, StringComparison.OrdinalIgnoreCase);
+
+            SKColor glowColor;
+            if (isPlac && !isHigh) glowColor = PlacedGlow;
+            else if (isActive) glowColor = ActiveGlow;
+            else if (isHigh) glowColor = PrimaryGlow;
+            else glowColor = PlacedGlow;
+
+            float pad = 0.8f;
+            var rect = new SKRect((float)sym.MinX - pad, (float)sym.MinY - pad, (float)sym.MaxX + pad, (float)sym.MaxY + pad);
+
+            fillGlowPaint.Color = glowColor.WithAlpha(isActive ? (byte)55 : (byte)28);
+            canvas.DrawRoundRect(rect, 0.8f, 0.8f, fillGlowPaint);
+
+            reticlePaint.Color = glowColor;
+            reticlePaint.StrokeWidth = (float)Math.Max(0.2, (isActive ? 2.8 : 1.8) / _state.Scale);
+            canvas.DrawRoundRect(rect, 0.8f, 0.8f, reticlePaint);
         }
-        canvas.DrawPath(path, paint);
+
+        // Render Badges in Screen Space for highlighted symbols
+        if (highlighted.Count > 0)
+        {
+            canvas.SetMatrix(screenMatrix);
+            foreach (var sym in sch.Symbols)
+            {
+                if (!highlighted.Contains(sym.Reference)) continue;
+
+                bool isActive = string.Equals(sym.Reference, _state.ActiveSymbolRef, StringComparison.OrdinalIgnoreCase);
+                bool isPlac = placed.Contains(sym.Reference);
+                SKColor compColor = isActive ? ActiveGlow : (isPlac ? PlacedGlow : PrimaryGlow);
+
+                var (sx, sy) = WorldToScreen((sym.MinX + sym.MaxX) / 2.0, sym.MinY);
+                if (sx < -100 || sx > _bounds.Width + 100 || sy < -100 || sy > _bounds.Height + 100)
+                    continue;
+
+                string labelText = isPlac ? $"✓  {sym.Reference}  {sym.Value}" : $"{sym.Reference}  {sym.Value}";
+
+                float fontSize = 12f;
+                using var fontPaint = new SKPaint
+                {
+                    IsAntialias = true,
+                    Typeface = SansSemiBoldTypeface,
+                    TextSize = fontSize
+                };
+
+                float textW = fontPaint.MeasureText(labelText);
+                float pillW = textW + 16f;
+                float pillH = 22f;
+                var pillRect = new SKRect((float)sx - pillW / 2f, (float)sy - pillH - 8f, (float)sx + pillW / 2f, (float)sy - 8f);
+
+                using var pillBgPaint = new SKPaint
+                {
+                    IsAntialias = true,
+                    Style = SKPaintStyle.Fill,
+                    Color = new SKColor(0x12, 0x16, 0x22, 0xF0)
+                };
+                canvas.DrawRoundRect(pillRect, 6f, 6f, pillBgPaint);
+
+                using var pillBorderPaint = new SKPaint
+                {
+                    IsAntialias = true,
+                    Style = SKPaintStyle.Stroke,
+                    StrokeWidth = isActive ? 2.0f : 1.2f,
+                    Color = compColor
+                };
+                canvas.DrawRoundRect(pillRect, 6f, 6f, pillBorderPaint);
+
+                using var textPaint = new SKPaint
+                {
+                    IsAntialias = true,
+                    Typeface = SansSemiBoldTypeface,
+                    TextSize = fontSize,
+                    Color = SKColors.White
+                };
+                canvas.DrawText(labelText, (float)sx - textW / 2f, (float)sy - 8f - pillH / 2f + fontSize * 0.35f, textPaint);
+            }
+            canvas.SetMatrix(worldMatrix);
+        }
     }
 
     private void DrawJunctions(SKCanvas canvas, KiCadSchematic sch)
@@ -255,28 +285,6 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
             float radius = (float)(j.Diameter / 2.0);
             if (radius < 0.35f) radius = 0.45f;
             canvas.DrawCircle((float)j.X, (float)j.Y, radius, paint);
-        }
-    }
-
-    private void DrawNoConnects(SKCanvas canvas, KiCadSchematic sch)
-    {
-        if (sch.NoConnects.Count == 0) return;
-
-        using var paint = new SKPaint
-        {
-            IsAntialias = true,
-            Style = SKPaintStyle.Stroke,
-            Color = new SKColor(0xEF, 0x44, 0x44), // Vibrant Red
-            StrokeWidth = (float)Math.Max(0.18, 1.2 / _state.Scale)
-        };
-
-        float s = 0.5f;
-        foreach (var nc in sch.NoConnects)
-        {
-            float cx = (float)nc.X;
-            float cy = (float)nc.Y;
-            canvas.DrawLine(cx - s, cy - s, cx + s, cy + s, paint);
-            canvas.DrawLine(cx - s, cy + s, cx + s, cy - s, paint);
         }
     }
 
@@ -362,6 +370,71 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
             }
 
             canvas.Restore();
+        }
+    }
+
+    private void DrawNoConnects(SKCanvas canvas, KiCadSchematic sch)
+    {
+        if (sch.NoConnects.Count == 0) return;
+
+        using var paint = new SKPaint
+        {
+            IsAntialias = true,
+            Style = SKPaintStyle.Stroke,
+            Color = new SKColor(0xEF, 0x44, 0x44), // Vibrant Red
+            StrokeWidth = (float)Math.Max(0.18, 1.2 / _state.Scale)
+        };
+
+        float s = 0.5f;
+        foreach (var nc in sch.NoConnects)
+        {
+            float cx = (float)nc.X;
+            float cy = (float)nc.Y;
+            canvas.DrawLine(cx - s, cy - s, cx + s, cy + s, paint);
+            canvas.DrawLine(cx - s, cy + s, cx + s, cy - s, paint);
+        }
+    }
+
+    private void DrawSheets(SKCanvas canvas, KiCadSchematic sch)
+    {
+        if (sch.Sheets.Count == 0) return;
+
+        using var strokePaint = new SKPaint
+        {
+            IsAntialias = true,
+            Style = SKPaintStyle.Stroke,
+            Color = new SKColor(0xFB, 0x92, 0x3C),
+            StrokeWidth = (float)Math.Max(0.2, 1.5 / _state.Scale)
+        };
+
+        using var fillPaint = new SKPaint
+        {
+            IsAntialias = true,
+            Style = SKPaintStyle.Fill,
+            Color = new SKColor(0x45, 0x1A, 0x03, 70)
+        };
+
+        using var textPaint = new SKPaint
+        {
+            IsAntialias = true,
+            Typeface = SansSemiBoldTypeface,
+            TextSize = 2.0f,
+            Color = strokePaint.Color
+        };
+
+        foreach (var s in sch.Sheets)
+        {
+            var rect = new SKRect((float)s.X, (float)s.Y, (float)(s.X + s.Width), (float)(s.Y + s.Height));
+            canvas.DrawRoundRect(rect, 1.0f, 1.0f, fillPaint);
+            canvas.DrawRoundRect(rect, 1.0f, 1.0f, strokePaint);
+
+            canvas.DrawText($"Sheet: {s.Name}", (float)s.X + 1.5f, (float)s.Y + 3.0f, textPaint);
+            if (!string.IsNullOrWhiteSpace(s.FilePath))
+            {
+                textPaint.TextSize = 1.4f;
+                canvas.DrawText(s.FilePath, (float)s.X + 1.5f, (float)s.Y + 5.5f, textPaint);
+                textPaint.TextSize = 2.0f;
+            }
         }
     }
 
@@ -538,130 +611,83 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
         }
     }
 
-    private static void DrawPropertyText(SKCanvas canvas, string text, float x, float y, double rotDeg, SKPaint paint)
+    private void DrawWires(SKCanvas canvas, KiCadSchematic sch)
     {
-        int rot = ((int)Math.Round(rotDeg) % 360 + 360) % 360;
-        bool isVertical = rot is 90 or 270;
+        if (sch.Wires.Count == 0) return;
 
-        if (!isVertical)
-        {
-            canvas.DrawText(text, x, y, paint);
-        }
-        else
-        {
-            canvas.Save();
-            canvas.Translate(x, y);
-            canvas.RotateDegrees(-90); // Read bottom-to-top
-            canvas.DrawText(text, 0, 0, paint);
-            canvas.Restore();
-        }
-    }
-
-    private void DrawHighlights(SKCanvas canvas, KiCadSchematic sch, SKMatrix screenMatrix, SKMatrix worldMatrix)
-    {
-        var highlighted = _state.HighlightedSymbolRefs;
-        var placed = _state.PlacedSymbolRefs;
-        if (highlighted.Count == 0 && placed.Count == 0) return;
-
-        using var reticlePaint = new SKPaint
+        using var paint = new SKPaint
         {
             IsAntialias = true,
             Style = SKPaintStyle.Stroke,
+            Color = WireColor,
             StrokeCap = SKStrokeCap.Round,
-            StrokeJoin = SKStrokeJoin.Round
+            StrokeJoin = SKStrokeJoin.Round,
+            StrokeWidth = (float)Math.Max(0.18, 1.4 / _state.Scale)
         };
 
-        using var fillGlowPaint = new SKPaint
+        using var path = new SKPath();
+        foreach (var w in sch.Wires)
         {
-            IsAntialias = true,
-            Style = SKPaintStyle.Fill
-        };
-
-        // Render in World Space
-        foreach (var sym in sch.Symbols)
-        {
-            bool isHigh = highlighted.Contains(sym.Reference);
-            bool isPlac = placed.Contains(sym.Reference);
-            if (!isHigh && !isPlac) continue;
-
-            bool isActive = isHigh && string.Equals(sym.Reference, _state.ActiveSymbolRef, StringComparison.OrdinalIgnoreCase);
-
-            SKColor glowColor;
-            if (isPlac && !isHigh) glowColor = PlacedGlow;
-            else if (isActive) glowColor = ActiveGlow;
-            else if (isHigh) glowColor = PrimaryGlow;
-            else glowColor = PlacedGlow;
-
-            float pad = 0.8f;
-            var rect = new SKRect((float)sym.MinX - pad, (float)sym.MinY - pad, (float)sym.MaxX + pad, (float)sym.MaxY + pad);
-
-            fillGlowPaint.Color = glowColor.WithAlpha(isActive ? (byte)55 : (byte)28);
-            canvas.DrawRoundRect(rect, 0.8f, 0.8f, fillGlowPaint);
-
-            reticlePaint.Color = glowColor;
-            reticlePaint.StrokeWidth = (float)Math.Max(0.2, (isActive ? 2.8 : 1.8) / _state.Scale);
-            canvas.DrawRoundRect(rect, 0.8f, 0.8f, reticlePaint);
-        }
-
-        // Render Badges in Screen Space for highlighted symbols
-        if (highlighted.Count > 0)
-        {
-            canvas.SetMatrix(screenMatrix);
-            foreach (var sym in sch.Symbols)
+            if (w.Points.Count < 2) continue;
+            path.MoveTo((float)w.Points[0].X, (float)w.Points[0].Y);
+            for (int i = 1; i < w.Points.Count; i++)
             {
-                if (!highlighted.Contains(sym.Reference)) continue;
-
-                bool isActive = string.Equals(sym.Reference, _state.ActiveSymbolRef, StringComparison.OrdinalIgnoreCase);
-                bool isPlac = placed.Contains(sym.Reference);
-                SKColor compColor = isActive ? ActiveGlow : (isPlac ? PlacedGlow : PrimaryGlow);
-
-                var (sx, sy) = WorldToScreen((sym.MinX + sym.MaxX) / 2.0, sym.MinY);
-                if (sx < -100 || sx > _bounds.Width + 100 || sy < -100 || sy > _bounds.Height + 100)
-                    continue;
-
-                string labelText = isPlac ? $"✓  {sym.Reference}  {sym.Value}" : $"{sym.Reference}  {sym.Value}";
-
-                float fontSize = 12f;
-                using var fontPaint = new SKPaint
-                {
-                    IsAntialias = true,
-                    Typeface = SansSemiBoldTypeface,
-                    TextSize = fontSize
-                };
-
-                float textW = fontPaint.MeasureText(labelText);
-                float pillW = textW + 16f;
-                float pillH = 22f;
-                var pillRect = new SKRect((float)sx - pillW / 2f, (float)sy - pillH - 8f, (float)sx + pillW / 2f, (float)sy - 8f);
-
-                using var pillBgPaint = new SKPaint
-                {
-                    IsAntialias = true,
-                    Style = SKPaintStyle.Fill,
-                    Color = new SKColor(0x12, 0x16, 0x22, 0xF0)
-                };
-                canvas.DrawRoundRect(pillRect, 6f, 6f, pillBgPaint);
-
-                using var pillBorderPaint = new SKPaint
-                {
-                    IsAntialias = true,
-                    Style = SKPaintStyle.Stroke,
-                    StrokeWidth = isActive ? 2.0f : 1.2f,
-                    Color = compColor
-                };
-                canvas.DrawRoundRect(pillRect, 6f, 6f, pillBorderPaint);
-
-                using var textPaint = new SKPaint
-                {
-                    IsAntialias = true,
-                    Typeface = SansSemiBoldTypeface,
-                    TextSize = fontSize,
-                    Color = SKColors.White
-                };
-                canvas.DrawText(labelText, (float)sx - textW / 2f, (float)sy - 8f - pillH / 2f + fontSize * 0.35f, textPaint);
+                path.LineTo((float)w.Points[i].X, (float)w.Points[i].Y);
             }
-            canvas.SetMatrix(worldMatrix);
         }
+        canvas.DrawPath(path, paint);
+    }
+
+    private void RenderToCanvas(SKCanvas canvas)
+    {
+        SKMatrix screenMatrix = canvas.TotalMatrix;
+
+        canvas.Save();
+        canvas.ClipRect(new SKRect(0, 0, (float)_bounds.Width, (float)_bounds.Height));
+
+        SKColor bgColor = new SKColor(0x0F, 0x13, 0x1D);
+        canvas.DrawColor(bgColor);
+
+        var sch = _state.Schematic;
+        if (sch is null)
+        {
+            canvas.Restore();
+            return;
+        }
+
+        // Apply World Transform
+        canvas.Translate((float)_state.PanX, (float)_state.PanY);
+        canvas.Scale((float)_state.Scale, (float)_state.Scale);
+        SKMatrix worldMatrix = canvas.TotalMatrix;
+
+        // 1. Draw Grid
+        DrawGrid(canvas);
+
+        // 2. Draw Sheets
+        DrawSheets(canvas, sch);
+
+        // 3. Draw Buses
+        DrawBuses(canvas, sch);
+
+        // 4. Draw Wires
+        DrawWires(canvas, sch);
+
+        // 5. Draw Junctions
+        DrawJunctions(canvas, sch);
+
+        // 6. Draw No-Connects
+        DrawNoConnects(canvas, sch);
+
+        // 7. Draw Labels
+        DrawLabels(canvas, sch);
+
+        // 8. Draw Symbols
+        DrawSymbols(canvas, sch);
+
+        // 9. Draw Highlights & Reticles
+        DrawHighlights(canvas, sch, screenMatrix, worldMatrix);
+
+        canvas.Restore();
     }
 
     private (double ScreenX, double ScreenY) WorldToScreen(double worldX, double worldY)
@@ -671,4 +697,3 @@ public sealed class SchSkiaDrawOperation : ICustomDrawOperation
         return (x2 + _state.PanX, y2 + _state.PanY);
     }
 }
-

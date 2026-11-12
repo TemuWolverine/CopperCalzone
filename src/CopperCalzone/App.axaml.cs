@@ -1,7 +1,6 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Styling;
 using CopperCalzone.Parsing;
 using CopperCalzone.Services;
 using CopperCalzone.ViewModels;

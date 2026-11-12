@@ -1,4 +1,3 @@
-using CopperCalzone.Models.Schematic;
 using CopperCalzone.ViewModels;
 
 namespace CopperCalzone.Parsing;

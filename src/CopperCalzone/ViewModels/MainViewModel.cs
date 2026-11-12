@@ -1,12 +1,11 @@
-using System.Collections.ObjectModel;
 using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CopperCalzone.Models;
-using CopperCalzone.Models.Schematic;
 using CopperCalzone.Parsing;
 using CopperCalzone.Rendering;
 using CopperCalzone.Services;
+using System.Collections.ObjectModel;
 
 namespace CopperCalzone.ViewModels;
 
