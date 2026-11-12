@@ -41,6 +41,8 @@
         <Setter Property="Foreground" Value="{DynamicResource M3OnSurfaceVariantBrush}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Padding" Value="0" />
     </Style>

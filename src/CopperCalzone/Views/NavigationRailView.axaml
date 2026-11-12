@@ -94,10 +94,6 @@
             <!-- Active Indicator Pill -->
             <Border Background="{DynamicResource M3SecondaryContainerBrush}"
                     CornerRadius="16"
-                    Width="56" Height="32"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Top"
-                    Margin="0,2,0,0"
                     IsVisible="{Binding IsViewerTabActive}" />
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="2">
               <materialIcons:MaterialIcon Kind="DeveloperBoard" Width="20" Height="20" HorizontalAlignment="Center" />
@@ -112,20 +108,20 @@
                 Classes="nav-rail-item"
                 Classes.active="{Binding IsViewerTabActive}"
                 Height="56"
+                CornerRadius="28"
                 HorizontalAlignment="Stretch"
-                Padding="16,0"
                 IsVisible="{Binding IsNavRailExpanded}">
           <Grid ColumnDefinitions="Auto,*">
             <Border Grid.ColumnSpan="2"
                     Background="{DynamicResource M3SecondaryContainerBrush}"
                     CornerRadius="28"
                     IsVisible="{Binding IsViewerTabActive}" />
-            <materialIcons:MaterialIcon Grid.Column="0" Kind="DeveloperBoard" Width="22" Height="22" VerticalAlignment="Center" />
+            <materialIcons:MaterialIcon Grid.Column="0" Kind="DeveloperBoard" Width="22" Height="22" VerticalAlignment="Center" Margin="16,0,0,0" />
             <TextBlock Grid.Column="1"
                        Text="PCB Viewer"
                        Classes="m3-label-large"
                        VerticalAlignment="Center"
-                       Margin="16,0,0,0" />
+                       Margin="16,0,16,0" />
           </Grid>
         </Button>
 
@@ -143,10 +139,6 @@
             <!-- Active Indicator Pill -->
             <Border Background="{DynamicResource M3SecondaryContainerBrush}"
                     CornerRadius="16"
-                    Width="56" Height="32"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Top"
-                    Margin="0,2,0,0"
                     IsVisible="{Binding IsSchematicTabActive}" />
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="2">
               <materialIcons:MaterialIcon Kind="FileDocumentOutline" Width="20" Height="20" HorizontalAlignment="Center" />
@@ -161,20 +153,20 @@
                 Classes="nav-rail-item"
                 Classes.active="{Binding IsSchematicTabActive}"
                 Height="56"
+                CornerRadius="28"
                 HorizontalAlignment="Stretch"
-                Padding="16,0"
                 IsVisible="{Binding IsNavRailExpanded}">
           <Grid ColumnDefinitions="Auto,*">
             <Border Grid.ColumnSpan="2"
                     Background="{DynamicResource M3SecondaryContainerBrush}"
                     CornerRadius="28"
                     IsVisible="{Binding IsSchematicTabActive}" />
-            <materialIcons:MaterialIcon Grid.Column="0" Kind="FileDocumentOutline" Width="22" Height="22" VerticalAlignment="Center" />
+            <materialIcons:MaterialIcon Grid.Column="0" Kind="FileDocumentOutline" Width="22" Height="22" VerticalAlignment="Center" Margin="16,0,0,0" />
             <TextBlock Grid.Column="1"
                        Text="Schematic"
                        Classes="m3-label-large"
                        VerticalAlignment="Center"
-                       Margin="16,0,0,0" />
+                       Margin="16,0,16,0" />
           </Grid>
         </Button>
 
@@ -192,10 +184,6 @@
             <!-- Active Indicator Pill -->
             <Border Background="{DynamicResource M3SecondaryContainerBrush}"
                     CornerRadius="16"
-                    Width="56" Height="32"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Top"
-                    Margin="0,2,0,0"
                     IsVisible="{Binding IsGitHubTabActive}" />
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="2">
               <materialIcons:MaterialIcon Kind="Github" Width="20" Height="20" HorizontalAlignment="Center" />
@@ -210,20 +198,20 @@
                 Classes="nav-rail-item"
                 Classes.active="{Binding IsGitHubTabActive}"
                 Height="56"
+                CornerRadius="28"
                 HorizontalAlignment="Stretch"
-                Padding="16,0"
                 IsVisible="{Binding IsNavRailExpanded}">
           <Grid ColumnDefinitions="Auto,*">
             <Border Grid.ColumnSpan="2"
                     Background="{DynamicResource M3SecondaryContainerBrush}"
                     CornerRadius="28"
                     IsVisible="{Binding IsGitHubTabActive}" />
-            <materialIcons:MaterialIcon Grid.Column="0" Kind="Github" Width="22" Height="22" VerticalAlignment="Center" />
+            <materialIcons:MaterialIcon Grid.Column="0" Kind="Github" Width="22" Height="22" VerticalAlignment="Center" Margin="16,0,0,0" />
             <TextBlock Grid.Column="1"
                        Text="GitHub"
                        Classes="m3-label-large"
                        VerticalAlignment="Center"
-                       Margin="16,0,0,0" />
+                       Margin="16,0,16,0" />
           </Grid>
         </Button>
 
@@ -241,10 +229,6 @@
             <!-- Active Indicator Pill -->
             <Border Background="{DynamicResource M3SecondaryContainerBrush}"
                     CornerRadius="16"
-                    Width="56" Height="32"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Top"
-                    Margin="0,2,0,0"
                     IsVisible="{Binding IsSettingsTabActive}" />
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="2">
               <materialIcons:MaterialIcon Kind="CogOutline" Width="20" Height="20" HorizontalAlignment="Center" />
@@ -259,20 +243,20 @@
                 Classes="nav-rail-item"
                 Classes.active="{Binding IsSettingsTabActive}"
                 Height="56"
+                CornerRadius="28"
                 HorizontalAlignment="Stretch"
-                Padding="16,0"
                 IsVisible="{Binding IsNavRailExpanded}">
           <Grid ColumnDefinitions="Auto,*">
             <Border Grid.ColumnSpan="2"
                     Background="{DynamicResource M3SecondaryContainerBrush}"
                     CornerRadius="28"
                     IsVisible="{Binding IsSettingsTabActive}" />
-            <materialIcons:MaterialIcon Grid.Column="0" Kind="CogOutline" Width="22" Height="22" VerticalAlignment="Center" />
+            <materialIcons:MaterialIcon Grid.Column="0" Kind="CogOutline" Width="22" Height="22" VerticalAlignment="Center" Margin="16,0,0,0" />
             <TextBlock Grid.Column="1"
                        Text="Settings"
                        Classes="m3-label-large"
                        VerticalAlignment="Center"
-                       Margin="16,0,0,0" />
+                       Margin="16,0,16,0" />
           </Grid>
         </Button>
 
