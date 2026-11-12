@@ -53,10 +53,6 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isNetsTabActive = true;
 
-    private double _lastBomSidebarWidth = 520;
-
-    private double _lastNonBomSidebarWidth = 340;
-
     [ObservableProperty]
     private double _sidebarWidth = 340;
 
@@ -359,9 +355,7 @@ public sealed partial class MainViewModel : ObservableObject
     {
         if (s.RememberSidebarWidths)
         {
-            _lastNonBomSidebarWidth = s.LastNetsSidebarWidth;
-            _lastBomSidebarWidth = s.LastBomSidebarWidth;
-            SidebarWidth = IsBomTabActive ? _lastBomSidebarWidth : _lastNonBomSidebarWidth;
+            SidebarWidth = s.LastNetsSidebarWidth;
         }
 
         Bom.BomColPlacedWidth = s.BomColPlacedWidth;
@@ -570,15 +564,11 @@ public sealed partial class MainViewModel : ObservableObject
 
         if (wasBom && !IsBomTabActive)
         {
-            _lastBomSidebarWidth = SidebarWidth;
-            SidebarWidth = _lastNonBomSidebarWidth;
             _canvas?.SetHighlightedFootprints(null);
             _canvas?.SetPlacedFootprints(null);
         }
         else if (!wasBom && IsBomTabActive)
         {
-            _lastNonBomSidebarWidth = SidebarWidth;
-            SidebarWidth = Math.Max(520, _lastBomSidebarWidth);
             _canvas?.SetPlacedFootprints(Bom.GetPlacedFootprintRefs());
             if (Bom.SelectedBomItem is not null)
             {
@@ -688,16 +678,11 @@ public sealed partial class MainViewModel : ObservableObject
 
     partial void OnSidebarWidthChanged(double value)
     {
-        if (IsBomTabActive)
-            _lastBomSidebarWidth = value;
-        else
-            _lastNonBomSidebarWidth = value;
-
         var s = SettingsService.Instance.Current;
         if (s.RememberSidebarWidths)
         {
-            s.LastNetsSidebarWidth = _lastNonBomSidebarWidth;
-            s.LastBomSidebarWidth = _lastBomSidebarWidth;
+            s.LastNetsSidebarWidth = value;
+            s.LastBomSidebarWidth = value;
             SettingsService.Instance.Save();
         }
     }

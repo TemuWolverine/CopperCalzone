@@ -134,7 +134,7 @@ public partial class MainView : UserControl
     {
         if (DataContext is MainViewModel vm)
         {
-            vm.SidebarWidth = vm.IsBomTabActive ? 520 : 340;
+            vm.SidebarWidth = 340;
         }
     }
 
