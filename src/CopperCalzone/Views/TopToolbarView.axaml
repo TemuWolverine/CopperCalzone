@@ -13,7 +13,8 @@
           Background="{DynamicResource M3SurfaceBrush}"
           BorderBrush="{DynamicResource M3OutlineVariantBrush}"
           BorderThickness="0,0,0,1"
-          Padding="16,8">
+          Padding="16,8"
+          PointerPressed="OnTitleBarPointerPressed">
     <Grid>
       <!-- DESKTOP APP BAR (Width >= 760) -->
       <Grid x:Name="DesktopGrid"
@@ -62,7 +63,7 @@
           </Border>
         </Border>
 
-        <!-- Right: Assembly Progress Badge + Theme Toggle -->
+        <!-- Right: Assembly Progress Badge + Window Controls -->
         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
           <!-- Assembly Progress Badge (when board has BOM items) -->
           <Border Classes="m3-badge-primary"
@@ -78,6 +79,43 @@
                          VerticalAlignment="Center" />
             </StackPanel>
           </Border>
+
+          <!-- Desktop Window Caption Buttons (Minimize, Maximize/Restore, Close) -->
+          <StackPanel x:Name="WindowControlsPanel"
+                      Orientation="Horizontal"
+                      Spacing="4"
+                      VerticalAlignment="Center">
+            <Button Click="OnMinimizeClick"
+                    ToolTip.Tip="Minimize"
+                    Classes="tool-btn"
+                    Width="32" Height="32"
+                    CornerRadius="16"
+                    Padding="0"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center">
+              <materialIcons:MaterialIcon Kind="WindowMinimize" Width="16" Height="16" />
+            </Button>
+            <Button Click="OnMaximizeRestoreClick"
+                    ToolTip.Tip="Maximize / Restore"
+                    Classes="tool-btn"
+                    Width="32" Height="32"
+                    CornerRadius="16"
+                    Padding="0"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center">
+              <materialIcons:MaterialIcon x:Name="MaximizeIcon" Kind="WindowMaximize" Width="16" Height="16" />
+            </Button>
+            <Button Click="OnCloseClick"
+                    ToolTip.Tip="Close"
+                    Classes="tool-btn"
+                    Width="32" Height="32"
+                    CornerRadius="16"
+                    Padding="0"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center">
+              <materialIcons:MaterialIcon Kind="WindowClose" Width="16" Height="16" />
+            </Button>
+          </StackPanel>
         </StackPanel>
       </Grid>
 

@@ -1,5 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Material.Icons;
 
 namespace CopperCalzone.Views;
 
@@ -22,6 +25,64 @@ public partial class TopToolbarView : UserControl
         if (RootBorder != null)
         {
             RootBorder.Padding = Padding;
+        }
+        if (WindowControlsPanel != null)
+        {
+            WindowControlsPanel.IsVisible = !OperatingSystem.IsAndroid();
+        }
+    }
+
+    private void OnTitleBarPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed &&
+            TopLevel.GetTopLevel(this) is Window window)
+        {
+            if (e.ClickCount == 2)
+            {
+                ToggleMaximize(window);
+            }
+            else
+            {
+                window.BeginMoveDrag(e);
+            }
+        }
+    }
+
+    private void OnMinimizeClick(object? sender, RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is Window window)
+        {
+            window.WindowState = WindowState.Minimized;
+        }
+    }
+
+    private void OnMaximizeRestoreClick(object? sender, RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is Window window)
+        {
+            ToggleMaximize(window);
+        }
+    }
+
+    private void OnCloseClick(object? sender, RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is Window window)
+        {
+            window.Close();
+        }
+    }
+
+    private void ToggleMaximize(Window window)
+    {
+        window.WindowState = window.WindowState == WindowState.Maximized
+            ? WindowState.Normal
+            : WindowState.Maximized;
+
+        if (MaximizeIcon != null)
+        {
+            MaximizeIcon.Kind = window.WindowState == WindowState.Maximized
+                ? MaterialIconKind.WindowRestore
+                : MaterialIconKind.WindowMaximize;
         }
     }
 
