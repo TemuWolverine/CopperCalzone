@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:CopperCalzone.ViewModels"
+             xmlns:m="using:CopperCalzone.Markup"
              xmlns:render="using:CopperCalzone.Rendering.Schematic"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
@@ -92,17 +93,17 @@
       <StackPanel Orientation="Horizontal" Spacing="2">
         <Button Classes="tool-btn"
                 Command="{Binding ZoomInCommand}"
-                ToolTip.Tip="Zoom In (+)">
+                ToolTip.Tip="{m:PlatformTip 'Zoom In', '(+)'}">
           <materialIcons:MaterialIcon Kind="MagnifyPlusOutline" Width="18" Height="18" />
         </Button>
         <Button Classes="tool-btn"
                 Command="{Binding ZoomOutCommand}"
-                ToolTip.Tip="Zoom Out (-)">
+                ToolTip.Tip="{m:PlatformTip 'Zoom Out', '(-)'}">
           <materialIcons:MaterialIcon Kind="MagnifyMinusOutline" Width="18" Height="18" />
         </Button>
         <Button Classes="tool-btn"
                 Command="{Binding ZoomFitCommand}"
-                ToolTip.Tip="Fit to Screen (Home)">
+                ToolTip.Tip="{m:PlatformTip 'Fit to Screen', '(Home)'}">
           <materialIcons:MaterialIcon Kind="FitToScreenOutline" Width="18" Height="18" />
         </Button>
       </StackPanel>

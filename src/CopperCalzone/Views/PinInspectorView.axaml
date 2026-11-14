@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:CopperCalzone.ViewModels"
+             xmlns:m="using:CopperCalzone.Markup"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="430" d:DesignHeight="280"
              x:Class="CopperCalzone.Views.PinInspectorView"
@@ -41,7 +42,7 @@
 
         <Button Grid.Column="1"
                 Command="{Binding ClearSelectionCommand}"
-                ToolTip.Tip="Clear Net Selection (Esc)"
+                ToolTip.Tip="{m:PlatformTip 'Clear Net Selection', '(Esc)'}"
                 Classes="tool-btn"
                 Width="32" Height="32"
                 Padding="0"
@@ -92,7 +93,7 @@
       <Grid ColumnDefinitions="*,Auto,*" Margin="0,4,0,0">
         <Button Grid.Column="0"
                 Command="{Binding PrevPinCommand}"
-                ToolTip.Tip="Fly to Previous Pin on Net ([ or Left Arrow)"
+                ToolTip.Tip="{m:PlatformTip 'Fly to Previous Pin on Net', '([ or Left Arrow)'}"
                 Classes="segmented-left"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Center">
@@ -119,7 +120,7 @@
 
         <Button Grid.Column="2"
                 Command="{Binding NextPinCommand}"
-                ToolTip.Tip="Fly to Next Pin on Net (] or Right Arrow)"
+                ToolTip.Tip="{m:PlatformTip 'Fly to Next Pin on Net', '(] or Right Arrow)'}"
                 Classes="segmented-right"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Center">

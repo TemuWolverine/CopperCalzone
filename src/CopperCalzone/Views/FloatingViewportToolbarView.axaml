@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:CopperCalzone.ViewModels"
+             xmlns:m="using:CopperCalzone.Markup"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="70"
              x:Class="CopperCalzone.Views.FloatingViewportToolbarView"
@@ -18,19 +19,19 @@
       <!-- SLOT 1: Zoom & View Navigation -->
       <Button Classes="tool-btn"
               Command="{Binding ZoomInCommand}"
-              ToolTip.Tip="Zoom In (+)">
+              ToolTip.Tip="{m:PlatformTip 'Zoom In', '(+)'}">
         <materialIcons:MaterialIcon Kind="MagnifyPlusOutline" Width="18" Height="18" />
       </Button>
 
       <Button Classes="tool-btn"
               Command="{Binding ZoomOutCommand}"
-              ToolTip.Tip="Zoom Out (-)">
+              ToolTip.Tip="{m:PlatformTip 'Zoom Out', '(-)'}">
         <materialIcons:MaterialIcon Kind="MagnifyMinusOutline" Width="18" Height="18" />
       </Button>
 
       <Button Classes="tool-btn"
               Command="{Binding ZoomFitCommand}"
-              ToolTip.Tip="Fit Board to View (Home)"
+              ToolTip.Tip="{m:PlatformTip 'Fit Board to View', '(Home)'}"
               Padding="12,6">
         <StackPanel Orientation="Horizontal" Spacing="6">
           <materialIcons:MaterialIcon Kind="FitToScreenOutline" Width="16" Height="16" VerticalAlignment="Center" />
@@ -48,20 +49,20 @@
       <!-- SLOT 2: Orientation & Board Transforms -->
       <Button Classes="tool-btn"
               Command="{Binding RotateCounterClockwiseCommand}"
-              ToolTip.Tip="Rotate 90° CCW (Shift+R)">
+              ToolTip.Tip="{m:PlatformTip 'Rotate 90° CCW', '(Shift+R)'}">
         <materialIcons:MaterialIcon Kind="RotateLeft" Width="18" Height="18" />
       </Button>
 
       <Button Classes="tool-btn"
               Command="{Binding RotateClockwiseCommand}"
-              ToolTip.Tip="Rotate 90° CW (R)">
+              ToolTip.Tip="{m:PlatformTip 'Rotate 90° CW', '(R)'}">
         <materialIcons:MaterialIcon Kind="RotateRight" Width="18" Height="18" />
       </Button>
 
       <Button Classes="tool-btn"
               Classes.active="{Binding IsFlipped}"
               Command="{Binding ToggleFlipBoardCommand}"
-              ToolTip.Tip="Flip Board View / Mirror X (F)"
+              ToolTip.Tip="{m:PlatformTip 'Flip Board View / Mirror X', '(F)'}"
               Padding="12,6">
         <StackPanel Orientation="Horizontal" Spacing="6">
           <materialIcons:MaterialIcon Kind="FlipHorizontal" Width="16" Height="16" VerticalAlignment="Center" />
@@ -80,7 +81,7 @@
       <Button Classes="tool-btn"
               Classes.active="{Binding ShowPadNetNames}"
               Command="{Binding TogglePadLabelsCommand}"
-              ToolTip.Tip="Toggle Net Names on Pads (N)"
+              ToolTip.Tip="{m:PlatformTip 'Toggle Net Names on Pads', '(N)'}"
               Padding="12,6">
         <StackPanel Orientation="Horizontal" Spacing="6">
           <materialIcons:MaterialIcon Kind="TagTextOutline" Width="16" Height="16" VerticalAlignment="Center" />
