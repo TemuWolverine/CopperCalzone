@@ -433,10 +433,12 @@ public sealed partial class MainViewModel : ObservableObject
         BoardTitle = string.IsNullOrWhiteSpace(board.Metadata.Title) ? "KiCad Board" : board.Metadata.Title;
         BoardSubtitle = $"{board.Bbox.Width:0.#} × {board.Bbox.Height:0.#} mm • {board.Nets.Count} nets • {board.Pads.Count} pads";
 
+        var settings = SettingsService.Instance.Current;
+
         // Load sub-viewmodels
         Nets.LoadNets(board.Nets);
         Bom.LoadBom(board);
-        Layers.SetupLayers(board.Layers);
+        Layers.SetupLayers(board.Layers, settings.VisibleLayers);
         Inspector.CloseInspector();
 
         if (_canvas is not null)
@@ -450,9 +452,11 @@ public sealed partial class MainViewModel : ObservableObject
             _ = LoadSchematicsForBoardAsync(pcbFilePath);
         }
 
-        // Apply layer preset and default sidebar tab from settings
-        var settings = SettingsService.Instance.Current;
-        Layers.ApplyLayerPreset(settings.DefaultLayerPreset);
+        // Apply non-default layer preset (when "all", preserve Default Layer Visibility Toggles) and default sidebar tab
+        if (!string.Equals(settings.DefaultLayerPreset, "all", StringComparison.OrdinalIgnoreCase))
+        {
+            Layers.ApplyLayerPreset(settings.DefaultLayerPreset);
+        }
         SwitchTab(settings.DefaultSidebarTab);
     }
 
