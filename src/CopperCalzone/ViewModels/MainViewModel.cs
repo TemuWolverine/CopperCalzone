@@ -133,8 +133,6 @@ public sealed partial class MainViewModel : ObservableObject
 
     public bool IsViewerTabActive => ActiveTabMode == MainTabMode.Viewer;
 
-    public bool IsZoneHatch { get => Layers.IsZoneHatch; set => Layers.IsZoneHatch = value; }
-
     public bool IsZoneHide { get => Layers.IsZoneHide; set => Layers.IsZoneHide = value; }
 
     public bool IsZoneOutline { get => Layers.IsZoneOutline; set => Layers.IsZoneOutline = value; }
@@ -366,15 +364,13 @@ public sealed partial class MainViewModel : ObservableObject
         Layers.ShowPadNetNames = s.ShowPadNetNames;
         IsLeftSidebarOpen = s.IsSidebarOpenByDefault;
 
-        Layers.IsZoneSolid = s.ZoneMode == "solid";
-        Layers.IsZoneHatch = s.ZoneMode == "hatch";
+        Layers.IsZoneSolid = s.ZoneMode is not ("outline" or "hide");
         Layers.IsZoneOutline = s.ZoneMode == "outline";
         Layers.IsZoneHide = s.ZoneMode == "hide";
         if (_canvas is not null)
         {
             ZoneDisplayMode zm = s.ZoneMode switch
             {
-                "hatch" => ZoneDisplayMode.Hatch,
                 "outline" => ZoneDisplayMode.Outline,
                 "hide" => ZoneDisplayMode.Hide,
                 _ => ZoneDisplayMode.Solid

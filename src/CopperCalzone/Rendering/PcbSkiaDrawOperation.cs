@@ -216,31 +216,6 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
         }
     }
 
-    private static void DrawHatchedPath(SKCanvas canvas, SKPath polyPath, SKColor color)
-    {
-        canvas.Save();
-        canvas.ClipPath(polyPath, SKClipOperation.Intersect, true);
-
-        SKRect bounds = polyPath.Bounds;
-        float step = 0.8f; // 0.8mm hatch spacing
-        using var hatchPaint = new SKPaint
-        {
-            IsAntialias = true,
-            Style = SKPaintStyle.Stroke,
-            Color = color,
-            StrokeWidth = 0.12f
-        };
-
-        float minX = bounds.Left - bounds.Height;
-        float maxX = bounds.Right + bounds.Height;
-        for (float x = minX; x <= maxX; x += step)
-        {
-            canvas.DrawLine(x, bounds.Top, x + bounds.Height, bounds.Bottom, hatchPaint);
-        }
-
-        canvas.Restore();
-    }
-
     private static void DrawOutlinedText(
         SKCanvas canvas,
         string text,
@@ -585,10 +560,6 @@ public sealed class PcbSkiaDrawOperation : ICustomDrawOperation
                     if (_state.ZoneMode == ZoneDisplayMode.Solid)
                     {
                         canvas.DrawPath(path, fillPaint);
-                    }
-                    else if (_state.ZoneMode == ZoneDisplayMode.Hatch)
-                    {
-                        DrawHatchedPath(canvas, path, baseColor.WithAlpha((byte)(dimAlpha * 0.65)));
                     }
                     canvas.DrawPath(path, strokePaint);
                 }

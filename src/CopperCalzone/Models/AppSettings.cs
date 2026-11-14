@@ -31,7 +31,7 @@ public sealed class AppSettings
     public bool ShowPadNetNames { get; set; } = true;
 
     [JsonPropertyName("zoneMode")]
-    public string ZoneMode { get; set; } = "solid"; // "solid", "hatch", "outline", "hide"
+    public string ZoneMode { get; set; } = "solid"; // "solid", "outline", "hide"
 
     [JsonPropertyName("visibleLayers")]
     public List<string> VisibleLayers { get; set; } =

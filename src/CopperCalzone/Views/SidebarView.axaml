@@ -786,9 +786,6 @@
                              IsChecked="{Binding IsZoneSolid}"
                              Content="Solid Fill" />
                 <RadioButton GroupName="ZoneMode"
-                             IsChecked="{Binding IsZoneHatch}"
-                             Content="Cross-Hatch Fill" />
-                <RadioButton GroupName="ZoneMode"
                              IsChecked="{Binding IsZoneOutline}"
                              Content="Outlines Only" />
                 <RadioButton GroupName="ZoneMode"

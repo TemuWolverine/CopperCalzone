@@ -73,12 +73,13 @@ public sealed partial class SettingsViewModel : ObservableObject
     public bool IsPresetBottom => DefaultLayerPreset == "bottom";
     public bool IsPresetCopper => DefaultLayerPreset == "copper";
     public bool IsPresetTop => DefaultLayerPreset == "top";
-    public bool IsZoneHatch => ZoneMode == "hatch";
     public bool IsZoneHide => ZoneMode == "hide";
     public bool IsZoneOutline => ZoneMode == "outline";
 
     // Zone Mode Getters
     public bool IsZoneSolid => ZoneMode == "solid";
+
+    public bool ShowConfigFileLocation => !OperatingSystem.IsAndroid();
 
     public string SettingsFilePath => _settingsService.SettingsFilePath;
 
@@ -116,7 +117,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
             DefaultLayerPreset = s.DefaultLayerPreset;
             ShowPadNetNames = s.ShowPadNetNames;
-            ZoneMode = s.ZoneMode;
+            ZoneMode = s.ZoneMode is "outline" or "hide" ? s.ZoneMode : "solid";
 
             DefaultBomSortColumn = s.DefaultBomSortColumn;
             DefaultBomSortAscending = s.DefaultBomSortAscending;
@@ -288,7 +289,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         OnPropertyChanged(nameof(IsPresetCopper));
 
         OnPropertyChanged(nameof(IsZoneSolid));
-        OnPropertyChanged(nameof(IsZoneHatch));
         OnPropertyChanged(nameof(IsZoneOutline));
         OnPropertyChanged(nameof(IsZoneHide));
 

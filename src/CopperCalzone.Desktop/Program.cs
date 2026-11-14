@@ -170,7 +170,7 @@ internal sealed class Program
             // Test setting persistence: default sidebar tab, layer options, zone mode
             settingsVm.SetDefaultSidebarTab("layers");
             settingsVm.SetDefaultLayerPreset("top");
-            settingsVm.SetZoneMode("hatch");
+            settingsVm.SetZoneMode("outline");
             settingsVm.ShowPadNetNames = false;
             settingsVm.AutoSave();
 
@@ -182,8 +182,8 @@ internal sealed class Program
                 throw new Exception($"Expected DefaultSidebarTab='layers', got '{loadedSettings.DefaultSidebarTab}'");
             if (loadedSettings.DefaultLayerPreset != "top")
                 throw new Exception($"Expected DefaultLayerPreset='top', got '{loadedSettings.DefaultLayerPreset}'");
-            if (loadedSettings.ZoneMode != "hatch")
-                throw new Exception($"Expected ZoneMode='hatch', got '{loadedSettings.ZoneMode}'");
+            if (loadedSettings.ZoneMode != "outline")
+                throw new Exception($"Expected ZoneMode='outline', got '{loadedSettings.ZoneMode}'");
             if (loadedSettings.ShowPadNetNames != false)
                 throw new Exception("Expected ShowPadNetNames=false");
 

@@ -174,7 +174,6 @@
 
             <WrapPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
               <Button Classes="chip-btn" Classes.active="{Binding IsZoneSolid}" Command="{Binding SetZoneModeCommand}" CommandParameter="solid" Margin="0,0,6,0" Content="Solid Fill" />
-              <Button Classes="chip-btn" Classes.active="{Binding IsZoneHatch}" Command="{Binding SetZoneModeCommand}" CommandParameter="hatch" Margin="0,0,6,0" Content="Hatch Fill" />
               <Button Classes="chip-btn" Classes.active="{Binding IsZoneOutline}" Command="{Binding SetZoneModeCommand}" CommandParameter="outline" Margin="0,0,6,0" Content="Outlines Only" />
               <Button Classes="chip-btn" Classes.active="{Binding IsZoneHide}" Command="{Binding SetZoneModeCommand}" CommandParameter="hide" Content="Hidden" />
             </WrapPanel>
@@ -352,7 +351,8 @@
           </Grid>
 
           <!-- Settings File Path -->
-          <Grid ColumnDefinitions="*,Auto" Margin="0,6,0,0">
+          <Grid ColumnDefinitions="*,Auto" Margin="0,6,0,0"
+                IsVisible="{Binding ShowConfigFileLocation}">
             <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
               <TextBlock Classes="m3-label-medium" Text="Configuration File Location" FontWeight="Bold" />
               <TextBlock Classes="m3-mono-small"
