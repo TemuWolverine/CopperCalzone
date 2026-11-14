@@ -1,267 +1,412 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:CopperCalzone.ViewModels"
-             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-             mc:Ignorable="d" d:DesignWidth="80" d:DesignHeight="800"
-             x:Class="CopperCalzone.Views.NavigationRailView"
-             x:DataType="vm:MainViewModel">
+<UserControl
+          x:Class="CopperCalzone.Views.NavigationRailView"
+          xmlns="https://github.com/avaloniaui"
+          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+          xmlns:m="using:CopperCalzone.Markup"
+          xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+          xmlns:vm="using:CopperCalzone.ViewModels"
+          d:DesignHeight="800"
+          d:DesignWidth="80"
+          x:DataType="vm:MainViewModel"
+          mc:Ignorable="d">
 
-  <Border Background="{DynamicResource M3SurfaceBrush}"
-          BorderBrush="{DynamicResource M3OutlineVariantBrush}"
-          BorderThickness="0,0,1,0"
-          Width="{Binding NavRailWidth}">
-    <Border.Transitions>
-      <Transitions>
-        <DoubleTransition Property="Width" Duration="0:0:0.2" Easing="CubicEaseOut" />
-      </Transitions>
-    </Border.Transitions>
+    <Border
+              Width="{Binding NavRailWidth}"
+              Background="{DynamicResource M3SurfaceBrush}"
+              BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+              BorderThickness="0,0,1,0">
+        <Border.Transitions>
+            <Transitions>
+                <DoubleTransition
+                          Easing="CubicEaseOut"
+                          Property="Width"
+                          Duration="0:0:0.2" />
+            </Transitions>
+        </Border.Transitions>
 
-    <Grid RowDefinitions="Auto,Auto,*" Margin="0,12,0,16">
+        <Grid Margin="0,12,0,16" RowDefinitions="Auto,*">
 
-      <!-- 1. Rail Toggle Menu Button -->
-      <Grid Grid.Row="0" Margin="12,0,12,12">
-        <!-- Collapsed Toggle -->
-        <Button Command="{Binding ToggleNavRailCommand}"
-                ToolTip.Tip="Expand Navigation Rail"
-                Classes="tool-btn"
-                Width="48" Height="48"
-                CornerRadius="24"
-                HorizontalAlignment="Center"
-                IsVisible="{Binding !IsNavRailExpanded}">
-          <materialIcons:MaterialIcon Kind="Menu" Width="22" Height="22" />
-        </Button>
+            <!--  1. Rail Toggle Menu Button  -->
+            <Grid Grid.Row="0" Margin="12,0,12,12">
+                <!--  Collapsed Toggle  -->
+                <Button
+                          Width="48"
+                          Height="48"
+                          HorizontalAlignment="Center"
+                          Classes="tool-btn"
+                          Command="{Binding ToggleNavRailCommand}"
+                          CornerRadius="24"
+                          IsVisible="{Binding !IsNavRailExpanded}"
+                          ToolTip.Tip="Expand Navigation Rail">
+                    <materialIcons:MaterialIcon
+                              Width="22"
+                              Height="22"
+                              Kind="Menu" />
+                </Button>
 
-        <!-- Expanded Toggle -->
-        <Button Command="{Binding ToggleNavRailCommand}"
-                ToolTip.Tip="Collapse Navigation Rail"
-                Classes="tool-btn"
-                Height="48"
-                CornerRadius="24"
-                HorizontalAlignment="Stretch"
-                Padding="16,0"
-                IsVisible="{Binding IsNavRailExpanded}">
-          <Grid ColumnDefinitions="Auto,*,Auto">
-            <materialIcons:MaterialIcon Grid.Column="0" Kind="MenuOpen" Width="22" Height="22" />
-            <TextBlock Grid.Column="1"
-                       Text="Collapse"
-                       Classes="m3-label-large"
-                       VerticalAlignment="Center"
-                       Margin="14,0,0,0" />
-            <materialIcons:MaterialIcon Grid.Column="2" Kind="ChevronLeft" Width="18" Height="18" />
-          </Grid>
-        </Button>
-      </Grid>
+                <!--  Expanded Toggle  -->
+                <Button
+                          Height="48"
+                          Padding="16,0"
+                          HorizontalAlignment="Stretch"
+                          Classes="tool-btn"
+                          Command="{Binding ToggleNavRailCommand}"
+                          CornerRadius="24"
+                          IsVisible="{Binding IsNavRailExpanded}"
+                          ToolTip.Tip="Collapse Navigation Rail">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <materialIcons:MaterialIcon
+                                  Grid.Column="0"
+                                  Width="22"
+                                  Height="22"
+                                  Kind="MenuOpen" />
+                        <TextBlock
+                                  Grid.Column="1"
+                                  Margin="14,0,0,0"
+                                  VerticalAlignment="Center"
+                                  Classes="m3-label-large"
+                                  Text="Collapse" />
+                        <materialIcons:MaterialIcon
+                                  Grid.Column="2"
+                                  Width="18"
+                                  Height="18"
+                                  Kind="ChevronLeft" />
+                    </Grid>
+                </Button>
+            </Grid>
 
-      <!-- 2. Anchored Open PCB FAB -->
-      <Grid Grid.Row="1" Margin="12,0,12,20">
-        <!-- Collapsed FAB -->
-        <Button Command="{Binding RequestOpenFileCommand}"
-                ToolTip.Tip="Open PCB (.kicad_pcb, .json, .html) [Ctrl+O]"
-                Classes="m3-fab"
-                HorizontalAlignment="Center"
-                IsVisible="{Binding !IsNavRailExpanded}">
-          <materialIcons:MaterialIcon Kind="FolderOpenOutline" Width="24" Height="24" />
-        </Button>
+            <!--  2. Destinations Stack (Open PCB, GitHub, PCB Viewer, Schematic, Settings)  -->
+            <StackPanel
+                      Grid.Row="1"
+                      Margin="8,0"
+                      Spacing="8">
 
-        <!-- Expanded Extended FAB -->
-        <Button Command="{Binding RequestOpenFileCommand}"
-                ToolTip.Tip="Open PCB (.kicad_pcb, .json, .html) [Ctrl+O]"
-                Classes="m3-extended-fab"
-                HorizontalAlignment="Stretch"
-                IsVisible="{Binding IsNavRailExpanded}">
-          <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
-            <materialIcons:MaterialIcon Kind="FolderOpenOutline" Width="22" Height="22" VerticalAlignment="Center" />
-            <TextBlock Text="Open PCB" VerticalAlignment="Center" />
-          </StackPanel>
-        </Button>
-      </Grid>
+                <!--  Destination 1: Open PCB  -->
+                <!--  Collapsed Item  -->
+                <Button
+                          Width="64"
+                          Height="56"
+                          HorizontalAlignment="Center"
+                          Classes="nav-rail-item"
+                          Command="{Binding RequestOpenFileCommand}"
+                          IsVisible="{Binding !IsNavRailExpanded}"
+                          ToolTip.Tip="{m:PlatformTip 'Open PCB (.kicad_pcb, .json, .html)',
+                                                      '[Ctrl+O]'}">
+                    <StackPanel
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              Spacing="2">
+                        <materialIcons:MaterialIcon
+                                  Width="20"
+                                  Height="20"
+                                  HorizontalAlignment="Center"
+                                  Kind="FolderOpenOutline" />
+                        <TextBlock
+                                  HorizontalAlignment="Center"
+                                  Classes="m3-label-small"
+                                  Text="Open PCB" />
+                    </StackPanel>
+                </Button>
 
-      <!-- 3. Destinations Stack (Viewer, Schematic, GitHub, Settings) -->
-      <StackPanel Grid.Row="2" Spacing="8" Margin="8,0">
+                <!--  Expanded Item  -->
+                <Button
+                          Height="56"
+                          HorizontalAlignment="Stretch"
+                          Classes="nav-rail-item"
+                          Command="{Binding RequestOpenFileCommand}"
+                          CornerRadius="28"
+                          IsVisible="{Binding IsNavRailExpanded}"
+                          ToolTip.Tip="{m:PlatformTip 'Open PCB (.kicad_pcb, .json, .html)',
+                                                      '[Ctrl+O]'}">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <materialIcons:MaterialIcon
+                                  Grid.Column="0"
+                                  Width="22"
+                                  Height="22"
+                                  Margin="16,0,0,0"
+                                  VerticalAlignment="Center"
+                                  Kind="FolderOpenOutline" />
+                        <TextBlock
+                                  Grid.Column="1"
+                                  Margin="16,0,16,0"
+                                  VerticalAlignment="Center"
+                                  Classes="m3-label-large"
+                                  Text="Open PCB" />
+                    </Grid>
+                </Button>
 
-        <!-- Destination 1: PCB Viewer -->
-        <!-- Collapsed Item -->
-        <Button Command="{Binding SwitchToViewerCommand}"
-                ToolTip.Tip="PCB Viewer"
-                Classes="nav-rail-item"
-                Classes.active="{Binding IsViewerTabActive}"
-                Width="64" Height="56"
-                HorizontalAlignment="Center"
-                IsVisible="{Binding !IsNavRailExpanded}">
-          <Grid>
-            <!-- Active Indicator Pill -->
-            <Border Background="{DynamicResource M3SecondaryContainerBrush}"
-                    CornerRadius="16"
-                    IsVisible="{Binding IsViewerTabActive}" />
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="2">
-              <materialIcons:MaterialIcon Kind="DeveloperBoard" Width="20" Height="20" HorizontalAlignment="Center" />
-              <TextBlock Text="Viewer" Classes="m3-label-small" HorizontalAlignment="Center" />
+
+                <!--  Destination 2: GitHub Browser  -->
+                <!--  Collapsed Item  -->
+                <Button
+                          Width="64"
+                          Height="56"
+                          HorizontalAlignment="Center"
+                          Classes="nav-rail-item"
+                          Classes.active="{Binding IsGitHubTabActive}"
+                          Command="{Binding OpenGitHubBrowserCommand}"
+                          IsVisible="{Binding !IsNavRailExpanded}"
+                          ToolTip.Tip="GitHub PCB Browser">
+                    <Grid>
+                        <!--  Active Indicator Pill  -->
+                        <Border
+                                  Background="{DynamicResource M3SecondaryContainerBrush}"
+                                  CornerRadius="16"
+                                  IsVisible="{Binding IsGitHubTabActive}" />
+                        <StackPanel
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Spacing="2">
+                            <materialIcons:MaterialIcon
+                                      Width="20"
+                                      Height="20"
+                                      HorizontalAlignment="Center"
+                                      Kind="Github" />
+                            <TextBlock
+                                      HorizontalAlignment="Center"
+                                      Classes="m3-label-small"
+                                      Text="GitHub" />
+                        </StackPanel>
+                    </Grid>
+                </Button>
+
+                <!--  Expanded Item  -->
+                <Button
+                          Height="56"
+                          HorizontalAlignment="Stretch"
+                          Classes="nav-rail-item"
+                          Classes.active="{Binding IsGitHubTabActive}"
+                          Command="{Binding OpenGitHubBrowserCommand}"
+                          CornerRadius="28"
+                          IsVisible="{Binding IsNavRailExpanded}"
+                          ToolTip.Tip="GitHub PCB Browser">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Border
+                                  Grid.ColumnSpan="2"
+                                  Background="{DynamicResource M3SecondaryContainerBrush}"
+                                  CornerRadius="28"
+                                  IsVisible="{Binding IsGitHubTabActive}" />
+                        <materialIcons:MaterialIcon
+                                  Grid.Column="0"
+                                  Width="22"
+                                  Height="22"
+                                  Margin="16,0,0,0"
+                                  VerticalAlignment="Center"
+                                  Kind="Github" />
+                        <TextBlock
+                                  Grid.Column="1"
+                                  Margin="16,0,16,0"
+                                  VerticalAlignment="Center"
+                                  Classes="m3-label-large"
+                                  Text="GitHub" />
+                    </Grid>
+                </Button>
+
+
+                <!--  Destination 3: PCB Viewer  -->
+                <!--  Collapsed Item  -->
+                <Button
+                          Width="64"
+                          Height="56"
+                          HorizontalAlignment="Center"
+                          Classes="nav-rail-item"
+                          Classes.active="{Binding IsViewerTabActive}"
+                          Command="{Binding SwitchToViewerCommand}"
+                          IsVisible="{Binding !IsNavRailExpanded}"
+                          ToolTip.Tip="PCB Viewer">
+                    <Grid>
+                        <!--  Active Indicator Pill  -->
+                        <Border
+                                  Background="{DynamicResource M3SecondaryContainerBrush}"
+                                  CornerRadius="16"
+                                  IsVisible="{Binding IsViewerTabActive}" />
+                        <StackPanel
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Spacing="2">
+                            <materialIcons:MaterialIcon
+                                      Width="20"
+                                      Height="20"
+                                      HorizontalAlignment="Center"
+                                      Kind="DeveloperBoard" />
+                            <TextBlock
+                                      HorizontalAlignment="Center"
+                                      Classes="m3-label-small"
+                                      Text="Viewer" />
+                        </StackPanel>
+                    </Grid>
+                </Button>
+
+                <!--  Expanded Item  -->
+                <Button
+                          Height="56"
+                          HorizontalAlignment="Stretch"
+                          Classes="nav-rail-item"
+                          Classes.active="{Binding IsViewerTabActive}"
+                          Command="{Binding SwitchToViewerCommand}"
+                          CornerRadius="28"
+                          IsVisible="{Binding IsNavRailExpanded}"
+                          ToolTip.Tip="PCB Viewer">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Border
+                                  Grid.ColumnSpan="2"
+                                  Background="{DynamicResource M3SecondaryContainerBrush}"
+                                  CornerRadius="28"
+                                  IsVisible="{Binding IsViewerTabActive}" />
+                        <materialIcons:MaterialIcon
+                                  Grid.Column="0"
+                                  Width="22"
+                                  Height="22"
+                                  Margin="16,0,0,0"
+                                  VerticalAlignment="Center"
+                                  Kind="DeveloperBoard" />
+                        <TextBlock
+                                  Grid.Column="1"
+                                  Margin="16,0,16,0"
+                                  VerticalAlignment="Center"
+                                  Classes="m3-label-large"
+                                  Text="PCB Viewer" />
+                    </Grid>
+                </Button>
+
+
+                <!--  Destination 4: Schematic  -->
+                <!--  Collapsed Item  -->
+                <Button
+                          Width="64"
+                          Height="56"
+                          HorizontalAlignment="Center"
+                          Classes="nav-rail-item"
+                          Classes.active="{Binding IsSchematicTabActive}"
+                          Command="{Binding SwitchToSchematicCommand}"
+                          IsVisible="{Binding !IsNavRailExpanded}"
+                          ToolTip.Tip="Schematic Viewer">
+                    <Grid>
+                        <!--  Active Indicator Pill  -->
+                        <Border
+                                  Background="{DynamicResource M3SecondaryContainerBrush}"
+                                  CornerRadius="16"
+                                  IsVisible="{Binding IsSchematicTabActive}" />
+                        <StackPanel
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Spacing="2">
+                            <materialIcons:MaterialIcon
+                                      Width="20"
+                                      Height="20"
+                                      HorizontalAlignment="Center"
+                                      Kind="FileDocumentOutline" />
+                            <TextBlock
+                                      HorizontalAlignment="Center"
+                                      Classes="m3-label-small"
+                                      Text="Schematic" />
+                        </StackPanel>
+                    </Grid>
+                </Button>
+
+                <!--  Expanded Item  -->
+                <Button
+                          Height="56"
+                          HorizontalAlignment="Stretch"
+                          Classes="nav-rail-item"
+                          Classes.active="{Binding IsSchematicTabActive}"
+                          Command="{Binding SwitchToSchematicCommand}"
+                          CornerRadius="28"
+                          IsVisible="{Binding IsNavRailExpanded}"
+                          ToolTip.Tip="Schematic Viewer">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Border
+                                  Grid.ColumnSpan="2"
+                                  Background="{DynamicResource M3SecondaryContainerBrush}"
+                                  CornerRadius="28"
+                                  IsVisible="{Binding IsSchematicTabActive}" />
+                        <materialIcons:MaterialIcon
+                                  Grid.Column="0"
+                                  Width="22"
+                                  Height="22"
+                                  Margin="16,0,0,0"
+                                  VerticalAlignment="Center"
+                                  Kind="FileDocumentOutline" />
+                        <TextBlock
+                                  Grid.Column="1"
+                                  Margin="16,0,16,0"
+                                  VerticalAlignment="Center"
+                                  Classes="m3-label-large"
+                                  Text="Schematic" />
+                    </Grid>
+                </Button>
+
+
+                <!--  Destination 4: Settings  -->
+                <!--  Collapsed Item  -->
+                <Button
+                          Width="64"
+                          Height="56"
+                          HorizontalAlignment="Center"
+                          Classes="nav-rail-item"
+                          Classes.active="{Binding IsSettingsTabActive}"
+                          Command="{Binding OpenSettingsCommand}"
+                          IsVisible="{Binding !IsNavRailExpanded}"
+                          ToolTip.Tip="Preferences &amp; Settings">
+                    <Grid>
+                        <!--  Active Indicator Pill  -->
+                        <Border
+                                  Background="{DynamicResource M3SecondaryContainerBrush}"
+                                  CornerRadius="16"
+                                  IsVisible="{Binding IsSettingsTabActive}" />
+                        <StackPanel
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Spacing="2">
+                            <materialIcons:MaterialIcon
+                                      Width="20"
+                                      Height="20"
+                                      HorizontalAlignment="Center"
+                                      Kind="CogOutline" />
+                            <TextBlock
+                                      HorizontalAlignment="Center"
+                                      Classes="m3-label-small"
+                                      Text="Settings" />
+                        </StackPanel>
+                    </Grid>
+                </Button>
+
+                <!--  Expanded Item  -->
+                <Button
+                          Height="56"
+                          HorizontalAlignment="Stretch"
+                          Classes="nav-rail-item"
+                          Classes.active="{Binding IsSettingsTabActive}"
+                          Command="{Binding OpenSettingsCommand}"
+                          CornerRadius="28"
+                          IsVisible="{Binding IsNavRailExpanded}"
+                          ToolTip.Tip="Preferences &amp; Settings">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Border
+                                  Grid.ColumnSpan="2"
+                                  Background="{DynamicResource M3SecondaryContainerBrush}"
+                                  CornerRadius="28"
+                                  IsVisible="{Binding IsSettingsTabActive}" />
+                        <materialIcons:MaterialIcon
+                                  Grid.Column="0"
+                                  Width="22"
+                                  Height="22"
+                                  Margin="16,0,0,0"
+                                  VerticalAlignment="Center"
+                                  Kind="CogOutline" />
+                        <TextBlock
+                                  Grid.Column="1"
+                                  Margin="16,0,16,0"
+                                  VerticalAlignment="Center"
+                                  Classes="m3-label-large"
+                                  Text="Settings" />
+                    </Grid>
+                </Button>
+
             </StackPanel>
-          </Grid>
-        </Button>
 
-        <!-- Expanded Item -->
-        <Button Command="{Binding SwitchToViewerCommand}"
-                ToolTip.Tip="PCB Viewer"
-                Classes="nav-rail-item"
-                Classes.active="{Binding IsViewerTabActive}"
-                Height="56"
-                CornerRadius="28"
-                HorizontalAlignment="Stretch"
-                IsVisible="{Binding IsNavRailExpanded}">
-          <Grid ColumnDefinitions="Auto,*">
-            <Border Grid.ColumnSpan="2"
-                    Background="{DynamicResource M3SecondaryContainerBrush}"
-                    CornerRadius="28"
-                    IsVisible="{Binding IsViewerTabActive}" />
-            <materialIcons:MaterialIcon Grid.Column="0" Kind="DeveloperBoard" Width="22" Height="22" VerticalAlignment="Center" Margin="16,0,0,0" />
-            <TextBlock Grid.Column="1"
-                       Text="PCB Viewer"
-                       Classes="m3-label-large"
-                       VerticalAlignment="Center"
-                       Margin="16,0,16,0" />
-          </Grid>
-        </Button>
-
-
-        <!-- Destination 2: Schematic -->
-        <!-- Collapsed Item -->
-        <Button Command="{Binding SwitchToSchematicCommand}"
-                ToolTip.Tip="Schematic Viewer"
-                Classes="nav-rail-item"
-                Classes.active="{Binding IsSchematicTabActive}"
-                Width="64" Height="56"
-                HorizontalAlignment="Center"
-                IsVisible="{Binding !IsNavRailExpanded}">
-          <Grid>
-            <!-- Active Indicator Pill -->
-            <Border Background="{DynamicResource M3SecondaryContainerBrush}"
-                    CornerRadius="16"
-                    IsVisible="{Binding IsSchematicTabActive}" />
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="2">
-              <materialIcons:MaterialIcon Kind="FileDocumentOutline" Width="20" Height="20" HorizontalAlignment="Center" />
-              <TextBlock Text="Schematic" Classes="m3-label-small" HorizontalAlignment="Center" />
-            </StackPanel>
-          </Grid>
-        </Button>
-
-        <!-- Expanded Item -->
-        <Button Command="{Binding SwitchToSchematicCommand}"
-                ToolTip.Tip="Schematic Viewer"
-                Classes="nav-rail-item"
-                Classes.active="{Binding IsSchematicTabActive}"
-                Height="56"
-                CornerRadius="28"
-                HorizontalAlignment="Stretch"
-                IsVisible="{Binding IsNavRailExpanded}">
-          <Grid ColumnDefinitions="Auto,*">
-            <Border Grid.ColumnSpan="2"
-                    Background="{DynamicResource M3SecondaryContainerBrush}"
-                    CornerRadius="28"
-                    IsVisible="{Binding IsSchematicTabActive}" />
-            <materialIcons:MaterialIcon Grid.Column="0" Kind="FileDocumentOutline" Width="22" Height="22" VerticalAlignment="Center" Margin="16,0,0,0" />
-            <TextBlock Grid.Column="1"
-                       Text="Schematic"
-                       Classes="m3-label-large"
-                       VerticalAlignment="Center"
-                       Margin="16,0,16,0" />
-          </Grid>
-        </Button>
-
-
-        <!-- Destination 3: GitHub Browser -->
-        <!-- Collapsed Item -->
-        <Button Command="{Binding OpenGitHubBrowserCommand}"
-                ToolTip.Tip="GitHub PCB Browser"
-                Classes="nav-rail-item"
-                Classes.active="{Binding IsGitHubTabActive}"
-                Width="64" Height="56"
-                HorizontalAlignment="Center"
-                IsVisible="{Binding !IsNavRailExpanded}">
-          <Grid>
-            <!-- Active Indicator Pill -->
-            <Border Background="{DynamicResource M3SecondaryContainerBrush}"
-                    CornerRadius="16"
-                    IsVisible="{Binding IsGitHubTabActive}" />
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="2">
-              <materialIcons:MaterialIcon Kind="Github" Width="20" Height="20" HorizontalAlignment="Center" />
-              <TextBlock Text="GitHub" Classes="m3-label-small" HorizontalAlignment="Center" />
-            </StackPanel>
-          </Grid>
-        </Button>
-
-        <!-- Expanded Item -->
-        <Button Command="{Binding OpenGitHubBrowserCommand}"
-                ToolTip.Tip="GitHub PCB Browser"
-                Classes="nav-rail-item"
-                Classes.active="{Binding IsGitHubTabActive}"
-                Height="56"
-                CornerRadius="28"
-                HorizontalAlignment="Stretch"
-                IsVisible="{Binding IsNavRailExpanded}">
-          <Grid ColumnDefinitions="Auto,*">
-            <Border Grid.ColumnSpan="2"
-                    Background="{DynamicResource M3SecondaryContainerBrush}"
-                    CornerRadius="28"
-                    IsVisible="{Binding IsGitHubTabActive}" />
-            <materialIcons:MaterialIcon Grid.Column="0" Kind="Github" Width="22" Height="22" VerticalAlignment="Center" Margin="16,0,0,0" />
-            <TextBlock Grid.Column="1"
-                       Text="GitHub"
-                       Classes="m3-label-large"
-                       VerticalAlignment="Center"
-                       Margin="16,0,16,0" />
-          </Grid>
-        </Button>
-
-
-        <!-- Destination 4: Settings -->
-        <!-- Collapsed Item -->
-        <Button Command="{Binding OpenSettingsCommand}"
-                ToolTip.Tip="Preferences &amp; Settings"
-                Classes="nav-rail-item"
-                Classes.active="{Binding IsSettingsTabActive}"
-                Width="64" Height="56"
-                HorizontalAlignment="Center"
-                IsVisible="{Binding !IsNavRailExpanded}">
-          <Grid>
-            <!-- Active Indicator Pill -->
-            <Border Background="{DynamicResource M3SecondaryContainerBrush}"
-                    CornerRadius="16"
-                    IsVisible="{Binding IsSettingsTabActive}" />
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="2">
-              <materialIcons:MaterialIcon Kind="CogOutline" Width="20" Height="20" HorizontalAlignment="Center" />
-              <TextBlock Text="Settings" Classes="m3-label-small" HorizontalAlignment="Center" />
-            </StackPanel>
-          </Grid>
-        </Button>
-
-        <!-- Expanded Item -->
-        <Button Command="{Binding OpenSettingsCommand}"
-                ToolTip.Tip="Preferences &amp; Settings"
-                Classes="nav-rail-item"
-                Classes.active="{Binding IsSettingsTabActive}"
-                Height="56"
-                CornerRadius="28"
-                HorizontalAlignment="Stretch"
-                IsVisible="{Binding IsNavRailExpanded}">
-          <Grid ColumnDefinitions="Auto,*">
-            <Border Grid.ColumnSpan="2"
-                    Background="{DynamicResource M3SecondaryContainerBrush}"
-                    CornerRadius="28"
-                    IsVisible="{Binding IsSettingsTabActive}" />
-            <materialIcons:MaterialIcon Grid.Column="0" Kind="CogOutline" Width="22" Height="22" VerticalAlignment="Center" Margin="16,0,0,0" />
-            <TextBlock Grid.Column="1"
-                       Text="Settings"
-                       Classes="m3-label-large"
-                       VerticalAlignment="Center"
-                       Margin="16,0,16,0" />
-          </Grid>
-        </Button>
-
-      </StackPanel>
-
-    </Grid>
-  </Border>
+        </Grid>
+    </Border>
 </UserControl>
