@@ -1,135 +1,185 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:CopperCalzone.ViewModels"
-             xmlns:m="using:CopperCalzone.Markup"
-             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-             mc:Ignorable="d" d:DesignWidth="430" d:DesignHeight="280"
-             x:Class="CopperCalzone.Views.PinInspectorView"
-             x:DataType="vm:MainViewModel">
+<UserControl
+          x:Class="CopperCalzone.Views.PinInspectorView"
+          xmlns="https://github.com/avaloniaui"
+          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+          xmlns:m="using:CopperCalzone.Markup"
+          xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+          xmlns:vm="using:CopperCalzone.ViewModels"
+          d:DesignHeight="280"
+          d:DesignWidth="430"
+          x:DataType="vm:MainViewModel"
+          mc:Ignorable="d">
 
-  <!-- M3 Expressive Elevated Card Pin Inspector & Pin-to-Pin Navigation Bar -->
-  <Border Classes="m3-elevated-card"
-          IsVisible="{Binding HasActiveInspector}"
-          HorizontalAlignment="Right"
-          VerticalAlignment="Top"
-          Margin="16"
-          MaxWidth="430">
-    <StackPanel Spacing="12">
-      <!-- Header Row: Net Name + Tonal Close Button -->
-      <Grid ColumnDefinitions="*,Auto">
-        <StackPanel Grid.Column="0" Spacing="3">
-          <StackPanel Orientation="Horizontal" Spacing="6">
-            <materialIcons:MaterialIcon Kind="LanConnect"
-                                        Width="14" Height="14"
-                                        Foreground="{DynamicResource M3PrimaryBrush}"
-                                        VerticalAlignment="Center" />
-            <TextBlock Classes="m3-section-title"
-                       Text="ACTIVE NET"
-                       VerticalAlignment="Center" />
-            <Border Classes="m3-badge-secondary">
-              <TextBlock Classes="m3-label-small"
-                         Text="{Binding InspectorNetSummary}"
-                         Foreground="{DynamicResource M3OnSecondaryContainerBrush}"
-                         VerticalAlignment="Center" />
+    <!--  M3 Expressive Elevated Card Pin Inspector & Pin-to-Pin Navigation Bar  -->
+    <Border
+              MaxWidth="430"
+              Margin="16"
+              HorizontalAlignment="Right"
+              VerticalAlignment="Top"
+              Classes="m3-elevated-card"
+              IsVisible="{Binding HasActiveInspector}">
+        <StackPanel Spacing="12">
+            <!--  Header Row: Net Name + Tonal Close Button  -->
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="3">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <materialIcons:MaterialIcon
+                                  Width="14"
+                                  Height="14"
+                                  VerticalAlignment="Center"
+                                  Foreground="{DynamicResource M3PrimaryBrush}"
+                                  Kind="LanConnect" />
+                        <TextBlock
+                                  VerticalAlignment="Center"
+                                  Classes="m3-section-title"
+                                  Text="ACTIVE NET" />
+                        <Border Classes="m3-badge-secondary">
+                            <TextBlock
+                                      VerticalAlignment="Center"
+                                      Classes="m3-label-small"
+                                      Foreground="{DynamicResource M3OnSecondaryContainerBrush}"
+                                      Text="{Binding InspectorNetSummary}" />
+                        </Border>
+                    </StackPanel>
+                    <TextBlock
+                              Classes="m3-mono-title"
+                              Text="{Binding InspectorNetName}"
+                              TextWrapping="Wrap" />
+                </StackPanel>
+
+                <Button
+                          Grid.Column="1"
+                          Width="32"
+                          Height="32"
+                          Padding="0"
+                          HorizontalContentAlignment="Center"
+                          VerticalContentAlignment="Top"
+                          Classes="tool-btn"
+                          Command="{Binding ClearSelectionCommand}"
+                          CornerRadius="16"
+                          ToolTip.Tip="{m:PlatformTip 'Clear Net Selection',
+                                                      '(Esc)'}">
+                    <materialIcons:MaterialIcon
+                              Width="16"
+                              Height="16"
+                              Kind="Close" />
+                </Button>
+            </Grid>
+
+            <!--  Current Pin Inspector Sub-Card (Optical Radius: outer 20 - padding 12 = 8dp)  -->
+            <Border
+                      Padding="12,10"
+                      Background="{DynamicResource M3SurfaceContainerHighestBrush}"
+                      CornerRadius="8">
+                <StackPanel Spacing="4">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel
+                                  Grid.Column="0"
+                                  VerticalAlignment="Center"
+                                  Orientation="Horizontal"
+                                  Spacing="6">
+                            <materialIcons:MaterialIcon
+                                      Width="15"
+                                      Height="15"
+                                      Foreground="{DynamicResource M3TertiaryBrush}"
+                                      Kind="Memory" />
+                            <TextBlock
+                                      VerticalAlignment="Center"
+                                      Classes="m3-label-large"
+                                      Foreground="{DynamicResource M3TertiaryBrush}"
+                                      Text="{Binding InspectorPinTitle}" />
+                        </StackPanel>
+                        <Border
+                                  Grid.Column="1"
+                                  Padding="8,3"
+                                  Classes="m3-badge-tertiary">
+                            <TextBlock
+                                      Classes="m3-label-small"
+                                      Foreground="{DynamicResource M3OnTertiaryContainerBrush}"
+                                      Text="{Binding InspectorPinBadge}" />
+                        </Border>
+                    </Grid>
+
+                    <TextBlock
+                              Classes="m3-label-medium"
+                              Foreground="{DynamicResource M3OnSurfaceBrush}"
+                              Text="{Binding InspectorPinMeta}" />
+
+                    <TextBlock
+                              Margin="0,2,0,0"
+                              Classes="m3-mono-small"
+                              Foreground="{DynamicResource M3OnSurfaceVariantBrush}"
+                              Text="{Binding InspectorConnectedPins}"
+                              TextWrapping="Wrap" />
+                </StackPanel>
             </Border>
-          </StackPanel>
-          <TextBlock Classes="m3-mono-title"
-                     Text="{Binding InspectorNetName}"
-                     TextWrapping="Wrap" />
+
+            <!--  M3 Expressive Connected Segmented Navigation Buttons  -->
+            <Grid Margin="0,4,0,0" ColumnDefinitions="*,Auto,*">
+                <Button
+                          Grid.Column="0"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Center"
+                          Classes="segmented-left"
+                          Command="{Binding PrevPinCommand}"
+                          ToolTip.Tip="{m:PlatformTip 'Fly to Previous Pin on Net',
+                                                      '([ or Left Arrow)'}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <materialIcons:MaterialIcon
+                                  Width="16"
+                                  Height="16"
+                                  Kind="ChevronLeft" />
+                        <TextBlock
+                                  VerticalAlignment="Center"
+                                  Classes="m3-label-medium"
+                                  Text="Prev Pin" />
+                    </StackPanel>
+                </Button>
+
+                <Button
+                          Grid.Column="1"
+                          Padding="12,9"
+                          Background="{DynamicResource M3SurfaceContainerHighBrush}"
+                          BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+                          BorderThickness="0.5,1,0.5,1"
+                          Classes="tool-btn"
+                          Command="{Binding FocusCurrentPinCommand}"
+                          CornerRadius="0"
+                          ToolTip.Tip="Center camera on current pin">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <materialIcons:MaterialIcon
+                                  Width="15"
+                                  Height="15"
+                                  Kind="CrosshairsGps" />
+                        <TextBlock
+                                  VerticalAlignment="Center"
+                                  Classes="m3-label-medium"
+                                  Text="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button
+                          Grid.Column="2"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Center"
+                          Classes="segmented-right"
+                          Command="{Binding NextPinCommand}"
+                          ToolTip.Tip="{m:PlatformTip 'Fly to Next Pin on Net',
+                                                      '(] or Right Arrow)'}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock
+                                  VerticalAlignment="Center"
+                                  Classes="m3-label-medium"
+                                  Text="Next Pin" />
+                        <materialIcons:MaterialIcon
+                                  Width="16"
+                                  Height="16"
+                                  Kind="ChevronRight" />
+                    </StackPanel>
+                </Button>
+            </Grid>
         </StackPanel>
-
-        <Button Grid.Column="1"
-                Command="{Binding ClearSelectionCommand}"
-                ToolTip.Tip="{m:PlatformTip 'Clear Net Selection', '(Esc)'}"
-                Classes="tool-btn"
-                Width="32" Height="32"
-                Padding="0"
-                CornerRadius="16"
-                HorizontalContentAlignment="Center"
-                VerticalContentAlignment="Top">
-          <materialIcons:MaterialIcon Kind="Close" Width="16" Height="16" />
-        </Button>
-      </Grid>
-
-      <!-- Current Pin Inspector Sub-Card (Optical Radius: outer 20 - padding 12 = 8dp) -->
-      <Border Background="{DynamicResource M3SurfaceContainerHighestBrush}"
-              CornerRadius="8"
-              Padding="12,10">
-        <StackPanel Spacing="4">
-          <Grid ColumnDefinitions="*,Auto">
-            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-              <materialIcons:MaterialIcon Kind="Memory"
-                                          Width="15" Height="15"
-                                          Foreground="{DynamicResource M3TertiaryBrush}" />
-              <TextBlock Text="{Binding InspectorPinTitle}"
-                         Classes="m3-label-large"
-                         Foreground="{DynamicResource M3TertiaryBrush}"
-                         VerticalAlignment="Center" />
-            </StackPanel>
-            <Border Grid.Column="1"
-                    Classes="m3-badge-tertiary"
-                    Padding="8,3">
-              <TextBlock Classes="m3-label-small"
-                         Text="{Binding InspectorPinBadge}"
-                         Foreground="{DynamicResource M3OnTertiaryContainerBrush}" />
-            </Border>
-          </Grid>
-
-          <TextBlock Classes="m3-label-medium"
-                     Text="{Binding InspectorPinMeta}"
-                     Foreground="{DynamicResource M3OnSurfaceBrush}" />
-
-          <TextBlock Classes="m3-mono-small"
-                     Text="{Binding InspectorConnectedPins}"
-                     Foreground="{DynamicResource M3OnSurfaceVariantBrush}"
-                     TextWrapping="Wrap"
-                     Margin="0,2,0,0" />
-        </StackPanel>
-      </Border>
-
-      <!-- M3 Expressive Connected Segmented Navigation Buttons -->
-      <Grid ColumnDefinitions="*,Auto,*" Margin="0,4,0,0">
-        <Button Grid.Column="0"
-                Command="{Binding PrevPinCommand}"
-                ToolTip.Tip="{m:PlatformTip 'Fly to Previous Pin on Net', '([ or Left Arrow)'}"
-                Classes="segmented-left"
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Center">
-          <StackPanel Orientation="Horizontal" Spacing="6">
-            <materialIcons:MaterialIcon Kind="ChevronLeft" Width="16" Height="16" />
-            <TextBlock Text="Prev Pin" VerticalAlignment="Center" Classes="m3-label-medium" />
-          </StackPanel>
-        </Button>
-
-        <Button Grid.Column="1"
-                Command="{Binding FocusCurrentPinCommand}"
-                ToolTip.Tip="Center camera on current pin"
-                Classes="tool-btn"
-                Background="{DynamicResource M3SurfaceContainerHighBrush}"
-                BorderBrush="{DynamicResource M3OutlineVariantBrush}"
-                BorderThickness="0.5,1,0.5,1"
-                CornerRadius="0"
-                Padding="12,9">
-          <StackPanel Orientation="Horizontal" Spacing="5">
-            <materialIcons:MaterialIcon Kind="CrosshairsGps" Width="15" Height="15" />
-            <TextBlock Text="Center" VerticalAlignment="Center" Classes="m3-label-medium" />
-          </StackPanel>
-        </Button>
-
-        <Button Grid.Column="2"
-                Command="{Binding NextPinCommand}"
-                ToolTip.Tip="{m:PlatformTip 'Fly to Next Pin on Net', '(] or Right Arrow)'}"
-                Classes="segmented-right"
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Center">
-          <StackPanel Orientation="Horizontal" Spacing="6">
-            <TextBlock Text="Next Pin" VerticalAlignment="Center" Classes="m3-label-medium" />
-            <materialIcons:MaterialIcon Kind="ChevronRight" Width="16" Height="16" />
-          </StackPanel>
-        </Button>
-      </Grid>
-    </StackPanel>
-  </Border>
+    </Border>
 </UserControl>

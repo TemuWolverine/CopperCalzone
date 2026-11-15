@@ -1,261 +1,368 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:CopperCalzone.ViewModels"
-             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="64"
-             x:Class="CopperCalzone.Views.TopToolbarView"
-             x:DataType="vm:MainViewModel"
-             x:Name="Root">
+<UserControl
+          x:Class="CopperCalzone.Views.TopToolbarView"
+          xmlns="https://github.com/avaloniaui"
+          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+          xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+          xmlns:vm="using:CopperCalzone.ViewModels"
+          x:Name="Root"
+          d:DesignHeight="64"
+          d:DesignWidth="1280"
+          x:DataType="vm:MainViewModel"
+          mc:Ignorable="d">
 
-  <Border x:Name="RootBorder"
-          Background="{DynamicResource M3SurfaceBrush}"
-          BorderBrush="{DynamicResource M3OutlineVariantBrush}"
-          BorderThickness="0,0,0,1"
-          Padding="16,8"
-          PointerPressed="OnTitleBarPointerPressed">
-    <Grid>
-      <!-- DESKTOP APP BAR (Width >= 760) -->
-      <Grid x:Name="DesktopGrid"
-            IsVisible="{Binding !IsCompact, ElementName=Root}"
-            MinHeight="48"
-            ColumnDefinitions="Auto,*,Auto">
+    <Border
+              x:Name="RootBorder"
+              Padding="16,8"
+              Background="{DynamicResource M3SurfaceBrush}"
+              BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+              BorderThickness="0,0,0,1"
+              PointerPressed="OnTitleBarPointerPressed">
+        <Grid>
+            <!--  DESKTOP APP BAR (Width >= 760)  -->
+            <Grid
+                      x:Name="DesktopGrid"
+                      MinHeight="48"
+                      ColumnDefinitions="Auto,*,Auto"
+                      IsVisible="{Binding !IsCompact, ElementName=Root}">
 
-        <!-- Left: Side Sheet Toggle + Board Title / Subtitle -->
-        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
-          <!-- Toggle Side Sheet (Nets, BOM, Layers) -->
-          <Button Command="{Binding ToggleLeftSidebarCommand}"
-                  ToolTip.Tip="Toggle Nets &amp; Layers Side Sheet"
-                  Classes="tool-btn"
-                  Width="40" Height="40"
-                  CornerRadius="20"
-                  Padding="0"
-                  HorizontalContentAlignment="Center"
-                  VerticalContentAlignment="Center"
-                  IsVisible="{Binding IsViewerTabActive}">
-            <materialIcons:MaterialIcon Kind="DockLeft" Width="20" Height="20" />
-          </Button>
+                <!--  Left: Side Sheet Toggle + Board Title / Subtitle  -->
+                <StackPanel
+                          Grid.Column="0"
+                          VerticalAlignment="Center"
+                          Orientation="Horizontal"
+                          Spacing="14">
+                    <!--  Toggle Side Sheet (Nets, BOM, Layers)  -->
+                    <Button
+                              Width="40"
+                              Height="40"
+                              Padding="0"
+                              HorizontalContentAlignment="Center"
+                              VerticalContentAlignment="Center"
+                              Classes="tool-btn"
+                              Command="{Binding ToggleLeftSidebarCommand}"
+                              CornerRadius="20"
+                              IsVisible="{Binding IsViewerTabActive}"
+                              ToolTip.Tip="Toggle Nets &amp; Layers Side Sheet">
+                        <materialIcons:MaterialIcon
+                                  Width="20"
+                                  Height="20"
+                                  Kind="DockLeft" />
+                    </Button>
 
-          <!-- Board Title & Subtitle -->
-          <StackPanel VerticalAlignment="Center" Spacing="2">
-            <TextBlock Classes="m3-title-medium"
-                       Text="{Binding BoardTitle}"
-                       TextTrimming="CharacterEllipsis" />
-            <TextBlock Classes="m3-caption"
-                       Text="{Binding BoardSubtitle}"
-                       TextTrimming="CharacterEllipsis" />
-          </StackPanel>
-        </StackPanel>
+                    <!--  Board Title & Subtitle  -->
+                    <StackPanel VerticalAlignment="Center" Spacing="2">
+                        <TextBlock
+                                  Classes="m3-title-medium"
+                                  Text="{Binding BoardTitle}"
+                                  TextTrimming="CharacterEllipsis" />
+                        <TextBlock
+                                  Classes="m3-caption"
+                                  Text="{Binding BoardSubtitle}"
+                                  TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </StackPanel>
 
-        <!-- Center: Current Destination Badge (Breadcrumb) -->
-        <Border Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-          <Border Classes="m3-badge-secondary"
-                  Padding="12,4"
-                  CornerRadius="14"
-                  IsVisible="{Binding !IsViewerTabActive}">
-            <StackPanel Orientation="Horizontal" Spacing="6">
-              <materialIcons:MaterialIcon Kind="LayersOutline" Width="14" Height="14" VerticalAlignment="Center" />
-              <TextBlock Classes="m3-label-medium"
-                         Text="{Binding ActiveTabMode}"
-                         VerticalAlignment="Center" />
-            </StackPanel>
-          </Border>
-        </Border>
+                <!--  Center: Current Destination Badge (Breadcrumb)  -->
+                <Border
+                          Grid.Column="1"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center">
+                    <Border
+                              Padding="12,4"
+                              Classes="m3-badge-secondary"
+                              CornerRadius="14"
+                              IsVisible="{Binding !IsViewerTabActive}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <materialIcons:MaterialIcon
+                                      Width="14"
+                                      Height="14"
+                                      VerticalAlignment="Center"
+                                      Kind="LayersOutline" />
+                            <TextBlock
+                                      VerticalAlignment="Center"
+                                      Classes="m3-label-medium"
+                                      Text="{Binding ActiveTabMode}" />
+                        </StackPanel>
+                    </Border>
+                </Border>
 
-        <!-- Right: Assembly Progress Badge + Window Controls -->
-        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-          <!-- Assembly Progress Badge (when board has BOM items) -->
-          <Border Classes="m3-badge-primary"
-                  IsVisible="{Binding AssemblyProgressRatio, Converter={x:Static ObjectConverters.IsNotNull}}"
-                  ToolTip.Tip="Assembly Placement Progress"
-                  Padding="10,4"
-                  CornerRadius="12">
-            <StackPanel Orientation="Horizontal" Spacing="6">
-              <materialIcons:MaterialIcon Kind="CheckDecagramOutline" Width="14" Height="14" VerticalAlignment="Center" />
-              <TextBlock Classes="m3-label-small"
-                         Text="{Binding AssemblyProgressText}"
-                         Foreground="{DynamicResource M3OnPrimaryContainerBrush}"
-                         VerticalAlignment="Center" />
-            </StackPanel>
-          </Border>
+                <!--  Right: Assembly Progress Badge + Window Controls  -->
+                <StackPanel
+                          Grid.Column="2"
+                          VerticalAlignment="Center"
+                          Orientation="Horizontal"
+                          Spacing="10">
+                    <!--  Assembly Progress Badge (when board has BOM items)  -->
+                    <Border
+                              Padding="10,4"
+                              Classes="m3-badge-primary"
+                              CornerRadius="12"
+                              IsVisible="{Binding AssemblyProgressRatio, Converter={x:Static ObjectConverters.IsNotNull}}"
+                              ToolTip.Tip="Assembly Placement Progress">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <materialIcons:MaterialIcon
+                                      Width="14"
+                                      Height="14"
+                                      VerticalAlignment="Center"
+                                      Kind="CheckDecagramOutline" />
+                            <TextBlock
+                                      VerticalAlignment="Center"
+                                      Classes="m3-label-small"
+                                      Foreground="{DynamicResource M3OnPrimaryContainerBrush}"
+                                      Text="{Binding AssemblyProgressText}" />
+                        </StackPanel>
+                    </Border>
 
-          <!-- Desktop Window Caption Buttons (Minimize, Maximize/Restore, Close) -->
-          <StackPanel x:Name="WindowControlsPanel"
-                      Orientation="Horizontal"
-                      Spacing="4"
-                      VerticalAlignment="Center">
-            <Button Click="OnMinimizeClick"
-                    ToolTip.Tip="Minimize"
-                    Classes="tool-btn"
-                    Width="32" Height="32"
-                    CornerRadius="16"
-                    Padding="0"
-                    HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center">
-              <materialIcons:MaterialIcon Kind="WindowMinimize" Width="16" Height="16" />
-            </Button>
-            <Button Click="OnMaximizeRestoreClick"
-                    ToolTip.Tip="Maximize / Restore"
-                    Classes="tool-btn"
-                    Width="32" Height="32"
-                    CornerRadius="16"
-                    Padding="0"
-                    HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center">
-              <materialIcons:MaterialIcon x:Name="MaximizeIcon" Kind="WindowMaximize" Width="16" Height="16" />
-            </Button>
-            <Button Click="OnCloseClick"
-                    ToolTip.Tip="Close"
-                    Classes="tool-btn"
-                    Width="32" Height="32"
-                    CornerRadius="16"
-                    Padding="0"
-                    HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center">
-              <materialIcons:MaterialIcon Kind="WindowClose" Width="16" Height="16" />
-            </Button>
-          </StackPanel>
-        </StackPanel>
-      </Grid>
+                    <!--  Desktop Window Caption Buttons (Minimize, Maximize/Restore, Close)  -->
+                    <StackPanel
+                              x:Name="WindowControlsPanel"
+                              VerticalAlignment="Center"
+                              Orientation="Horizontal"
+                              Spacing="4">
+                        <Button
+                                  Width="32"
+                                  Height="32"
+                                  Padding="0"
+                                  HorizontalContentAlignment="Center"
+                                  VerticalContentAlignment="Center"
+                                  Classes="tool-btn"
+                                  Click="OnMinimizeClick"
+                                  CornerRadius="16"
+                                  ToolTip.Tip="Minimize">
+                            <materialIcons:MaterialIcon
+                                      Width="16"
+                                      Height="16"
+                                      Kind="WindowMinimize" />
+                        </Button>
+                        <Button
+                                  Width="32"
+                                  Height="32"
+                                  Padding="0"
+                                  HorizontalContentAlignment="Center"
+                                  VerticalContentAlignment="Center"
+                                  Classes="tool-btn"
+                                  Click="OnMaximizeRestoreClick"
+                                  CornerRadius="16"
+                                  ToolTip.Tip="Maximize / Restore">
+                            <materialIcons:MaterialIcon
+                                      x:Name="MaximizeIcon"
+                                      Width="16"
+                                      Height="16"
+                                      Kind="WindowMaximize" />
+                        </Button>
+                        <Button
+                                  Width="32"
+                                  Height="32"
+                                  Padding="0"
+                                  HorizontalContentAlignment="Center"
+                                  VerticalContentAlignment="Center"
+                                  Classes="tool-btn"
+                                  Click="OnCloseClick"
+                                  CornerRadius="16"
+                                  ToolTip.Tip="Close">
+                            <materialIcons:MaterialIcon
+                                      Width="16"
+                                      Height="16"
+                                      Kind="WindowClose" />
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
 
-      <!-- COMPACT / MOBILE APP BAR (Width < 760, Portrait Phones & Narrow Windows) -->
-      <Grid x:Name="CompactGrid"
-            IsVisible="{Binding IsCompact, ElementName=Root}"
-            RowDefinitions="Auto,Auto"
-            Margin="0,2,0,4">
+            <!--  COMPACT / MOBILE APP BAR (Width < 760, Portrait Phones & Narrow Windows)  -->
+            <Grid
+                      x:Name="CompactGrid"
+                      Margin="0,2,0,4"
+                      IsVisible="{Binding IsCompact, ElementName=Root}"
+                      RowDefinitions="Auto,Auto">
 
-        <!-- Row 0: Drawer Toggle, Board Title, Open FAB -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" Margin="0,2,0,6">
-          <Button Grid.Column="0"
-                  Command="{Binding ToggleLeftSidebarCommand}"
-                  ToolTip.Tip="Toggle Nets &amp; Layers Drawer"
-                  Classes="tool-btn"
-                  Width="36" Height="36"
-                  CornerRadius="18"
-                  Padding="0"
-                  HorizontalContentAlignment="Center"
-                  VerticalContentAlignment="Center"
-                  Margin="0,0,6,0">
-            <materialIcons:MaterialIcon Kind="Menu" Width="18" Height="18" />
-          </Button>
+                <!--  Row 0: Drawer Toggle, Board Title, Open FAB  -->
+                <Grid
+                          Grid.Row="0"
+                          Margin="0,2,0,6"
+                          ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto">
+                    <Button
+                              Grid.Column="0"
+                              Width="36"
+                              Height="36"
+                              Margin="0,0,6,0"
+                              Padding="0"
+                              HorizontalContentAlignment="Center"
+                              VerticalContentAlignment="Center"
+                              Classes="tool-btn"
+                              Command="{Binding ToggleLeftSidebarCommand}"
+                              CornerRadius="18"
+                              ToolTip.Tip="Toggle Nets &amp; Layers Drawer">
+                        <materialIcons:MaterialIcon
+                                  Width="18"
+                                  Height="18"
+                                  Kind="Menu" />
+                    </Button>
 
-          <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1" Margin="0,0,6,0">
-            <TextBlock Classes="m3-title-small"
-                       Text="{Binding BoardTitle}"
-                       TextTrimming="CharacterEllipsis" />
-            <TextBlock Classes="m3-caption"
-                       Text="{Binding BoardSubtitle}"
-                       TextTrimming="CharacterEllipsis" />
-          </StackPanel>
+                    <StackPanel
+                              Grid.Column="1"
+                              Margin="0,0,6,0"
+                              VerticalAlignment="Center"
+                              Spacing="1">
+                        <TextBlock
+                                  Classes="m3-title-small"
+                                  Text="{Binding BoardTitle}"
+                                  TextTrimming="CharacterEllipsis" />
+                        <TextBlock
+                                  Classes="m3-caption"
+                                  Text="{Binding BoardSubtitle}"
+                                  TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
 
-          <!-- Open PCB FAB (Compact) -->
-          <Button Grid.Column="2"
-                  Command="{Binding RequestOpenFileCommand}"
-                  Classes="m3-extended-fab"
-                  ToolTip.Tip="Open PCB"
-                  Padding="10,6"
-                  Height="36"
-                  CornerRadius="14"
-                  Margin="0,0,6,0"
-                  VerticalAlignment="Center">
-            <StackPanel Orientation="Horizontal" Spacing="4">
-              <materialIcons:MaterialIcon Kind="FolderOpenOutline" Width="16" Height="16" />
-              <TextBlock Text="Open" VerticalAlignment="Center" Classes="m3-label-small" />
-            </StackPanel>
-          </Button>
+                    <!--  Open PCB FAB (Compact)  -->
+                    <Button
+                              Grid.Column="2"
+                              Height="36"
+                              Margin="0,0,6,0"
+                              Padding="10,6"
+                              VerticalAlignment="Center"
+                              Classes="m3-extended-fab"
+                              Command="{Binding RequestOpenFileCommand}"
+                              CornerRadius="14"
+                              ToolTip.Tip="Open PCB">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <materialIcons:MaterialIcon
+                                      Width="16"
+                                      Height="16"
+                                      Kind="FolderOpenOutline" />
+                            <TextBlock
+                                      VerticalAlignment="Center"
+                                      Classes="m3-label-small"
+                                      Text="Open" />
+                        </StackPanel>
+                    </Button>
 
-          <!-- Schematic Tab -->
-          <Button Grid.Column="3"
-                  Command="{Binding SwitchToSchematicCommand}"
-                  ToolTip.Tip="Schematic Viewer"
-                  Classes="tool-btn"
-                  Classes.active="{Binding IsSchematicTabActive}"
-                  Padding="8"
-                  Margin="0,0,4,0">
-            <materialIcons:MaterialIcon Kind="FileDocumentOutline" Width="18" Height="18" />
-          </Button>
+                    <!--  Schematic Tab  -->
+                    <Button
+                              Grid.Column="3"
+                              Margin="0,0,4,0"
+                              Padding="8"
+                              Classes="tool-btn"
+                              Classes.active="{Binding IsSchematicTabActive}"
+                              Command="{Binding SwitchToSchematicCommand}"
+                              ToolTip.Tip="Schematic Viewer">
+                        <materialIcons:MaterialIcon
+                                  Width="18"
+                                  Height="18"
+                                  Kind="FileDocumentOutline" />
+                    </Button>
 
-          <!-- GitHub Tab -->
-          <Button Grid.Column="4"
-                  Command="{Binding OpenGitHubBrowserCommand}"
-                  ToolTip.Tip="GitHub Browser"
-                  Classes="tool-btn"
-                  Classes.active="{Binding IsGitHubTabActive}"
-                  Padding="8"
-                  Margin="0,0,4,0">
-            <materialIcons:MaterialIcon Kind="Github" Width="18" Height="18" />
-          </Button>
+                    <!--  GitHub Tab  -->
+                    <Button
+                              Grid.Column="4"
+                              Margin="0,0,4,0"
+                              Padding="8"
+                              Classes="tool-btn"
+                              Classes.active="{Binding IsGitHubTabActive}"
+                              Command="{Binding OpenGitHubBrowserCommand}"
+                              ToolTip.Tip="GitHub Browser">
+                        <materialIcons:MaterialIcon
+                                  Width="18"
+                                  Height="18"
+                                  Kind="Github" />
+                    </Button>
 
-          <!-- Settings Tab -->
-          <Button Grid.Column="5"
-                  Command="{Binding OpenSettingsCommand}"
-                  ToolTip.Tip="Settings"
-                  Classes="tool-btn"
-                  Classes.active="{Binding IsSettingsTabActive}"
-                  Padding="8"
-                  Margin="0,0,4,0">
-            <materialIcons:MaterialIcon Kind="CogOutline" Width="18" Height="18" />
-          </Button>
+                    <!--  Settings Tab  -->
+                    <Button
+                              Grid.Column="5"
+                              Margin="0,0,4,0"
+                              Padding="8"
+                              Classes="tool-btn"
+                              Classes.active="{Binding IsSettingsTabActive}"
+                              Command="{Binding OpenSettingsCommand}"
+                              ToolTip.Tip="Settings">
+                        <materialIcons:MaterialIcon
+                                  Width="18"
+                                  Height="18"
+                                  Kind="CogOutline" />
+                    </Button>
+                </Grid>
+
+                <!--  Row 1: Compact Viewport Controls (Horizontally Scrollable)  -->
+                <ScrollViewer
+                          Grid.Row="1"
+                          HorizontalScrollBarVisibility="Hidden"
+                          IsVisible="{Binding IsViewerTabActive}"
+                          VerticalScrollBarVisibility="Disabled">
+                    <Border
+                              Padding="2"
+                              HorizontalAlignment="Center"
+                              Classes="m3-pill-bar">
+                        <StackPanel Orientation="Horizontal" Spacing="2">
+                            <Button
+                                      Padding="8,4"
+                                      Classes="tool-btn"
+                                      Command="{Binding ZoomInCommand}"
+                                      ToolTip.Tip="Zoom In">
+                                <materialIcons:MaterialIcon
+                                          Width="16"
+                                          Height="16"
+                                          Kind="MagnifyPlusOutline" />
+                            </Button>
+                            <Button
+                                      Padding="8,4"
+                                      Classes="tool-btn"
+                                      Command="{Binding ZoomOutCommand}"
+                                      ToolTip.Tip="Zoom Out">
+                                <materialIcons:MaterialIcon
+                                          Width="16"
+                                          Height="16"
+                                          Kind="MagnifyMinusOutline" />
+                            </Button>
+                            <Button
+                                      Padding="8,4"
+                                      Classes="tool-btn"
+                                      Command="{Binding ZoomFitCommand}"
+                                      ToolTip.Tip="Fit Board">
+                                <TextBlock Classes="m3-label-small" Text="Fit" />
+                            </Button>
+                            <Button
+                                      Padding="8,4"
+                                      Classes="tool-btn"
+                                      Command="{Binding RotateCounterClockwiseCommand}"
+                                      ToolTip.Tip="Rotate 90° CCW">
+                                <materialIcons:MaterialIcon
+                                          Width="16"
+                                          Height="16"
+                                          Kind="RotateLeft" />
+                            </Button>
+                            <Button
+                                      Padding="8,4"
+                                      Classes="tool-btn"
+                                      Command="{Binding RotateClockwiseCommand}"
+                                      ToolTip.Tip="Rotate 90° CW">
+                                <materialIcons:MaterialIcon
+                                          Width="16"
+                                          Height="16"
+                                          Kind="RotateRight" />
+                            </Button>
+                            <Button
+                                      Padding="8,4"
+                                      Classes="tool-btn"
+                                      Classes.active="{Binding IsFlipped}"
+                                      Command="{Binding ToggleFlipBoardCommand}"
+                                      ToolTip.Tip="Flip Board">
+                                <TextBlock Classes="m3-label-small" Text="Flip" />
+                            </Button>
+                            <Button
+                                      Padding="8,4"
+                                      Classes="tool-btn"
+                                      Classes.active="{Binding ShowPadNetNames}"
+                                      Command="{Binding TogglePadLabelsCommand}"
+                                      ToolTip.Tip="Toggle Net Labels">
+                                <TextBlock Classes="m3-label-small" Text="Labels" />
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </ScrollViewer>
+            </Grid>
         </Grid>
-
-        <!-- Row 1: Compact Viewport Controls (Horizontally Scrollable) -->
-        <ScrollViewer Grid.Row="1"
-                      HorizontalScrollBarVisibility="Hidden"
-                      VerticalScrollBarVisibility="Disabled"
-                      IsVisible="{Binding IsViewerTabActive}">
-          <Border Classes="m3-pill-bar"
-                  Padding="2"
-                  HorizontalAlignment="Center">
-            <StackPanel Orientation="Horizontal" Spacing="2">
-              <Button Classes="tool-btn"
-                      Command="{Binding ZoomInCommand}"
-                      Padding="8,4"
-                      ToolTip.Tip="Zoom In">
-                <materialIcons:MaterialIcon Kind="MagnifyPlusOutline" Width="16" Height="16" />
-              </Button>
-              <Button Classes="tool-btn"
-                      Command="{Binding ZoomOutCommand}"
-                      Padding="8,4"
-                      ToolTip.Tip="Zoom Out">
-                <materialIcons:MaterialIcon Kind="MagnifyMinusOutline" Width="16" Height="16" />
-              </Button>
-              <Button Classes="tool-btn"
-                      Command="{Binding ZoomFitCommand}"
-                      Padding="8,4"
-                      ToolTip.Tip="Fit Board">
-                <TextBlock Text="Fit" Classes="m3-label-small" />
-              </Button>
-              <Button Classes="tool-btn"
-                      Command="{Binding RotateCounterClockwiseCommand}"
-                      Padding="8,4"
-                      ToolTip.Tip="Rotate 90° CCW">
-                <materialIcons:MaterialIcon Kind="RotateLeft" Width="16" Height="16" />
-              </Button>
-              <Button Classes="tool-btn"
-                      Command="{Binding RotateClockwiseCommand}"
-                      Padding="8,4"
-                      ToolTip.Tip="Rotate 90° CW">
-                <materialIcons:MaterialIcon Kind="RotateRight" Width="16" Height="16" />
-              </Button>
-              <Button Classes="tool-btn"
-                      Classes.active="{Binding IsFlipped}"
-                      Command="{Binding ToggleFlipBoardCommand}"
-                      Padding="8,4"
-                      ToolTip.Tip="Flip Board">
-                <TextBlock Text="Flip" Classes="m3-label-small" />
-              </Button>
-              <Button Classes="tool-btn"
-                      Classes.active="{Binding ShowPadNetNames}"
-                      Command="{Binding TogglePadLabelsCommand}"
-                      Padding="8,4"
-                      ToolTip.Tip="Toggle Net Labels">
-                <TextBlock Text="Labels" Classes="m3-label-small" />
-              </Button>
-            </StackPanel>
-          </Border>
-        </ScrollViewer>
-      </Grid>
-    </Grid>
-  </Border>
+    </Border>
 </UserControl>

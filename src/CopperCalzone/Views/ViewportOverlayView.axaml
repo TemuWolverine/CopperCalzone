@@ -1,76 +1,96 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:CopperCalzone.ViewModels"
-             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
-             x:Class="CopperCalzone.Views.ViewportOverlayView"
-             x:DataType="vm:MainViewModel"
-             IsHitTestVisible="False">
+<UserControl
+          x:Class="CopperCalzone.Views.ViewportOverlayView"
+          xmlns="https://github.com/avaloniaui"
+          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+          xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+          xmlns:vm="using:CopperCalzone.ViewModels"
+          d:DesignHeight="600"
+          d:DesignWidth="800"
+          x:DataType="vm:MainViewModel"
+          IsHitTestVisible="False"
+          mc:Ignorable="d">
 
-  <Panel IsHitTestVisible="False">
-    <!-- M3 Expressive Hover Tooltip -->
-    <Border IsVisible="{Binding IsHoverTooltipVisible}"
-            IsHitTestVisible="False"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Margin="{Binding HoverTooltipMargin}"
-            Background="{DynamicResource M3SurfaceContainerHighestBrush}"
-            BorderBrush="{DynamicResource M3PrimaryBrush}"
-            BorderThickness="1"
-            CornerRadius="14"
-            Padding="12,8"
-            BoxShadow="0 6 16 0 #44000000">
-      <StackPanel Spacing="2">
-        <TextBlock Classes="m3-label-medium"
-                   FontWeight="Bold"
-                   Foreground="{DynamicResource M3OnSurfaceBrush}"
-                   Text="{Binding HoverTooltipTitle}" />
-        <TextBlock Classes="m3-mono-small"
-                   FontWeight="SemiBold"
-                   Foreground="{DynamicResource M3PrimaryBrush}"
-                   Text="{Binding HoverTooltipNet}" />
-      </StackPanel>
-    </Border>
+    <Panel IsHitTestVisible="False">
+        <!--  M3 Expressive Hover Tooltip  -->
+        <Border
+                  Margin="{Binding HoverTooltipMargin}"
+                  Padding="12,8"
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Background="{DynamicResource M3SurfaceContainerHighestBrush}"
+                  BorderBrush="{DynamicResource M3PrimaryBrush}"
+                  BorderThickness="1"
+                  BoxShadow="0 6 16 0 #44000000"
+                  CornerRadius="14"
+                  IsHitTestVisible="False"
+                  IsVisible="{Binding IsHoverTooltipVisible}">
+            <StackPanel Spacing="2">
+                <TextBlock
+                          Classes="m3-label-medium"
+                          FontWeight="Bold"
+                          Foreground="{DynamicResource M3OnSurfaceBrush}"
+                          Text="{Binding HoverTooltipTitle}" />
+                <TextBlock
+                          Classes="m3-mono-small"
+                          FontWeight="SemiBold"
+                          Foreground="{DynamicResource M3PrimaryBrush}"
+                          Text="{Binding HoverTooltipNet}" />
+            </StackPanel>
+        </Border>
 
-    <!-- Bottom-Right M3 Tonal HUD Status Pill -->
-    <Border HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            Margin="16"
-            IsHitTestVisible="False"
-            IsVisible="{Binding HasBoard}"
-            Background="{DynamicResource M3SurfaceOverlayBrush}"
-            BorderBrush="{DynamicResource M3OutlineVariantBrush}"
-            BorderThickness="1"
-            CornerRadius="20"
-            Padding="14,7"
-            BoxShadow="0 4 14 0 #33000000">
-      <StackPanel Orientation="Horizontal" Spacing="10">
-        <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-          <materialIcons:MaterialIcon Kind="AxisArrow"
-                                      Width="14" Height="14"
-                                      Foreground="{DynamicResource M3OnSurfaceVariantBrush}" />
-          <TextBlock Classes="m3-mono-small"
-                     Foreground="{DynamicResource M3OnSurfaceBrush}"
-                     Text="{Binding HudCoordinates}"
-                     VerticalAlignment="Center" />
-        </StackPanel>
-        <TextBlock Text="•"
-                   FontSize="{DynamicResource FontSizeSM}"
-                   Foreground="{DynamicResource M3OutlineBrush}"
-                   VerticalAlignment="Center" />
-        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-          <materialIcons:MaterialIcon Kind="Magnify"
-                                      Width="14" Height="14"
-                                      Foreground="{DynamicResource M3PrimaryBrush}" />
-          <TextBlock Classes="m3-mono-small"
-                     FontWeight="Bold"
-                     Foreground="{DynamicResource M3PrimaryBrush}"
-                     Text="{Binding HudZoom}"
-                     VerticalAlignment="Center" />
-        </StackPanel>
-      </StackPanel>
-    </Border>
-  </Panel>
+        <!--  Bottom-Right M3 Tonal HUD Status Pill  -->
+        <Border
+                  Margin="16"
+                  Padding="14,7"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Bottom"
+                  Background="{DynamicResource M3SurfaceOverlayBrush}"
+                  BorderBrush="{DynamicResource M3OutlineVariantBrush}"
+                  BorderThickness="1"
+                  BoxShadow="0 4 14 0 #33000000"
+                  CornerRadius="20"
+                  IsHitTestVisible="False"
+                  IsVisible="{Binding HasBoard}">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <StackPanel
+                          VerticalAlignment="Center"
+                          Orientation="Horizontal"
+                          Spacing="5">
+                    <materialIcons:MaterialIcon
+                              Width="14"
+                              Height="14"
+                              Foreground="{DynamicResource M3OnSurfaceVariantBrush}"
+                              Kind="AxisArrow" />
+                    <TextBlock
+                              VerticalAlignment="Center"
+                              Classes="m3-mono-small"
+                              Foreground="{DynamicResource M3OnSurfaceBrush}"
+                              Text="{Binding HudCoordinates}" />
+                </StackPanel>
+                <TextBlock
+                          VerticalAlignment="Center"
+                          FontSize="{DynamicResource FontSizeSM}"
+                          Foreground="{DynamicResource M3OutlineBrush}"
+                          Text="•" />
+                <StackPanel
+                          VerticalAlignment="Center"
+                          Orientation="Horizontal"
+                          Spacing="4">
+                    <materialIcons:MaterialIcon
+                              Width="14"
+                              Height="14"
+                              Foreground="{DynamicResource M3PrimaryBrush}"
+                              Kind="Magnify" />
+                    <TextBlock
+                              VerticalAlignment="Center"
+                              Classes="m3-mono-small"
+                              FontWeight="Bold"
+                              Foreground="{DynamicResource M3PrimaryBrush}"
+                              Text="{Binding HudZoom}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Panel>
 </UserControl>

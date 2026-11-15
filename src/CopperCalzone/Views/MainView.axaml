@@ -1,86 +1,86 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:CopperCalzone.ViewModels"
-             xmlns:views="using:CopperCalzone.Views"
-             xmlns:render="using:CopperCalzone.Rendering"
-             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
-             x:Class="CopperCalzone.Views.MainView"
-             x:DataType="vm:MainViewModel"
-             FontSize="{DynamicResource FontSizeMD}"
-             Background="{DynamicResource M3SurfaceBrush}"
-             DragDrop.AllowDrop="True">
+<UserControl
+          x:Class="CopperCalzone.Views.MainView"
+          xmlns="https://github.com/avaloniaui"
+          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+          xmlns:render="using:CopperCalzone.Rendering"
+          xmlns:views="using:CopperCalzone.Views"
+          xmlns:vm="using:CopperCalzone.ViewModels"
+          d:DesignHeight="800"
+          d:DesignWidth="1280"
+          x:DataType="vm:MainViewModel"
+          Background="{DynamicResource M3SurfaceBrush}"
+          DragDrop.AllowDrop="True"
+          FontSize="{DynamicResource FontSizeMD}"
+          mc:Ignorable="d">
 
-  <Grid ColumnDefinitions="Auto,*">
-    <!-- M3 Expressive Navigation Rail (Leading Edge: Desktop & Tablet) -->
-    <views:NavigationRailView Grid.Column="0"
-                              x:Name="NavigationRail"
-                              IsVisible="{Binding !IsCompact, ElementName=TopToolbar}" />
-
-    <!-- Main Content Work Area -->
-    <Grid Grid.Column="1" RowDefinitions="Auto,*">
-      <!-- M3 Expressive Top App Bar -->
-      <views:TopToolbarView Grid.Row="0" x:Name="TopToolbar" />
-
-      <!-- Main Content Container with Safe Insets Margin -->
-      <Grid Grid.Row="1" x:Name="MainContentContainer">
-        <!-- TAB 1: PCB Viewer (M3 Side Sheet + Expressive Rounded Viewport) -->
-        <Grid ColumnDefinitions="Auto,Auto,*"
-              x:Name="ContentGrid"
-              IsVisible="{Binding IsViewerTabActive}">
-
-          <!-- Left M3 Side Sheet / Navigation Drawer (Nets & Layers & BOM) -->
-          <views:SidebarView Grid.Column="0" x:Name="Sidebar" />
-
-          <!-- Side panel resize splitter thumb -->
-          <Thumb Grid.Column="1"
-                 x:Name="SidebarResizer"
-                 Classes="sidebar-resizer"
-                 Width="8"
-                 Margin="-3,0,-3,0"
-                 Cursor="SizeWestEast"
-                 DragDelta="OnSidebarResizerDragDelta"
-                 DoubleTapped="OnSidebarResizerDoubleTapped"
-                 IsVisible="{Binding IsLeftSidebarOpen}"
-                 ToolTip.Tip="Drag to resize side panel (Double-click to reset)" />
-
-          <!-- Center Expressive Viewport Container -->
-          <Border Grid.Column="2"
-                  Classes="m3-surface-sheet"
-                  Margin="4,0,8,8">
-            <Grid ClipToBounds="True">
-              <!-- Hardware-Accelerated Skia PCB Canvas -->
-              <render:PcbCanvasControl x:Name="PcbCanvas" />
-
-              <!-- Floating M3 Elevated Card Pin Inspector & Pin-to-Pin Navigation Bar -->
-              <views:PinInspectorView />
-
-              <!-- M3 Expressive Floating Viewport Toolbar (Bottom-Center) -->
-              <views:FloatingViewportToolbarView
+    <Grid ColumnDefinitions="Auto,*">
+        <!--  M3 Expressive Navigation Rail (Leading Edge: Desktop & Tablet)  -->
+        <views:NavigationRailView
+                  x:Name="NavigationRail"
+                  Grid.Column="0"
                   IsVisible="{Binding !IsCompact, ElementName=TopToolbar}" />
 
-              <!-- M3 Hover Tooltip & Bottom-Right HUD Tonal Status Pill -->
-              <views:ViewportOverlayView x:Name="ViewportOverlay" />
+        <!--  Main Content Work Area  -->
+        <Grid Grid.Column="1" RowDefinitions="Auto,*">
+            <!--  M3 Expressive Top App Bar  -->
+            <views:TopToolbarView x:Name="TopToolbar" Grid.Row="0" />
+
+            <!--  Main Content Container with Safe Insets Margin  -->
+            <Grid x:Name="MainContentContainer" Grid.Row="1">
+                <!--  TAB 1: PCB Viewer (M3 Side Sheet + Expressive Rounded Viewport)  -->
+                <Grid
+                          x:Name="ContentGrid"
+                          ColumnDefinitions="Auto,Auto,*"
+                          IsVisible="{Binding IsViewerTabActive}">
+
+                    <!--  Left M3 Side Sheet / Navigation Drawer (Nets & Layers & BOM)  -->
+                    <views:SidebarView x:Name="Sidebar" Grid.Column="0" />
+
+                    <!--  Side panel resize splitter thumb  -->
+                    <Thumb
+                              x:Name="SidebarResizer"
+                              Grid.Column="1"
+                              Width="8"
+                              Margin="-3,0,-3,0"
+                              Classes="sidebar-resizer"
+                              Cursor="SizeWestEast"
+                              DoubleTapped="OnSidebarResizerDoubleTapped"
+                              DragDelta="OnSidebarResizerDragDelta"
+                              IsVisible="{Binding IsLeftSidebarOpen}"
+                              ToolTip.Tip="Drag to resize side panel (Double-click to reset)" />
+
+                    <!--  Center Expressive Viewport Container  -->
+                    <Border
+                              Grid.Column="2"
+                              Margin="4,0,8,8"
+                              Classes="m3-surface-sheet">
+                        <Grid ClipToBounds="True">
+                            <!--  Hardware-Accelerated Skia PCB Canvas  -->
+                            <render:PcbCanvasControl x:Name="PcbCanvas" />
+
+                            <!--  Floating M3 Elevated Card Pin Inspector & Pin-to-Pin Navigation Bar  -->
+                            <views:PinInspectorView />
+
+                            <!--  M3 Expressive Floating Viewport Toolbar (Bottom-Center)  -->
+                            <views:FloatingViewportToolbarView IsVisible="{Binding !IsCompact, ElementName=TopToolbar}" />
+
+                            <!--  M3 Hover Tooltip & Bottom-Right HUD Tonal Status Pill  -->
+                            <views:ViewportOverlayView x:Name="ViewportOverlay" />
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!--  TAB 2: Schematic Viewer  -->
+                <views:SchematicView DataContext="{Binding Schematic}" IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsSchematicTabActive}" />
+
+                <!--  TAB 3: Full-Screen GitHub PCB Browser  -->
+                <views:GitHubBrowserView DataContext="{Binding GitHubBrowser}" IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsGitHubTabActive}" />
+
+                <!--  TAB 4: Preferences & Settings Panel  -->
+                <views:SettingsView DataContext="{Binding Settings}" IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsSettingsTabActive}" />
             </Grid>
-          </Border>
         </Grid>
-
-        <!-- TAB 2: Schematic Viewer -->
-        <views:SchematicView
-                             DataContext="{Binding Schematic}"
-                             IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsSchematicTabActive}" />
-
-        <!-- TAB 3: Full-Screen GitHub PCB Browser -->
-        <views:GitHubBrowserView
-                                 DataContext="{Binding GitHubBrowser}"
-                                 IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsGitHubTabActive}" />
-
-        <!-- TAB 4: Preferences & Settings Panel -->
-        <views:SettingsView
-                            DataContext="{Binding Settings}"
-                            IsVisible="{Binding $parent[views:MainView].((vm:MainViewModel)DataContext).IsSettingsTabActive}" />
-      </Grid>
     </Grid>
-  </Grid>
 </UserControl>
