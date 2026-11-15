@@ -7,11 +7,15 @@ namespace CopperCalzone.Services;
 public class GitHubPcbService
 {
     private readonly GitHubAuthService _authService;
+    private readonly GitHubFileCacheService _cacheService;
 
-    public GitHubPcbService(GitHubAuthService authService)
+    public GitHubPcbService(GitHubAuthService authService, GitHubFileCacheService? cacheService = null)
     {
         _authService = authService;
+        _cacheService = cacheService ?? new GitHubFileCacheService();
     }
+
+    public Task ClearCacheAsync() => _cacheService.ClearAsync();
 
     public async Task<IReadOnlyList<Repository>> GetAllAccessibleRepositoriesAsync()
     {
@@ -75,6 +79,23 @@ public class GitHubPcbService
             }
         }
 
+        var fileChecks = results
+            .Where(r => !r.IsDirectory)
+            .Select(r => (r.Path, r.Sha))
+            .ToList();
+
+        if (fileChecks.Count > 0)
+        {
+            var cachedPaths = await _cacheService.ValidateAndPruneBatchAsync(repositoryId, fileChecks);
+            foreach (var item in results)
+            {
+                if (!item.IsDirectory)
+                {
+                    item.IsCached = cachedPaths.Contains(item.Path);
+                }
+            }
+        }
+
         return results
             .OrderByDescending(r => r.IsDirectory)
             .ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
@@ -83,6 +104,12 @@ public class GitHubPcbService
 
     public async Task<string> DownloadFileAsync(Repository repository, string path, string? sha = null, long? size = null)
     {
+        string? cachedContent = await _cacheService.TryGetAsync(repository.Id, path, sha);
+        if (cachedContent is not null)
+        {
+            return cachedContent;
+        }
+
         var client = _authService.Client;
 
         // If file is reasonably sized (e.g., <= 1MB), use GetRawContent
@@ -91,7 +118,12 @@ public class GitHubPcbService
             try
             {
                 byte[] raw = await client.Repository.Content.GetRawContent(repository.Owner.Login, repository.Name, path);
-                return Encoding.UTF8.GetString(raw);
+                string rawText = Encoding.UTF8.GetString(raw);
+                if (!string.IsNullOrWhiteSpace(sha))
+                {
+                    await _cacheService.StoreAsync(repository.Id, path, sha, rawText);
+                }
+                return rawText;
             }
             catch
             {
@@ -103,12 +135,12 @@ public class GitHubPcbService
         if (!string.IsNullOrEmpty(sha))
         {
             var blob = await client.Git.Blob.Get(repository.Id, sha);
-            if (blob.Encoding == EncodingType.Base64)
-            {
-                byte[] bytes = Convert.FromBase64String(blob.Content);
-                return Encoding.UTF8.GetString(bytes);
-            }
-            return blob.Content;
+            string blobText = blob.Encoding == EncodingType.Base64
+                ? Encoding.UTF8.GetString(Convert.FromBase64String(blob.Content))
+                : blob.Content;
+
+            await _cacheService.StoreAsync(repository.Id, path, sha, blobText);
+            return blobText;
         }
 
         throw new InvalidOperationException($"Unable to download file '{path}'.");
@@ -139,6 +171,13 @@ public class GitHubPcbService
             var schItems = contents
                 .Where(c => c.Type == ContentType.File && c.Name.EndsWith(".kicad_sch", StringComparison.OrdinalIgnoreCase))
                 .ToList();
+
+            if (schItems.Count > 0)
+            {
+                await _cacheService.ValidateAndPruneBatchAsync(
+                    repository.Id,
+                    schItems.Select(s => (s.Path, (string?)s.Sha)).ToList());
+            }
 
             foreach (var sch in schItems)
             {

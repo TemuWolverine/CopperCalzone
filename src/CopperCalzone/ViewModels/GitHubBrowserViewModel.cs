@@ -152,7 +152,9 @@ public partial class GitHubBrowserViewModel : ObservableObject
 
         ErrorMessage = "";
         IsLoading = true;
-        StatusMessage = $"Downloading '{item.Name}'...";
+        StatusMessage = item.IsCached
+            ? $"Loading '{item.Name}' from cache..."
+            : $"Downloading '{item.Name}'...";
 
         try
         {
@@ -161,6 +163,7 @@ public partial class GitHubBrowserViewModel : ObservableObject
             StatusMessage = "Checking for schematic files...";
             var schematics = await _pcbService.DownloadSchematicFilesForPcbAsync(SelectedRepository, item.Path);
 
+            item.IsCached = !string.IsNullOrWhiteSpace(item.Sha);
             PcbContentReady?.Invoke(content, item.Name, schematics);
             RequestClose?.Invoke();
         }
@@ -179,6 +182,7 @@ public partial class GitHubBrowserViewModel : ObservableObject
     {
         _loginCts?.Cancel();
         await _authService.LogoutAsync();
+        await _pcbService.ClearCacheAsync();
         _allRepositories.Clear();
         FilteredRepositories.Clear();
         CurrentFolderItems.Clear();
